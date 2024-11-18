@@ -5,6 +5,11 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --banner-height: 50px;
+  --nav-height-normal: 130px;
+  --nav-height-condensed: 60px;
+  --header-height-normal: calc(var(--banner-height) + var(--nav-height-normal));
+  --header-height-condensed: calc(var(--banner-height) + var(--nav-height-condensed));
 }
 
 @media (prefers-color-scheme: dark) {
