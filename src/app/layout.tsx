@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Montserrat, Playfair_Display, Playfair_Display_SC } from 'next/font/google';
+import { Montserrat, Playfair_Display, Playfair_Display_SC, PT_Serif, DM_Sans } from 'next/font/google';
 import "./globals.css";
 import { Header } from '@/components/shared/header'
 
@@ -21,6 +21,19 @@ const playfairDisplay = Playfair_Display({
   variable: '--font-playfair-display',
   display: 'swap',
   weight: ['400', '500', '600', '700', '900'],
+});
+
+const ptSerif = PT_Serif({ 
+  subsets: ['latin'],
+  variable: '--font-pt-serif',
+  display: 'swap',
+  weight: ['400', '700'],
+});
+
+const dmSans = DM_Sans({ 
+  subsets: ['latin'],
+  variable: '--font-dm-sans',
+  display: 'swap',
 });
 
 export const metadata: Metadata = {
@@ -74,7 +87,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${montserrat.variable} ${playfairDisplaySC.variable} ${playfairDisplay.variable}`}
+        className={`${montserrat.variable} ${playfairDisplaySC.variable} ${playfairDisplay.variable} ${ptSerif.variable} ${dmSans.variable}`}
       >
         <Header />
         {children}

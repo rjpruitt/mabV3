@@ -10,15 +10,17 @@ const config: Config = {
     extend: {
       colors: {
         'primary': {
-          DEFAULT: '#016369', // darker teal for main nav
-          light: '#0A8B93',   // lighter teal for top banner
+          DEFAULT: '#016369',
+          light: '#0A8B93',
         },
-        'accent': '#CD8062', // CTA button color
+        'accent': '#CD8062',
       },
       fontFamily: {
         montserrat: ['var(--font-montserrat)'],
         'playfair': ['var(--font-playfair-display)'],
         'playfair-sc': ['var(--font-playfair-display-sc)'],
+        'pt-serif': ['var(--font-pt-serif)'],
+        'dm-sans': ['var(--font-dm-sans)'],
       },
     },
   },

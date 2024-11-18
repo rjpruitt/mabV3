@@ -1,5 +1,6 @@
 'use client'
 
+import React from 'react'
 import Link from 'next/link'
 import { NavItem } from './nav-item'
 
@@ -33,7 +34,7 @@ export function MainNav() {
           
           <Link 
             href="/consultation"
-            className="bg-accent px-6 py-2 rounded hover:opacity-90 transition-opacity text-center"
+            className="bg-accent px-6 py-2 rounded-sm hover:opacity-90 transition-opacity text-center"
           >
             BOOK A FREE CONSULTATION
           </Link>

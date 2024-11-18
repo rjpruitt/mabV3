@@ -1,5 +1,6 @@
 'use client'
 
+import React from 'react'
 import { motion, useScroll, useTransform } from 'framer-motion'
 import { TopBanner } from './top-banner'
 import { MainNav } from './main-nav'
