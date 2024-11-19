@@ -3,6 +3,7 @@
 import React from 'react'
 import Image from 'next/image'
 import { Check } from 'lucide-react'
+import Link from 'next/link'
 
 const benefits = [
   {
@@ -55,12 +56,12 @@ export function WhyChooseUs() {
             </div>
 
             <div className="text-center mt-12">
-              <a 
-                href="#" 
+              <Link 
+                href="/process" 
                 className="text-accent hover:text-accent/90 font-semibold inline-block"
               >
                 Learn more about our process
-              </a>
+              </Link>
             </div>
           </div>
         </div>

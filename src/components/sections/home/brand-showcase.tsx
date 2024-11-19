@@ -10,19 +10,21 @@ const brands = [
   },
   {
     name: 'Moen',
-    logo: '/images/home/brands/Moen_logo.svg'
+    logo: '/images/home/brands/Moen_logo.svg',
+    className: '[filter:brightness(0)]'
   },
   {
     name: 'Delta',
-    logo: '/images/home/brands/delta-faucets-logo-png-transparent.png'
+    logo: '/images/home/brands/delta-faucet-seeklogo.svg'
   },
   {
     name: 'American Standard',
-    logo: '/images/home/brands/American_standard_logo_detail.png'
+    logo: '/images/home/brands/american-standard-seeklogo.svg'
   },
   {
     name: 'GROHE',
-    logo: '/images/home/brands/Grohe-logo.png'
+    logo: '/images/home/brands/grohe-seeklogo.svg',
+    className: 'scale-[175%]'
   },
   {
     name: 'Jacuzzi',
@@ -49,7 +51,7 @@ export function BrandShowcase() {
                   src={brand.logo}
                   alt={`${brand.name} logo`}
                   fill
-                  className="object-contain filter grayscale"
+                  className={`object-contain ${brand.className || ''}`}
                   sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 16vw"
                 />
               </div>
