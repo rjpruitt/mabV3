@@ -6,16 +6,16 @@ import { Check } from 'lucide-react'
 
 const benefits = [
   {
-    title: 'One Day Installation',
-    description: 'End the day with a better bathroom than the one you woke up with. In as little as 24 hours, we will install a new tub or shower liner for a look you will love. Your dream bathroom is closer than you think.'
+    title: 'Quick, Efficient Installation',
+    description: 'Many of our bathroom transformations can be completed in just 1-3 days. From simple updates to complete conversions, we work efficiently to minimize disruption to your daily life.'
   },
   {
-    title: 'No Demolition, No Mess',
-    description: 'We believe in building up, not tearing down. Our sleek acrylic baths are custom made to fit right over your existing tub, so there is no demolition and no mess. It is a bathroom refresh, without the renovation headaches.'
+    title: 'Thoughtful, Clean Process',
+    description: 'We carefully plan each project to minimize demolition and mess. Our experienced teams use proven processes and protective measures to keep your home clean and respect your space throughout the renovation.'
   },
   {
-    title: 'Lifetime Guarantee',
-    description: 'Your new bathroom will stand the test of time. That is why all Bath Fitter products come with a lifetime warranty.'
+    title: 'Quality Workmanship Guaranteed',
+    description: 'We stand behind our installation work with a comprehensive workmanship guarantee. Plus, all products come with their respective manufacturer warranties for your peace of mind.'
   }
 ]
 
@@ -27,8 +27,8 @@ export function WhyChooseUs() {
           {/* Image Side */}
           <div className="relative aspect-[4/3] lg:aspect-auto min-h-[400px]">
             <Image
-              src="https://placehold.co/800x600/016369/FFFFFF/png?text=Senior+Couple"
-              alt="Happy senior couple in their newly renovated bathroom"
+              src="/images/home/why-choose-us/happyseniorscloseup.jpeg"
+              alt="Happy senior couple enjoying their newly renovated bathroom"
               fill
               className="object-cover rounded-sm"
               sizes="(max-width: 1024px) 100vw, 50vw"
@@ -38,7 +38,9 @@ export function WhyChooseUs() {
           {/* Content Side */}
           <div className="flex flex-col">
             <h2 className="text-primary text-2xl mb-4 italic">Why choose us?</h2>
-            <h3 className="font-pt-serif text-4xl md:text-5xl mb-8 text-[#2F2F2F]">Better results. Better experience.</h3>
+            <h3 className="font-pt-serif text-4xl md:text-5xl mb-8 text-[#2F2F2F]">
+              Better Results. A Better Experience.
+            </h3>
             
             <div className="space-y-8">
               {benefits.map((benefit, index) => (

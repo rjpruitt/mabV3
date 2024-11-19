@@ -21,6 +21,7 @@ const config: Config = {
         'playfair-sc': ['var(--font-playfair-display-sc)'],
         'pt-serif': ['var(--font-pt-serif)'],
         'dm-sans': ['var(--font-dm-sans)'],
+        'dancing': ['var(--font-dancing-script)'],
       },
     },
   },

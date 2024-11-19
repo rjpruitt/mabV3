@@ -10,12 +10,14 @@ export function HomeHero() {
       {/* Background Image with Gradient Overlay */}
       <div className="absolute inset-0">
         <Image
-          src="/images/tubwomanchildcrop.jpeg"
+          src="/images/home/hero/tubwomanchildcrop.jpeg"
           alt="Grandmother and child enjoying a playful moment in a bright, modern bathroom"
           fill
           className="object-cover"
-          priority
+          priority={true}
           sizes="100vw"
+          loading="eager"
+          quality={90}
         />
         <div className="absolute inset-0 bg-gradient-to-r from-primary/60 via-primary/40 to-transparent" />
       </div>

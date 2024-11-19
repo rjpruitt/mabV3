@@ -42,7 +42,9 @@ export function NavItem({ label, hasDropdown = false, children }: NavItemProps) 
             initial={{ opacity: 0, y: 0 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
-            className="fixed left-0 w-full bg-white text-primary shadow-lg"
+            className={`fixed left-0 w-full bg-white text-primary shadow-lg ${
+              label === 'Solutions' ? 'z-[60]' : 'z-50'
+            }`}
             style={{ top: 'var(--header-height-normal)' }}
           >
             {children || (

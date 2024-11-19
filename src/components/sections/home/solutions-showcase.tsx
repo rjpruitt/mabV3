@@ -9,19 +9,19 @@ const solutions = [
     id: 'bathtubs',
     title: 'Bathtubs',
     icon: Bath,
-    image: 'https://placehold.co/1200x800/016369/FFFFFF/png?text=Bathtubs',
+    image: '/images/home/solutions/womanwalkintub.jpeg',
   },
   {
     id: 'showers',
     title: 'Showers',
     icon: ShowerHead,
-    image: 'https://placehold.co/1200x800/016369/FFFFFF/png?text=Showers',
+    image: '/images/home/solutions/walkinshower.jpeg',
   },
   {
     id: 'accessibility',
     title: 'Accessibility & Safety',
     icon: Heart,
-    image: 'https://placehold.co/1200x800/016369/FFFFFF/png?text=Accessibility',
+    image: '/images/home/solutions/showersafety.jpeg',
   },
   {
     id: 'walls',
@@ -38,7 +38,7 @@ const solutions = [
 ]
 
 export function SolutionsShowcase() {
-  const [activeId, setActiveId] = useState('bathtubs')
+  const [activeId, setActiveId] = useState<string>('bathtubs')
 
   return (
     <section className="w-full py-32 bg-white">
