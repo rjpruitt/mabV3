@@ -5,9 +5,8 @@ import { SolutionsShowcase } from '@/components/sections/home/solutions-showcase
 import { BrandShowcase } from '@/components/sections/home/brand-showcase'
 import { ProcessOverview } from '@/components/sections/home/process-overview'
 import { BeforeAfter } from '@/components/sections/home/before-after'
-import { Testimonials } from '@/components/sections/home/testimonials'
 import { DesignToolShowcase } from '@/components/sections/home/design-tool-showcase'
-import { InspirationGallery } from '@/components/sections/home/inspiration-gallery'
+import { Testimonials } from '@/components/sections/home/testimonials'
 
 export default function Home() {
   return (
@@ -23,7 +22,6 @@ export default function Home() {
       <ProcessOverview />
       <BeforeAfter />
       <DesignToolShowcase />
-      <InspirationGallery />
       <Testimonials />
     </main>
   )

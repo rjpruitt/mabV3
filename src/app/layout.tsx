@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Montserrat, Playfair_Display, Playfair_Display_SC, PT_Serif, DM_Sans, Dancing_Script } from 'next/font/google';
 import "./globals.css";
-import { Header } from '@/components/shared/header'
+import { Header } from '@/components/shared/header/header'
 import { Footer } from '@/components/shared/footer/footer'
 
 const montserrat = Montserrat({ 
@@ -97,7 +97,9 @@ export default function RootLayout({
         className={`${montserrat.variable} ${playfairDisplaySC.variable} ${playfairDisplay.variable} ${ptSerif.variable} ${dmSans.variable} ${dancingScript.variable}`}
       >
         <Header />
-        {children}
+        <main className="pt-[calc(var(--top-banner-height)+var(--nav-height))]">
+          {children}
+        </main>
         <Footer />
       </body>
     </html>
