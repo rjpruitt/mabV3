@@ -3,7 +3,7 @@
 import React, { useState } from 'react'
 import Image from 'next/image'
 import { Star, ChevronLeft, ChevronRight } from 'lucide-react'
-import { ConsultationCTA } from '@/components/shared/consultation-cta'
+import Link from 'next/link'
 
 type TestimonialType = {
   id: number
@@ -57,7 +57,7 @@ const testimonials: TestimonialType[] = [
   }
 ]
 
-export function Testimonials() {
+export function Testimonials(): React.JSX.Element {
   const [activeIndex, setActiveIndex] = useState(0)
   const activeTestimonial = testimonials[activeIndex]
 
@@ -67,67 +67,89 @@ export function Testimonials() {
       <div className="absolute inset-0">
         <Image
           src="/images/home/testimonials/happyseniorstestimonial.jpeg"
-          alt="Happy customers enjoying their new bathroom"
+          alt="Happy customers"
           fill
           className="object-cover opacity-40"
           sizes="100vw"
         />
       </div>
 
-      {/* Testimonials */}
-      <div className="relative container mx-auto px-4 py-20">
-        <div className="max-w-[800px] mx-auto text-center text-white mb-20">
-          {/* Quote */}
-          <h2 className="font-dancing text-5xl md:text-6xl mb-8">
-            {activeTestimonial.quote}
-          </h2>
+      {/* Content */}
+      <div className="relative w-full">
+        {/* Testimonials */}
+        <div className="container mx-auto px-4 py-32">
+          <div className="max-w-[800px] mx-auto text-center text-white">
+            {/* Quote */}
+            <h2 className="font-dancing text-5xl md:text-6xl mb-8">
+              {activeTestimonial.quote}
+            </h2>
 
-          {/* Rating */}
-          <div className="flex justify-center gap-2 mb-6">
-            {[...Array(activeTestimonial.rating)].map((_, i) => (
-              <Star key={i} className="w-6 h-6 fill-accent text-accent" />
-            ))}
-          </div>
-
-          {/* Author Info */}
-          <div className="space-y-2 mb-12">
-            <p className="text-xl font-semibold">{activeTestimonial.author}</p>
-            <p className="text-white/80">{activeTestimonial.location}</p>
-          </div>
-
-          {/* Navigation */}
-          <div className="flex justify-center gap-4">
-            <button
-              onClick={() => setActiveIndex(prev => (prev > 0 ? prev - 1 : testimonials.length - 1))}
-              className="p-2 hover:bg-white/10 rounded-full transition-colors"
-              aria-label="Previous testimonial"
-            >
-              <ChevronLeft className="w-6 h-6" />
-            </button>
-            <div className="flex gap-2">
-              {testimonials.map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => setActiveIndex(index)}
-                  className={`w-2 h-2 rounded-full transition-colors ${
-                    index === activeIndex ? 'bg-white' : 'bg-white/30'
-                  }`}
-                  aria-label={`Go to testimonial ${index + 1}`}
-                />
+            {/* Rating */}
+            <div className="flex justify-center gap-2 mb-6">
+              {[...Array(activeTestimonial.rating)].map((_, i) => (
+                <Star key={i} className="w-6 h-6 fill-accent text-accent" />
               ))}
             </div>
-            <button
-              onClick={() => setActiveIndex(prev => (prev < testimonials.length - 1 ? prev + 1 : 0))}
-              className="p-2 hover:bg-white/10 rounded-full transition-colors"
-              aria-label="Next testimonial"
-            >
-              <ChevronRight className="w-6 h-6" />
-            </button>
+
+            {/* Author Info */}
+            <div className="space-y-2 mb-12">
+              <p className="text-xl font-semibold">{activeTestimonial.author}</p>
+              <p className="text-white/80">{activeTestimonial.location}</p>
+            </div>
+
+            {/* Navigation */}
+            <div className="flex justify-center gap-4">
+              <button
+                onClick={() => setActiveIndex(prev => (prev > 0 ? prev - 1 : testimonials.length - 1))}
+                className="p-2 hover:bg-white/10 rounded-full transition-colors"
+                aria-label="Previous testimonial"
+              >
+                <ChevronLeft className="w-6 h-6" />
+              </button>
+              <div className="flex gap-2">
+                {testimonials.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setActiveIndex(index)}
+                    className={`w-2 h-2 rounded-full transition-colors ${
+                      index === activeIndex ? 'bg-white' : 'bg-white/30'
+                    }`}
+                    aria-label={`Go to testimonial ${index + 1}`}
+                  />
+                ))}
+              </div>
+              <button
+                onClick={() => setActiveIndex(prev => (prev < testimonials.length - 1 ? prev + 1 : 0))}
+                className="p-2 hover:bg-white/10 rounded-full transition-colors"
+                aria-label="Next testimonial"
+              >
+                <ChevronRight className="w-6 h-6" />
+              </button>
+            </div>
           </div>
         </div>
 
-        {/* Consultation CTA */}
-        <ConsultationCTA darkMode />
+        {/* CTA Section */}
+        <div className="w-full">
+          <div className="max-w-[800px] mx-auto text-center px-4 pb-32">
+            <h3 className="font-pt-serif text-4xl text-white mb-4">
+              Ready To Speak With A Mid America Bathworks Expert?
+            </h3>
+            <p className="text-white/80 mb-8">
+              Book a FREE consultation by calling us at <span className="text-accent">1 (555) 555-5555</span> or by using
+              the link below to book a preferred date and time!
+            </p>
+            <Link
+              href="/consultation"
+              className="bg-accent px-8 py-3 rounded-sm font-montserrat font-semibold text-white hover:opacity-90 transition-opacity inline-block"
+            >
+              BOOK A FREE CONSULTATION
+            </Link>
+            <p className="font-dancing text-2xl mt-8 text-white">
+              It's quick, free and easy!
+            </p>
+          </div>
+        </div>
       </div>
     </section>
   )
