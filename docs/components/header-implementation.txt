@@ -1,0 +1,128 @@
+HEADER IMPLEMENTATION DOCUMENTATION
+
+WORKING IMPLEMENTATION (commit eb3775a)
+
+Key Features:
+- Header transitions up and out of view when scrolling down
+- Condensed header appears when scrolling up (if past hero)
+- Full header returns when hero comes into view
+- Smooth transitions between states
+
+Critical Code:
+
+// Working scroll logic in header.tsx
+const controlNavbar = () => {
+  const currentScrollY = window.scrollY
+  const headerHeight = 170 // Fixed height (130px nav + 40px banner)
+  
+  // Simple visibility logic
+  if (currentScrollY > lastScrollY && currentScrollY > headerHeight) {
+    setIsVisible(false)
+  } else if (currentScrollY < lastScrollY) {
+    setIsVisible(true)
+  }
+
+  // Condensed state based on fixed threshold
+  const heroHeight = window.innerHeight * 0.6
+  if (currentScrollY > heroHeight) {
+    setIsCondensed(true)
+  } else {
+    setIsCondensed(false)
+  }
+  
+  setLastScrollY(currentScrollY)
+}
+
+// Critical JSX structure
+<div 
+  className={`
+    fixed w-full top-0 left-0 right-0 z-50
+    transform-gpu transition-transform duration-200 ease-out
+    ${isVisible ? 'translate-y-0' : '-translate-y-full'}
+  `}
+  style={{
+    height: isCondensed ? 'var(--header-height-condensed)' : 'var(--header-height-normal)',
+    willChange: 'transform'
+  }}
+>
+  <div className="h-full flex flex-col bg-white">
+    {!isCondensed && <TopBanner />}
+    <MainNav isCondensed={isCondensed} />
+  </div>
+</div>
+
+FAILED EXPERIMENTS
+
+1. Dynamic Hero Detection
+// ❌ Caused inconsistent behavior
+const heroSection = document.querySelector('section:first-of-type')
+const heroHeight = heroSection?.getBoundingClientRect().height
+const heroBottom = heroSection.getBoundingClientRect().bottom
+setIsCondensed(heroBottom < headerHeight)
+
+Problem: Made header behavior dependent on page content, leading to jumpy transitions and unreliable state changes
+
+2. CSS Variable Modifications
+/* ❌ Broke header transitions */
+:root {
+  --hero-margin-top: 115px;
+  --header-offset: calc(var(--header-height-normal) + var(--hero-margin-top));
+}
+
+Problem: Complex calculations led to jumpy transitions and inconsistent spacing across different viewport sizes
+
+3. Layout Adjustments
+// ❌ Created gaps and overlay issues
+<main className="pt-[calc(var(--header-height-normal)-115px)]">
+  {children}
+</main>
+
+Problem: Affected all pages differently, caused header to overlay content on some pages and leave gaps on others
+
+WHY SIMPLE WORKS BETTER
+
+1. Fixed measurements:
+   - Header height is consistent (170px)
+   - Hero height is viewport-relative (60vh)
+   - Scroll thresholds are static
+   - No dynamic calculations during scroll
+
+2. Independent logic:
+   - Header behavior doesn't depend on page content
+   - Transitions use simple transform
+   - Clear state conditions
+   - Predictable behavior
+
+3. Consistent variables:
+:root {
+  --header-height-normal: 130px;
+  --header-height-condensed: 80px;
+}
+
+KNOWN ISSUES
+- 115px gap appears on non-home pages
+- Gap is consistent and predictable
+- Accepted as trade-off for reliable header behavior
+- Future fix should not modify header scroll logic or transitions
+
+IMPORTANT NOTES FOR FUTURE SESSIONS
+1. Do not modify:
+   - Header height variables
+   - Scroll logic in header.tsx
+   - Transform-based transitions
+
+2. If attempting fixes:
+   - Create new branch
+   - Keep header.working.tsx backup
+   - Test on all page types
+   - Verify all transition states
+
+3. Working commit details:
+   - Hash: eb3775a
+   - Message: "feat: Implement header scroll behavior"
+   - Contains final working version
+
+UPDATE HISTORY
+- Initial documentation: Nov 20, 2023
+- Last updated: Nov 20, 2023
+- Next review: When attempting any header modifications
