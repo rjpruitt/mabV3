@@ -3,6 +3,9 @@ import { Montserrat, Playfair_Display, Playfair_Display_SC, PT_Serif, DM_Sans, D
 import "./globals.css";
 import { Header } from '@/components/shared/header/header'
 import { Footer } from '@/components/shared/footer/footer'
+import { AccessibilityProvider } from '@/providers/accessibility-provider'
+import { ErrorBoundary } from '@/components/ui/error-boundary'
+import { SkipLink } from '@/components/ui/skip-link'
 
 const montserrat = Montserrat({ 
   subsets: ['latin'],
@@ -96,11 +99,20 @@ export default function RootLayout({
       <body
         className={`${montserrat.variable} ${playfairDisplaySC.variable} ${playfairDisplay.variable} ${ptSerif.variable} ${dmSans.variable} ${dancingScript.variable}`}
       >
-        <Header />
-        <main className="pt-[calc(var(--top-banner-height)+var(--nav-height))]">
-          {children}
-        </main>
-        <Footer />
+        <AccessibilityProvider>
+          <ErrorBoundary>
+            <SkipLink />
+            <Header />
+            <main 
+              id="main"
+              tabIndex={-1}
+              className="pt-[calc(var(--top-banner-height)+var(--nav-height))] focus:outline-none"
+            >
+              {children}
+            </main>
+            <Footer />
+          </ErrorBoundary>
+        </AccessibilityProvider>
       </body>
     </html>
   );
