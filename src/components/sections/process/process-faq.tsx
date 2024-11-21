@@ -2,9 +2,12 @@
 
 import React, { useState } from 'react'
 import { Plus, Minus } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { useAccessibility } from '@/providers/accessibility-provider'
 
 export function ProcessFAQ(): React.JSX.Element {
   const [openIndex, setOpenIndex] = useState<number | null>(null)
+  const { announce } = useAccessibility()
 
   const faqs = [
     {
@@ -29,38 +32,86 @@ export function ProcessFAQ(): React.JSX.Element {
     }
   ]
 
+  const handleToggle = (index: number) => {
+    const isOpening = openIndex !== index
+    const faq = faqs[index]
+    
+    if (isOpening) {
+      setOpenIndex(index)
+      announce(`Question expanded: ${faq.question}`, 'polite')
+    } else {
+      setOpenIndex(null)
+      announce('Question collapsed', 'polite')
+    }
+  }
+
   return (
-    <section className="w-full py-20 bg-[#F8F6F3]">
+    <section 
+      className="w-full py-20 bg-[#F8F6F3]"
+      aria-labelledby="faq-heading"
+    >
       <div className="container mx-auto px-4">
         <div className="max-w-3xl mx-auto">
-          <h2 className="font-pt-serif text-4xl text-[#2F2F2F] text-center mb-12">
+          <h2 
+            id="faq-heading"
+            className="font-pt-serif text-4xl text-[#2F2F2F] text-center mb-12"
+          >
             Common Questions
           </h2>
 
-          <div className="space-y-4">
+          <div 
+            className="space-y-4"
+            role="region"
+            aria-label="Frequently Asked Questions"
+          >
             {faqs.map((faq, index) => (
-              <div 
+              <motion.div 
                 key={index}
-                className="bg-white rounded-sm"
+                className="bg-white rounded-sm overflow-hidden"
+                initial={false}
+                animate={{ backgroundColor: openIndex === index ? 'rgb(248, 246, 243)' : 'white' }}
+                transition={{ duration: 0.2 }}
               >
                 <button
-                  className="w-full flex items-center justify-between p-6 text-left"
-                  onClick={() => setOpenIndex(openIndex === index ? null : index)}
+                  className="w-full flex items-center justify-between p-6 text-left focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                  onClick={() => handleToggle(index)}
+                  aria-expanded={openIndex === index}
+                  aria-controls={`faq-answer-${index}`}
+                  id={`faq-question-${index}`}
+                  aria-label={`${faq.question}${openIndex === index ? ' (Click to collapse)' : ' (Click to expand)'}`}
                 >
                   <span className="font-semibold text-[#2F2F2F]">{faq.question}</span>
-                  {openIndex === index ? (
-                    <Minus className="w-5 h-5 text-primary shrink-0" />
-                  ) : (
-                    <Plus className="w-5 h-5 text-primary shrink-0" />
-                  )}
+                  <motion.div
+                    animate={{ rotate: openIndex === index ? 180 : 0 }}
+                    transition={{ duration: 0.2 }}
+                    aria-hidden="true"
+                  >
+                    {openIndex === index ? (
+                      <Minus className="w-5 h-5 text-primary shrink-0" />
+                    ) : (
+                      <Plus className="w-5 h-5 text-primary shrink-0" />
+                    )}
+                  </motion.div>
                 </button>
                 
-                {openIndex === index && (
-                  <div className="px-6 pb-6">
-                    <p className="text-gray-600">{faq.answer}</p>
-                  </div>
-                )}
-              </div>
+                <AnimatePresence>
+                  {openIndex === index && (
+                    <motion.div
+                      id={`faq-answer-${index}`}
+                      role="region"
+                      aria-labelledby={`faq-question-${index}`}
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <div className="px-6 pb-6">
+                        <p className="text-gray-600">{faq.answer}</p>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.div>
             ))}
           </div>
         </div>
