@@ -126,3 +126,64 @@ UPDATE HISTORY
 - Initial documentation: Nov 20, 2023
 - Last updated: Nov 20, 2023
 - Next review: When attempting any header modifications
+
+HEADER IMPLEMENTATION DOCUMENTATION
+
+[Previous content remains unchanged...]
+
+FIXED ISSUES
+
+1. Header Bounce (Nov 21, 2023)
+Problem: Header would briefly bounce when scrolling down near hero bottom (~115px)
+Root Cause: Race condition between visibility and condensed state changes
+
+Solution: Implemented state machine approach with explicit states:
+type HeaderState = 'initial' | 'visible' | 'hidden' | 'condensed'
+
+Key Implementation:
+- State transitions controlled by switch statement
+- Clear conditions for each state change
+- Prevents unwanted state combinations
+- Maintains existing scroll thresholds
+
+Critical Code:
+switch (headerState) {
+  case 'initial':
+    if (currentScrollY > initialDelay && isScrollingDown) {
+      setHeaderState('hidden')
+    }
+    break
+    
+  case 'visible':
+    if (isScrollingDown && currentScrollY > initialDelay) {
+      setHeaderState('hidden')
+    } else if (currentScrollY > heroHeight) {
+      setHeaderState('condensed')
+    }
+    break
+    
+  case 'hidden':
+    if (!isScrollingDown) {
+      setHeaderState(currentScrollY > heroHeight ? 'condensed' : 'visible')
+    }
+    break
+    
+  case 'condensed':
+    if (isScrollingDown && currentScrollY > initialDelay) {
+      setHeaderState('hidden')
+    } else if (currentScrollY <= heroHeight) {
+      setHeaderState('visible')
+    }
+    break
+}
+
+Benefits:
+- Eliminates unwanted bounce effect
+- Maintains all existing functionality
+- More predictable state transitions
+- Easier to debug and maintain
+
+UPDATE HISTORY
+- Initial documentation: Nov 20, 2023
+- Last updated: Nov 21, 2023 - Added state machine fix for header bounce
+- Next review: When attempting any header modifications

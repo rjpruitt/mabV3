@@ -15,49 +15,31 @@ function throttle(func: (...args: any[]) => void, limit: number) {
   }
 }
 
-type HeaderState = 'initial' | 'visible' | 'hidden' | 'condensed'
-
 export function Header() {
-  const [headerState, setHeaderState] = useState<HeaderState>('initial')
+  const [isVisible, setIsVisible] = useState(true)
+  const [isCondensed, setIsCondensed] = useState(false)
   const [lastScrollY, setLastScrollY] = useState(0)
 
   useEffect(() => {
     const controlNavbar = () => {
       const currentScrollY = window.scrollY
       const heroHeight = window.innerHeight * 0.6
-      const headerHeight = 170 // Combined height: TopBanner (40px) + MainNav (130px)
-      const initialDelay = headerHeight + 115
       
-      const isScrollingDown = currentScrollY > lastScrollY
+      // Get header height directly
+      const headerHeight = 170 // Combined height of banner (40px) and nav (130px)
       
-      switch (headerState) {
-        case 'initial':
-          if (currentScrollY > initialDelay && isScrollingDown) {
-            setHeaderState('hidden')
-          }
-          break
-          
-        case 'visible':
-          if (isScrollingDown && currentScrollY > initialDelay) {
-            setHeaderState('hidden')
-          } else if (currentScrollY > heroHeight) {
-            setHeaderState('condensed')
-          }
-          break
-          
-        case 'hidden':
-          if (!isScrollingDown) {
-            setHeaderState(currentScrollY > heroHeight ? 'condensed' : 'visible')
-          }
-          break
-          
-        case 'condensed':
-          if (isScrollingDown && currentScrollY > initialDelay) {
-            setHeaderState('hidden')
-          } else if (currentScrollY <= heroHeight) {
-            setHeaderState('visible')
-          }
-          break
+      // Visibility logic
+      if (currentScrollY > lastScrollY && currentScrollY > headerHeight) {
+        setIsVisible(false)
+      } else if (currentScrollY < lastScrollY) {
+        setIsVisible(true)
+      }
+
+      // Condensed state
+      if (currentScrollY > heroHeight) {
+        setIsCondensed(true)
+      } else {
+        setIsCondensed(false)
       }
       
       setLastScrollY(currentScrollY)
@@ -67,10 +49,7 @@ export function Header() {
 
     window.addEventListener('scroll', throttledControlNavbar)
     return () => window.removeEventListener('scroll', throttledControlNavbar)
-  }, [lastScrollY, headerState])
-
-  const isVisible = headerState !== 'hidden'
-  const isCondensed = headerState === 'condensed'
+  }, [lastScrollY])
 
   return (
     <div 
