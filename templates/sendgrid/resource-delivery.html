@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Your {{resourceName}} is Here!</title>
+</head>
+<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #2F2F2F;">
+  <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+    <div style="text-align: center; margin-bottom: 30px;">
+      <img src="{{logoUrl}}" alt="Mid America Bathworks" style="max-width: 200px;">
+    </div>
+
+    <h1 style="color: #016369; margin-bottom: 20px;">Hello {{firstName}}!</h1>
+    
+    <p>Thank you for requesting our {{resourceName}}. Your guide is attached to this email.</p>
+    
+    <div style="background: #F8F6F3; padding: 20px; margin: 20px 0; border-radius: 4px;">
+      <h2 style="color: #016369; margin-top: 0;">What's Next?</h2>
+      <ul style="padding-left: 20px;">
+        <li>Review your guide at your convenience</li>
+        <li>Share it with family members involved in the decision</li>
+        <li>Schedule a free consultation to discuss your needs</li>
+      </ul>
+    </div>
+
+    <div style="text-align: center; margin: 30px 0;">
+      <a href="{{consultationUrl}}" 
+         style="background: #FF6B35; color: white; padding: 12px 24px; text-decoration: none; border-radius: 2px; display: inline-block;">
+        Schedule Free Consultation
+      </a>
+    </div>
+
+    <p>If you have any questions, feel free to call us at <span style="color: #FF6B35;">1 (555) 555-5555</span>.</p>
+
+    <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #eee; font-size: 12px; color: #666;">
+      <p>This email was sent to {{email}} because you requested a resource from Mid America Bathworks.</p>
+    </div>
+  </div>
+</body>
+</html> 

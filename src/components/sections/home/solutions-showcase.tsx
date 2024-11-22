@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react'
 import Image from 'next/image'
+import { useRouter } from 'next/navigation'
 import { Bath, ShowerHead, Heart, Grid, Package } from 'lucide-react'
 
 const solutions = [
@@ -10,35 +11,41 @@ const solutions = [
     title: 'Bathtubs',
     icon: Bath,
     image: '/images/home/solutions/womanwalkintub.jpeg',
+    href: '/solutions/bathtubs'
   },
   {
     id: 'showers',
     title: 'Showers',
     icon: ShowerHead,
     image: '/images/home/solutions/walkinshower.jpeg',
+    href: '/solutions/showers'
   },
   {
     id: 'accessibility',
     title: 'Accessibility & Safety',
     icon: Heart,
     image: '/images/home/solutions/showersafety.jpeg',
+    href: '/solutions/accessibility'
   },
   {
     id: 'walls',
     title: 'Walls & Wainscoting',
     icon: Grid,
-    image: 'https://placehold.co/1200x800/016369/FFFFFF/png?text=Walls',
+    image: '/images/home/solutions/wainscoting.jpeg',
+    href: '/solutions/walls'
   },
   {
     id: 'accessories',
     title: 'Accessories',
     icon: Package,
-    image: 'https://placehold.co/1200x800/016369/FFFFFF/png?text=Accessories',
+    image: '/images/home/solutions/niche.jpeg',
+    href: '/solutions/accessories'
   },
 ]
 
 export function SolutionsShowcase() {
   const [activeId, setActiveId] = useState<string>('bathtubs')
+  const router = useRouter()
 
   return (
     <section className="w-full py-32 bg-white">
@@ -59,7 +66,7 @@ export function SolutionsShowcase() {
                   key={solution.id}
                   className={`w-full text-left p-6 rounded-sm transition-colors flex items-center justify-between bg-white hover:bg-[#F3F2F0] border border-gray-200`}
                   onMouseEnter={() => setActiveId(solution.id)}
-                  onClick={() => setActiveId(solution.id)}
+                  onClick={() => router.push(solution.href)}
                 >
                   <div className="flex items-center gap-4">
                     <solution.icon 
