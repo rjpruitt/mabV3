@@ -1,0 +1,1359 @@
+DATABASE PROJECT SPECIFICATION
+Mid America Bathworks & Associated Companies
+Last Updated: [Current Date]
+
+1. PROJECT OVERVIEW
+==================
+Purpose: Design, develop, and implement a multi-tenant database system supporting multiple 
+related home service businesses with shared customer relationships.
+
+Primary Businesses:
+- Mid America Bathworks (bathroom remodeling, accessibility modifications)
+- Solid State Foundation Solutions (foundation repair services)
+- Caring For Us (senior care services and transition assistance)
+
+Key Requirements:
+- Support shared customer relationships across businesses
+- Enable family/household relationship tracking
+- Maintain data isolation where needed
+- Support comprehensive analytics and reporting
+- Enable future scaling to additional businesses
+
+1.1 DEVELOPMENT ARCHITECTURE
+===========================
+The system follows a modern microservices architecture pattern, allowing independent 
+development and deployment of components while maintaining system cohesion.
+
+1. Component Separation
+   Database as a Service (DBaaS)
+   - Independent development and deployment
+   - Single source of truth
+   - Separate versioning and scaling
+   - Accessed through defined APIs
+
+2. Application Independence
+   Architecture Diagram:
+   
+   Company Apps                    API Layer                Database
+   ┌──────────────┐               ┌──────────┐            ┌──────────┐
+   │ MAB Website  ├───────────────┤          │            │          │
+   └──────────────┘               │          │            │          │
+   ┌──────────────┐               │  API     ├────────────┤ Database │
+   │ SSFS Website ├───────────────┤  Gateway │            │  Service │
+   └──────────────┘               │          │            │          │
+   ┌──────────────┐               │          │            │          │
+   │ CFU Portal   ├───────────────┤          │            │          │
+   └──────────────┘               └──────────┘            └──────────┘
+
+3. Development Benefits
+   Each Application Can:
+   - Use different technology stacks
+   - Follow independent development timelines
+   - Scale independently
+   - Update without affecting other applications
+   - Implement business-specific features
+
+4. Integration Method
+   - Standardized API endpoints
+   - REST or GraphQL interfaces
+   - Consistent authentication/authorization
+   - Clear data access patterns
+
+5. Implementation Sequence
+   Recommended Development Order:
+   
+   1. Core Database & API Layer
+      └── Essential schemas and endpoints
+   
+   2. First Application (e.g., MAB)
+      └── Connect via API
+   
+   3. Second Application
+      └── Reuse existing API patterns
+   
+   4. Additional Services
+      └── Add new endpoints as needed
+
+6. Key Advantages
+   - Modular development approach
+   - Independent scaling of components
+   - Technology flexibility
+   - Simplified maintenance
+   - Clear separation of concerns
+   - Future-proof architecture
+
+1.2 BUSINESS RELATIONSHIP DYNAMICS
+================================
+The businesses within this group operate as distinct entities but with significant 
+customer overlap and service interactions. Understanding these relationships is 
+crucial to the database design:
+
+Primary Interaction Patterns:
+1. Senior Care to Home Modification Flow
+   - Initial Entry: Elderly client engages with Caring For Us for senior services
+   - Service Extension: Assessment identifies home modification needs
+   - Cross-Business Service: Mid America Bathworks performs safety modifications
+   - Ongoing Relationship: Continued care services while aging in place
+   - Family Extension: Relationships often extend to family members' homes
+
+2. Family Network Development
+   - Primary Client: Senior requiring services
+   - Extended Network:
+     * Adult children making decisions
+     * Family members becoming future clients
+     * Caregivers and healthcare providers
+     * Reference network for referrals
+
+3. Service Interaction Examples:
+   - Caring For Us client needs bathroom safety modifications (→ Mid America Bathworks)
+   - Home assessment reveals foundation issues (→ Solid State Foundation Solutions)
+   - Adult child's home requires similar modifications (→ Multiple businesses)
+   - Family referrals lead to new client relationships (→ Network expansion)
+
+4. Network Value Dynamics:
+   - Single client potentially connects to multiple revenue streams
+   - Family relationships create long-term business opportunities
+   - Cross-business referrals strengthen overall client relationships
+   - Multi-generational service opportunities
+   - Geographic clustering of services
+
+Key Business Intelligence Requirements:
+1. Relationship Mapping
+   - Family connection tracking
+   - Service history across businesses
+   - Referral chain documentation
+   - Household relationship mapping
+   - Care network visualization
+
+2. Opportunity Tracking
+   - Cross-business service needs
+   - Family member service potential
+   - Referral network development
+   - Geographic service clusters
+   - Multi-generational opportunities
+
+3. Service Coordination
+   - Integrated service scheduling
+   - Cross-business project management
+   - Family communication coordination
+   - Care network updates
+   - Service history accessibility
+
+2. BUSINESS REQUIREMENTS
+=======================
+2.1 Customer Management
+    - Unified customer profiles across businesses
+    - Family/household relationship tracking
+    - Referral chain tracking
+    - Service history across all businesses
+    - Contact preferences and communication history
+
+2.2 Business Isolation
+    - Separate business-specific customer data
+    - Role-based access control
+    - Business-specific configurations
+    - Isolated financial data
+
+2.3 Cross-Business Features
+    - Shared customer identification
+    - Cross-business opportunity tracking
+    - Referral management
+    - Family/household service coordination
+
+2.4 Analytics Requirements
+    - Cross-business customer journey tracking
+    - Referral chain analysis
+    - Service pattern analysis
+    - Revenue attribution
+    - Household-level analytics
+
+3. TECHNICAL SPECIFICATIONS
+==========================
+3.1 Database Architecture
+    Primary Database: PostgreSQL
+    Architecture Type: Multi-tenant with schema-based isolation
+    
+3.1.1 PostgreSQL Version Selection
+    Current Recommendation: PostgreSQL 16
+    
+    Version Considerations:
+    1. PostgreSQL Options
+       - PostgreSQL 16.x (Latest)
+         * Long-term support until 2028
+         * Latest features and optimizations
+         * Best performance improvements
+       
+       - PostgreSQL 15.x
+         * Very stable
+         * Supported until 2027
+         * Mature feature set
+       
+       - PostgreSQL 14.x
+         * Mature and battle-tested
+         * Supported until 2026
+         * Wide hosting support
+
+    2. Hosting Considerations
+       A. Managed Services
+          - Vercel Postgres
+            * Built on Neon's serverless PostgreSQL
+            * Easy Vercel integration
+            * Automatic scaling
+            * Limited configuration control
+          
+          - AWS RDS
+            * Industry standard
+            * High reliability
+            * Full configuration control
+            * Complex setup
+          
+          - Google Cloud SQL
+            * Strong Google ecosystem integration
+            * Good performance
+            * Comprehensive management tools
+          
+          - Azure Database
+            * Enterprise-grade features
+            * Strong Windows integration
+            * Good compliance tools
+          
+          - Digital Ocean
+            * Simple setup
+            * Cost-effective
+            * Basic feature set
+          
+          - Neon
+            * Modern serverless approach
+            * Good scalability
+            * Branch feature for development
+
+       B. Self-Hosted
+          * Complete control
+          * Complex maintenance
+          * Higher operational overhead
+          * Required for some compliance scenarios
+
+    3. Provider-Agnostic Implementation
+       Implementation Strategy:
+       - Use database abstraction layer
+       - Implement connection pooling
+       - Standardize configuration
+       - Plan for portability
+
+       Example Configuration Interface:
+       ```typescript
+       interface DatabaseConfig {
+         host: string;
+         port: number;
+         username: string;
+         password: string;
+         database: string;
+         ssl?: boolean;
+         pooling?: {
+           max: number;
+           idle: number;
+         };
+       }
+       ```
+
+       Example Service Layer:
+       ```typescript
+       class DatabaseService {
+         private static instance: DatabaseService;
+         private pool: Pool;
+
+         private constructor(config: DatabaseConfig) {
+           // Initialize connection pool
+         }
+
+         public static getInstance(config: DatabaseConfig) {
+           if (!DatabaseService.instance) {
+             DatabaseService.instance = new DatabaseService(config);
+           }
+           return DatabaseService.instance;
+         }
+
+         // Database operations
+       }
+       ```
+
+    4. Migration Considerations
+       - Version upgrade paths
+       - Data export/import procedures
+       - Connection string management
+       - Performance testing requirements
+
+[Continue with existing Core Schemas section...]
+
+3.2 Core Tables Structure
+    Common Tables (public schema):
+    - customers
+    - households
+    - customer_relationships
+    - addresses
+    - contact_methods
+    - user_accounts
+    - roles_permissions
+
+    Business-Specific Tables (per business schema):
+    - customer_profiles
+    - services
+    - appointments
+    - quotes
+    - invoices
+    - business_specific_config
+
+    Analytics Tables:
+    - customer_journeys
+    - service_patterns
+    - referral_chains
+    - revenue_attribution
+
+4. DATA MODELS
+=============
+4.1 Core Data Structures
+    [Previous content...]
+
+4.2 Dynamic Data Collection Framework
+    Purpose: Enable flexible modification of data collection forms and fields
+    without requiring database schema changes.
+
+    Implementation Strategy:
+    1. Form Definition System
+       - forms_definition
+         * form_id
+         * business_id
+         * form_type (lead_capture, design_tool, inspection, etc.)
+         * version
+         * status (active, archived)
+         * created_at
+         * modified_at
+
+    2. Dynamic Field Management
+       - form_fields
+         * field_id
+         * form_id
+         * field_name
+         * field_type
+         * validation_rules
+         * required
+         * order
+         * active
+
+    3. Form Responses Storage
+       - form_responses
+         * response_id
+         * form_id
+         * form_version
+         * customer_id
+         * response_data (JSONB)
+         * submitted_at
+         
+    4. Field Value History
+       - field_value_history
+         * history_id
+         * response_id
+         * field_id
+         * old_value
+         * new_value
+         * changed_at
+
+4.3 User Account System
+    1. Core User Management
+       - users
+         * user_id
+         * email
+         * phone
+         * auth_provider_id
+         * status
+         * created_at
+         * last_login
+
+    2. Profile Management
+       - user_profiles
+         * profile_id
+         * user_id
+         * business_id
+         * profile_type (customer, employee, contractor)
+         * preferences
+         * notification_settings
+
+    3. Business-Specific User Data
+       A. Mid America Bathworks
+          - design_projects
+            * project_id
+            * user_id
+            * status
+            * created_at
+            * last_modified
+
+          - design_boards
+            * board_id
+            * project_id
+            * name
+            * description
+            * created_at
+
+          - board_items
+            * item_id
+            * board_id
+            * item_type (inspiration, product, user_upload)
+            * content_reference
+            * position
+            * notes
+
+       B. Solid State Foundations
+          - property_inspections
+            * inspection_id
+            * customer_id
+            * inspector_id
+            * status
+            * inspection_date
+            * report_status
+
+          - inspection_documentation
+            * doc_id
+            * inspection_id
+            * doc_type (photo, video, report)
+            * stage (pre_inspection, during_work, post_completion)
+            * location_note
+            * upload_date
+            * uploaded_by
+
+          - repair_projects
+            * project_id
+            * inspection_id
+            * status
+            * payment_status
+            * start_date
+            * completion_date
+
+4.4 Media Management
+    - media_assets
+      * asset_id
+      * business_id
+      * user_id
+      * asset_type
+      * storage_path
+      * metadata
+      * permissions
+      * created_at
+
+    - asset_relationships
+      * relationship_id
+      * asset_id
+      * related_entity_type
+      * related_entity_id
+      * relationship_type
+
+4.5 Version Control and Change Management
+    1. Schema Version Control
+       - schema_versions
+         * version_id
+         * business_id
+         * schema_name
+         * version_number
+         * applied_at
+         * migration_script
+
+    2. Data Migration Tracking
+       - data_migrations
+         * migration_id
+         * version_id
+         * status
+         * started_at
+         * completed_at
+         * error_log
+
+5. CHANGE MANAGEMENT PROTOCOLS
+============================
+5.1 Form Modification Protocol
+    1. Version Control
+       - New form versions created for significant changes
+       - Old versions retained for historical data
+       - Version mapping for data migration
+
+    2. Field Changes
+       - Addition: Non-breaking change
+       - Modification: Requires migration strategy
+       - Deletion: Soft delete with data retention
+
+    3. Data Migration Strategies
+       - Automated migration scripts
+       - Data validation procedures
+       - Rollback capabilities
+
+5.2 Business Logic Adaptation
+    1. API Versioning
+       - Version-specific endpoints
+       - Deprecation schedules
+       - Backward compatibility
+
+    2. Feature Flags
+       - Progressive feature rollout
+       - A/B testing capability
+       - Business-specific customization
+
+6. SECURITY AND ACCESS CONTROL
+=============================
+6.1 Role Definitions
+    - Super Admin (cross-business access)
+    - Business Admin (single business access)
+    - Service Staff (limited business access)
+    - Customer Service (read-only access)
+    - Customers (self-service access)
+
+6.2 Data Access Patterns
+    - Row-level security implementation
+    - Cross-business data access rules
+    - Audit logging requirements
+
+7. INTEGRATION REQUIREMENTS
+==========================
+7.1 External Systems
+    - Google Sheets export capability
+    - CRM system integration
+    - Marketing automation platforms
+    - Communication systems (email, SMS)
+    - Payment processing systems
+
+7.2 API Requirements
+    - RESTful API endpoints
+    - GraphQL consideration for complex queries
+    - Authentication/Authorization
+    - Rate limiting
+    - Versioning strategy
+
+8. MIGRATION STRATEGY
+====================
+8.1 Phase 1: Initial Setup
+    - Core database setup
+    - Basic table structure
+    - Essential relationships
+
+8.2 Phase 2: Data Migration
+    - Google Sheets data import
+    - Existing customer data migration
+    - Relationship mapping
+
+8.3 Phase 3: Feature Implementation
+    - Cross-business functionality
+    - Analytics implementation
+    - Advanced features
+
+9. TESTING REQUIREMENTS
+======================
+9.1 Data Integrity Testing
+    - Relationship consistency
+    - Cross-business data isolation
+    - Referential integrity
+
+9.2 Performance Testing
+    - Query optimization
+    - Load testing
+    - Concurrent access testing
+
+9.3 Security Testing
+    - Access control validation
+    - Data isolation verification
+    - Audit log verification
+
+10. MAINTENANCE AND MONITORING
+=============================
+10.1 Backup Strategy
+10.2 Performance Monitoring
+10.3 Error Tracking
+10.4 Audit Logging
+
+11. FUTURE CONSIDERATIONS
+========================
+- Scaling to additional businesses
+- Advanced analytics capabilities
+- Machine learning integration
+- Additional service integrations
+
+12. HIPAA COMPLIANCE AND PROTECTED HEALTH INFORMATION (PHI)
+========================================================
+12.1 HIPAA Scope and Impact
+    1. Affected Business Units
+       - Primary: Caring For Us (covered entity)
+       - Secondary: Mid America Bathworks, SSFS (potential PHI exposure)
+       
+    2. PHI Data Categories
+       - Personal identifiers
+       - Medical conditions
+       - Care requirements
+       - Health assessments
+       - Payment information
+       - Medical history
+       - Accessibility needs
+
+12.2 Data Segregation Strategy
+    1. PHI-Specific Schema
+       - phi_data schema
+         * Encrypted at rest
+         * Separate backup procedures
+         * Enhanced audit logging
+         * Access restricted to authorized personnel
+
+    2. PHI Data Tables
+       - health_records
+         * record_id
+         * patient_id (encrypted reference)
+         * record_type
+         * content (encrypted)
+         * access_history
+         * retention_period
+
+       - phi_access_authorizations
+         * authorization_id
+         * patient_id
+         * authorized_entity_id
+         * relationship_type
+         * authorization_scope
+         * valid_from
+         * valid_until
+         * documentation_reference
+
+12.3 Security Measures
+    1. Encryption Requirements
+       - Data at rest encryption
+       - Data in transit encryption
+       - Key management procedures
+       - Encryption key rotation
+
+    2. Access Controls
+       - Role-based access (RBAC)
+       - Multi-factor authentication
+       - IP restriction
+       - Session management
+       - Access time restrictions
+
+    3. Audit Trail
+       - phi_access_logs
+         * access_id
+         * user_id
+         * record_id
+         * access_type
+         * timestamp
+         * ip_address
+         * reason_code
+
+12.4 Business Associate Agreements
+    1. Documentation
+       - agreement_records
+         * agreement_id
+         * business_id
+         * agreement_type
+         * effective_date
+         * review_date
+         * status
+
+    2. Compliance Tracking
+       - compliance_checks
+         * check_id
+         * agreement_id
+         * check_type
+         * status
+         * findings
+         * remediation_steps
+
+12.5 Data Handling Procedures
+    1. Data Retention
+       - Retention policy enforcement
+       - Automated archiving
+       - Secure destruction
+       - Legal hold management
+
+    2. Data Transfer
+       - Secure transfer protocols
+       - Transfer authorization
+       - Transfer logging
+       - Recipient verification
+
+    3. Breach Response
+       - Detection mechanisms
+       - Notification procedures
+       - Investigation tracking
+       - Remediation planning
+
+12.6 Cross-Business PHI Management
+    1. Information Sharing Controls
+       - Need-to-know basis
+       - Minimal necessary principle
+       - Authorization tracking
+       - Purpose specification
+
+    2. Integration Requirements
+       - Secure API endpoints
+       - Data transformation rules
+       - PHI filtering
+       - Access logging
+
+12.7 Technical Safeguards
+    1. Database Level
+       - Column-level encryption
+       - Row-level security
+       - Audit logging
+       - Access monitoring
+
+    2. Application Level
+       - Session management
+       - Activity timeout
+       - Secure communication
+       - Data masking
+
+    3. Infrastructure Level
+       - Network segregation
+       - Firewall rules
+       - Intrusion detection
+       - Vulnerability scanning
+
+12.8 Compliance Monitoring
+    1. Regular Audits
+       - Access pattern review
+       - Permission verification
+       - Policy compliance
+       - Risk assessment
+
+    2. Reporting Requirements
+       - Audit reports
+       - Incident reports
+       - Access reports
+       - Compliance status
+
+12.9 Training and Documentation
+    1. Staff Training
+       - HIPAA awareness
+       - Security procedures
+       - Incident response
+       - Data handling
+
+    2. Documentation Management
+       - Policy documentation
+       - Procedure guides
+       - Training records
+       - Compliance records
+
+13. PERSONAL CARE ASSISTANT (PCA) SYSTEM
+=======================================
+13.1 Care Documentation System
+    1. Mobile-First Application
+       - Real-time documentation
+       - Offline capability
+       - Secure authentication
+       - Location verification
+       - Photo/document upload
+
+    2. Care Activity Documentation
+       - medication_administration
+         * admin_id
+         * patient_id
+         * caregiver_id
+         * medication_id
+         * dosage_given
+         * scheduled_time
+         * actual_time
+         * status
+         * notes
+         * verification_method
+
+       - care_activities
+         * activity_id
+         * patient_id
+         * caregiver_id
+         * activity_type
+         * start_time
+         * end_time
+         * status
+         * notes
+         * photos (encrypted references)
+
+       - vital_signs
+         * record_id
+         * patient_id
+         * caregiver_id
+         * type
+         * value
+         * timestamp
+         * notes
+
+13.2 Medication Management
+    1. Medication Tracking
+       - medications
+         * med_id
+         * patient_id
+         * prescription_info
+         * dosage_instructions
+         * schedule
+         * prescriber_info
+         * pharmacy_info
+         * start_date
+         * end_date
+
+    2. Schedule Management
+       - med_schedule
+         * schedule_id
+         * med_id
+         * patient_id
+         * frequency
+         * time_slots
+         * special_instructions
+
+    3. Inventory Tracking
+       - med_inventory
+         * inventory_id
+         * med_id
+         * current_quantity
+         * last_refill
+         * next_refill_due
+         * alerts_enabled
+
+13.3 Family Portal
+    1. Access Management
+       - authorized_viewers
+         * viewer_id
+         * patient_id
+         * relationship
+         * access_level
+         * authorization_document
+         * valid_from
+         * valid_until
+
+    2. View Permissions
+       - permission_sets
+         * set_id
+         * viewer_id
+         * allowed_data_types
+         * restrictions
+         * custom_rules
+
+    3. Activity Feed
+       - care_updates
+         * update_id
+         * patient_id
+         * activity_reference
+         * visibility_level
+         * notification_sent
+         * viewed_by (array)
+
+13.4 Communication System
+    1. Secure Messaging
+       - messages
+         * message_id
+         * sender_id
+         * recipient_id
+         * patient_id
+         * content (encrypted)
+         * attachments
+         * priority_level
+         * read_status
+
+    2. Alert System
+       - alerts
+         * alert_id
+         * patient_id
+         * alert_type
+         * severity
+         * status
+         * resolution
+         * notification_list
+
+13.5 Quality Assurance
+    1. Care Plan Compliance
+       - care_plan_tracking
+         * tracking_id
+         * patient_id
+         * care_plan_id
+         * compliance_rate
+         * missed_items
+         * notes
+
+    2. Performance Monitoring
+       - caregiver_metrics
+         * metric_id
+         * caregiver_id
+         * period
+         * attendance_rate
+         * documentation_compliance
+         * patient_feedback
+         * supervisor_notes
+
+13.6 Reporting System
+    1. Standard Reports
+       - Medication compliance
+       - Care activity completion
+       - Incident reports
+       - Health status trends
+       - Caregiver performance
+
+    2. Custom Reports
+       - report_templates
+         * template_id
+         * creator_id
+         * parameters
+         * access_level
+         * schedule
+
+13.7 Integration Points
+    1. External Systems
+       - Electronic Health Records (EHR)
+       - Pharmacy systems
+       - Emergency services
+       - Healthcare providers
+
+    2. Internal Systems
+       - Billing/Invoicing
+       - Staff scheduling
+       - Quality management
+       - Training systems
+
+14. FUTURE BUSINESS AND SERVICE EXPANSION
+=======================================
+14.1 Business Integration Framework
+    1. New Business Onboarding
+       - business_registry
+         * business_id
+         * business_name
+         * business_type
+         * parent_company
+         * integration_level
+         * status
+         * onboarding_date
+         * compliance_requirements
+         * schema_name
+
+    2. Schema Generation System
+       - schema_templates
+         * template_id
+         * business_type
+         * required_tables
+         * optional_tables
+         * compliance_level
+         * data_retention_rules
+
+    3. Cross-Business Relationship Rules
+       - relationship_mappings
+         * mapping_id
+         * primary_business
+         * related_business
+         * relationship_type
+         * data_sharing_rules
+         * compliance_requirements
+
+14.2 Service Expansion Framework
+    1. Service Registry
+       - service_definitions
+         * service_id
+         * business_id
+         * service_name
+         * service_category
+         * required_certifications
+         * compliance_level
+         * data_requirements
+         * integration_points
+
+    2. Service Dependencies
+       - service_dependencies
+         * dependency_id
+         * service_id
+         * dependent_service_id
+         * dependency_type
+         * required_data_access
+         * workflow_integration
+
+    3. Service Customization
+       - service_configurations
+         * config_id
+         * service_id
+         * business_id
+         * custom_fields
+         * workflow_rules
+         * pricing_structure
+         * availability_rules
+
+14.3 Vertical Integration Capabilities
+    1. Healthcare Services Expansion
+       - Medical Equipment Supply
+       - Home Health Services
+       - Therapy Services
+       - Nutritional Services
+       - Transportation Services
+
+    2. Home Services Expansion
+       - Home Maintenance
+       - Security Systems
+       - Energy Efficiency
+       - Smart Home Integration
+       - Landscaping Services
+
+    3. Financial Services Integration
+       - Insurance Coordination
+       - Payment Processing
+       - Financial Planning
+       - Care Cost Management
+       - Service Financing
+
+14.4 Data Integration Patterns
+    1. Shared Customer Profile Enhancement
+       - profile_extensions
+         * extension_id
+         * customer_id
+         * business_id
+         * service_id
+         * extension_type
+         * data_schema
+         * privacy_level
+
+    2. Cross-Service Analytics
+       - service_analytics
+         * analytics_id
+         * customer_id
+         * service_group
+         * interaction_patterns
+         * value_metrics
+         * opportunity_signals
+
+    3. Unified Customer Journey
+       - journey_mapping
+         * journey_id
+         * customer_id
+         * touchpoint_sequence
+         * service_interactions
+         * outcome_tracking
+         * satisfaction_metrics
+
+14.5 Compliance Framework Expansion
+    1. Regulatory Requirement Management
+       - compliance_requirements
+         * requirement_id
+         * business_type
+         * service_type
+         * regulation_reference
+         * implementation_rules
+         * audit_requirements
+
+    2. Certification Tracking
+       - business_certifications
+         * cert_id
+         * business_id
+         * certification_type
+         * status
+         * expiration_date
+         * renewal_requirements
+
+14.6 Technology Stack Scalability
+    1. Infrastructure Scaling
+       - Load balancing requirements
+       - Geographic distribution
+       - Backup and recovery
+       - Performance monitoring
+
+    2. API Evolution
+       - Version management
+       - Deprecation strategies
+       - Documentation requirements
+       - Client migration support
+
+14.7 Business Intelligence Expansion
+    1. Cross-Business Analytics
+       - Market penetration
+       - Service adoption patterns
+       - Customer lifetime value
+       - Referral networks
+
+    2. Predictive Analytics
+       - Service need prediction
+       - Customer churn prevention
+       - Resource optimization
+       - Market opportunity identification
+
+14.8 Integration Hub
+    1. External Partner Integration
+       - partner_registry
+         * partner_id
+         * integration_type
+         * service_scope
+         * data_sharing_rules
+         * api_configurations
+
+    2. System Interconnections
+       - integration_points
+         * point_id
+         * source_system
+         * target_system
+         * data_flow_rules
+         * transformation_logic
+         * security_requirements
+
+14.9 Future-Proofing Measures
+    1. Technology Adoption Framework
+       - technology_assessment
+         * assessment_id
+         * technology_type
+         * business_impact
+         * integration_requirements
+         * implementation_timeline
+
+    2. Market Adaptation Capability
+       - market_response_system
+         * response_id
+         * market_trigger
+         * service_adjustments
+         * data_requirements
+         * implementation_plan
+
+15. PERFORMANCE SPECIFICATIONS
+============================
+15.1 Transaction Volume Requirements
+    1. Home Services (MAB, SSFS)
+       - Expected daily form submissions: 5-20
+       - Peak hours: 8am-6pm business days
+       - Design tool sessions: 10-30 daily
+       - Document uploads: 20-50 per project
+       - Concurrent users: 5-15 typical
+
+    2. Senior Care Services (CFU)
+       Initial Phase:
+       - Care inquiries: 5-15 daily
+       - Assessment forms: 3-10 daily
+       - Document uploads: 10-30 daily
+       - Concurrent users: 5-10 typical
+
+       Personal Care Phase:
+       - Care documentation: 50-200 entries daily
+       - Medication logs: 20-100 daily
+       - Activity logs: 100-300 daily
+       - Concurrent users: 20-50 typical
+       - Peak usage: Shift changes (6-8am, 2-4pm, 10pm-12am)
+
+15.2 Response Time Requirements
+    1. Web Applications
+       - Page load: < 2 seconds
+       - Form submission: < 1 second
+       - Search queries: < 500ms
+       - File upload feedback: < 2 seconds
+       - Design tool interactions: < 200ms
+
+    2. Mobile Applications (Care Documentation)
+       - App launch: < 3 seconds
+       - Form submission: < 2 seconds
+       - Offline sync: Background process
+       - Photo upload: Progressive with feedback
+       - Real-time updates: < 500ms
+
+15.3 Data Growth Projections
+    1. Home Services
+       - Customer data: 1-2K records/year
+       - Project documents: 5-10GB/year
+       - Design assets: 20-30GB/year
+       - Historical retention: 7 years
+
+    2. Senior Care
+       - Customer data: 500-1K records/year
+       - Care documentation: 100-200MB/year/patient
+       - Medical records: 1-2GB/year total
+       - Historical retention: Based on regulations
+
+15.4 Backup Requirements
+    1. Transaction Data
+       - Real-time replication
+       - Point-in-time recovery: 5 minute intervals
+       - Retention: 30 days minimum
+
+    2. Document Storage
+       - Daily incremental backups
+       - Weekly full backups
+       - Retention: 90 days minimum
+
+    3. Recovery Time Objectives
+       - Critical systems: < 1 hour
+       - Non-critical systems: < 4 hours
+       - Historical data: < 24 hours
+
+16. PRODUCT SPECIFICATIONS
+=========================
+16.1 Walk-In Shower Components
+
+    1. Shower Bases
+       A. Smart Solutions Tier
+          - Delta Classic 400 Series
+            * Sizes: 48x34, 60x32, 60x36
+            * Height: 4.5"
+            * Center drain
+            * Slip-resistant textured floor
+            * Price: $229-289
+            * SKU: 40064
+
+          - Sterling Ensemble
+            * Sizes: 48x34, 60x30, 60x32, 60x36
+            * Height: 5"
+            * Center or end drain options
+            * Vikrell material
+            * Price: $245-320
+            * SKU: 72171110
+
+          - ASB Standard Series
+            * Sizes: 48x34, 60x32, 60x36
+            * Height: 4"
+            * Center drain
+            * Price: $199-275
+            * SKU: SB6032
+
+       B. Premium Tier
+          - Kohler Ballast
+            * Sizes: Multiple configurations
+            * Height: 3.5"
+            * Multiple drain locations
+            * Colors: White, Biscuit, Almond
+            * Price: $445-650
+            * SKU: K-98024
+
+          - American Standard Studio
+            * Sizes: Custom available
+            * Height: 4"
+            * Multiple drain options
+            * Colors: White, Bone, Linen
+            * Price: $425-575
+            * SKU: AM6500CL
+
+    2. Wall Surrounds
+       A. Smart Solutions Tier
+          - ASB Smooth Wall Kit
+            * Height: 60"
+            * Material: PVC/Acrylic
+            * Colors: White
+            * Corner shelf included
+            * Price: $425-525
+            * SKU: ASB6032W
+
+          - Sterling Ensemble
+            * Height: 60"
+            * Material: Vikrell
+            * Colors: White
+            * Built-in shelf
+            * Price: $475-625
+            * SKU: 71220120
+
+       B. Premium Tier
+          - Kohler Choreograph
+            * Height: 72" or 96"
+            * Material: Serica™
+            * Multiple color options
+            * Integrated storage
+            * Price: $895-1,295
+            * SKU: K-97614
+
+          - Delta UPstile
+            * Height: 72" or 96"
+            * Material: Composite
+            * Multiple colors
+            * Integrated storage
+            * Price: $725-1,100
+            * SKU: 40984-XXX
+
+    3. Glass Doors
+       A. Smart Solutions Tier
+          - Delta Contemporary Semi-Frameless
+            * Height: 70"
+            * Glass: 1/4" clear tempered
+            * Track: Anodized aluminum
+            * Hardware: Chrome
+            * Price: $325-425
+            * SKU: SD3927410
+
+          - DreamLine Echo
+            * Height: 72"
+            * Glass: 1/4" clear tempered
+            * Track: Aluminum
+            * Hardware: Chrome
+            * Price: $399-499
+            * SKU: DL-6016
+
+       B. Premium Tier
+          - Kohler Levity
+            * Height: 74"
+            * Glass: 3/8" clear tempered
+            * Multiple finish options
+            * Premium hardware
+            * Price: $725-925
+            * SKU: K-706009-L
+
+          - DreamLine Enigma-X
+            * Height: 76"
+            * Glass: 3/8" clear tempered
+            * Track: Stainless steel
+            * Multiple hardware finishes
+            * Price: $899-1099
+            * SKU: DL-7005
+
+16.2 Bulk Pricing Structure
+    1. Contractor Pricing (5+ units)
+       - Smart Solutions: 20% off retail
+       - Premium Tier: 20-25% off retail
+
+    2. Volume Pricing (10+ units)
+       - Smart Solutions: 25-30% off retail
+       - Premium Tier: 30-35% off retail
+
+    3. Lead Times
+       - Standard orders: 2-3 weeks
+       - Bulk orders (5+ units): 3-4 weeks
+       - Large bulk (10+ units): 4-6 weeks
+
+16.3 Storage Requirements
+    - Climate-controlled environment
+    - Vertical storage for wall panels
+    - Protected storage for glass
+    - Minimum temperature: 55°F
+    - Maximum humidity: 60%
+
+16.4 Storage and Accessory Options
+
+A. Smart Solutions Tier
+   1. Corner Shelves and Caddies
+      - Delta Classic Corner Shelf
+        * Size: 8" x 8"
+        * Material: High-impact plastic
+        * Colors: White
+        * Installation: Adhesive mount
+        * Price: $35
+        * SKU: CS-STD-WHT
+        * Bulk (5+): $28/unit
+        * Bulk (10+): $24.50/unit
+
+      - Sterling Corner Caddy
+        * Size: 9" x 9"
+        * Material: Vikrell
+        * Colors: White
+        * Installation: Integrated
+        * Price: $45
+        * SKU: SC-STD-WHT
+        * Bulk (5+): $36/unit
+        * Bulk (10+): $31.50/unit
+
+   2. Grab Bars
+      - Delta Basic Safety Bar
+        * Lengths: 18", 24", 36"
+        * Finish: Chrome
+        * Weight capacity: 250 lbs
+        * Installation: Surface mount
+        * Price: $45-65
+        * SKU: GB-STD-[length]
+        * Bulk (5+): $36-52/unit
+        * Bulk (10+): $31.50-45.50/unit
+
+B. Premium Tier
+   1. Designer Storage Solutions
+      - Kohler Choreograph Floating Shelf
+        * Size: 14" x 4"
+        * Material: Aluminum with Serica™ finish
+        * Colors: Match wall surrounds
+        * Installation: Integrated mounting
+        * Price: $125-175
+        * SKU: KFS-PRM-[color]
+        * Bulk (5+): $100-140/unit
+        * Bulk (10+): $87.50-122.50/unit
+        * Supplier: Ferguson
+
+[Continue with remaining product specifications?] 

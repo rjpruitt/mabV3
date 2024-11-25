@@ -2,12 +2,9 @@
 
 import { motion, AnimatePresence } from 'framer-motion'
 import { useGallery } from './gallery-context'
-import { ReactCompareSlider, ReactCompareSliderImage } from 'react-compare-slider'
-import { useCallback, useRef, KeyboardEvent } from 'react'
-import { useComparisonSlider } from '@/hooks/use-comparison-slider'
-import { useTouchSlider } from '@/hooks/use-touch-slider'
+import { useCallback, useRef } from 'react'
+import { GalleryItem } from './gallery-item'
 
-// Container animation
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
@@ -19,49 +16,11 @@ const containerVariants = {
   }
 }
 
-// Individual item animation
-const itemVariants = {
-  hidden: { 
-    opacity: 0,
-    y: 20,
-    scale: 0.95
-  },
-  visible: {
-    opacity: 1,
-    y: 0,
-    scale: 1,
-    transition: {
-      duration: 0.3
-    }
-  },
-  exit: {
-    opacity: 0,
-    scale: 0.95,
-    transition: {
-      duration: 0.2
-    }
-  }
-}
-
-function getBudgetBadgeStyles(tier: string) {
-  switch (tier) {
-    case 'smart':
-      return 'bg-primary/10 text-primary'
-    case 'premium':
-      return 'bg-accent/10 text-accent'
-    case 'luxury':
-      return 'bg-gray-100 text-gray-600'
-    default:
-      return 'bg-gray-100 text-gray-600'
-  }
-}
-
 export function GalleryGrid(): React.JSX.Element {
   const { filteredItems } = useGallery()
   const gridRef = useRef<HTMLDivElement>(null)
 
-  // Handle grid navigation
-  const handleGridKeyDown = useCallback((e: KeyboardEvent<HTMLDivElement>, itemId: number) => {
+  const handleGridKeyDown = useCallback((e: React.KeyboardEvent<HTMLDivElement>, itemId: number) => {
     const currentElement = document.activeElement
     if (!currentElement?.parentElement) return
 
@@ -132,92 +91,13 @@ export function GalleryGrid(): React.JSX.Element {
               role="grid"
               aria-label="Gallery grid"
             >
-              <AnimatePresence>
-                {filteredItems.map((item) => {
-                  const sliderRef = useRef<HTMLDivElement>(null)
-                  const { position, setPosition, handleKeyDown } = useComparisonSlider({
-                    initialPosition: 50,
-                    onPositionChange: (pos) => {
-                      // Optional: Add any additional position change handling
-                    }
-                  })
-
-                  const { 
-                    handleTouchStart,
-                    handleTouchMove,
-                    handleTouchEnd,
-                    isDragging
-                  } = useTouchSlider({
-                    onPositionChange: setPosition,
-                    containerRef: sliderRef
-                  })
-
-                  return (
-                    <motion.div 
-                      key={item.id}
-                      layout
-                      className="bg-[#F8F6F3] rounded-sm overflow-hidden focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-2"
-                      variants={itemVariants}
-                      initial="hidden"
-                      animate="visible"
-                      exit="exit"
-                      role="gridcell"
-                      tabIndex={0}
-                      aria-label={`${item.title} transformation`}
-                      onKeyDown={(e) => handleGridKeyDown(e, item.id)}
-                    >
-                      <div 
-                        ref={sliderRef}
-                        className="relative aspect-[4/3]"
-                        onTouchStart={handleTouchStart}
-                        onTouchMove={handleTouchMove}
-                        onTouchEnd={handleTouchEnd}
-                      >
-                        <ReactCompareSlider
-                          id={`slider-${item.id}`}
-                          itemOne={
-                            <ReactCompareSliderImage 
-                              src={item.before} 
-                              alt={`${item.title} before transformation`}
-                            />
-                          }
-                          itemTwo={
-                            <ReactCompareSliderImage 
-                              src={item.after} 
-                              alt={`${item.title} after transformation`}
-                            />
-                          }
-                          position={position}
-                          onPositionChange={setPosition}
-                          onKeyDown={handleKeyDown}
-                          className={`h-full ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
-                          style={{
-                            touchAction: 'none',
-                            userSelect: 'none'
-                          }}
-                        />
-                      </div>
-                      <div className="p-6">
-                        <div className="flex justify-between items-start mb-4">
-                          <h3 className="font-semibold text-[#2F2F2F] mb-2">{item.title}</h3>
-                          <span 
-                            className={`text-sm px-2 py-1 rounded-sm capitalize ${getBudgetBadgeStyles(item.budgetTier)}`}
-                            role="status"
-                            aria-label={`Budget tier: ${item.budgetTier}`}
-                          >
-                            {item.budgetTier}
-                          </span>
-                        </div>
-                        <p className="text-gray-600 mb-4">{item.description}</p>
-                        <div className="flex justify-between text-sm">
-                          <span className="text-primary" aria-label="Project timeframe">{item.timeframe}</span>
-                          <span className="text-gray-500" aria-label="Project location">{item.location}</span>
-                        </div>
-                      </div>
-                    </motion.div>
-                  )
-                })}
-              </AnimatePresence>
+              {filteredItems.map((item) => (
+                <GalleryItem 
+                  key={item.id} 
+                  item={item} 
+                  onKeyDown={handleGridKeyDown}
+                />
+              ))}
             </motion.div>
           )}
         </AnimatePresence>

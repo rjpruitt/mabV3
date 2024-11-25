@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Montserrat, Playfair_Display, Playfair_Display_SC, PT_Serif, DM_Sans, Dancing_Script } from 'next/font/google';
 import "./globals.css";
-import { Header } from '@/components/shared/header/header'
+import { Header } from '@/components/shared/header'
 import { Footer } from '@/components/shared/footer/footer'
 import { AccessibilityProvider } from '@/providers/accessibility-provider'
 import { ErrorBoundary } from '@/components/ui/error-boundary'
@@ -91,18 +91,16 @@ export const jsonLd = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: {
+  children: React.ReactNode
+}) {
   return (
-    <html lang="en">
-      <body
-        className={`${montserrat.variable} ${playfairDisplaySC.variable} ${playfairDisplay.variable} ${ptSerif.variable} ${dmSans.variable} ${dancingScript.variable}`}
-      >
+    <html lang="en" className={`${playfairDisplaySC.variable} ${montserrat.variable} ${ptSerif.variable}`}>
+      <body>
+        <Header />
         <AccessibilityProvider>
           <ErrorBoundary>
             <SkipLink />
-            <Header />
             <main 
               id="main"
               tabIndex={-1}
@@ -115,5 +113,5 @@ export default function RootLayout({
         </AccessibilityProvider>
       </body>
     </html>
-  );
+  )
 }

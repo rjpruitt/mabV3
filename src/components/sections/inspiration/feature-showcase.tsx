@@ -45,7 +45,7 @@ const features = [
 
 export function FeatureShowcase(): React.JSX.Element {
   return (
-    <section className="w-full py-20 bg-white">
+    <div className="w-full py-20 bg-white">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
           <h2 className="font-pt-serif text-4xl text-[#2F2F2F] mb-4">
@@ -97,6 +97,6 @@ export function FeatureShowcase(): React.JSX.Element {
           ))}
         </div>
       </div>
-    </section>
+    </div>
   )
 } 

@@ -183,7 +183,7 @@ export function AccessibilityFeatures() {
     <div className="py-[120px]">
       <div className="space-y-8 md:space-y-[120px]">
         {accessibilitySolutions.map((solution) => (
-          <Section 
+          <div 
             key={solution.id}
             className="w-full bg-white"
           >
@@ -347,7 +347,7 @@ export function AccessibilityFeatures() {
                 </div>
               </div>
             </div>
-          </Section>
+          </div>
         ))}
       </div>
     </div>

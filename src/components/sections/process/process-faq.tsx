@@ -46,8 +46,9 @@ export function ProcessFAQ(): React.JSX.Element {
   }
 
   return (
-    <section 
+    <div 
       className="w-full py-20 bg-[#F8F6F3]"
+      role="region"
       aria-labelledby="faq-heading"
     >
       <div className="container mx-auto px-4">
@@ -67,29 +68,37 @@ export function ProcessFAQ(): React.JSX.Element {
             {faqs.map((faq, index) => (
               <motion.div 
                 key={index}
-                className="bg-white rounded-sm overflow-hidden"
+                className="bg-white rounded-sm overflow-hidden shadow-sm"
                 initial={false}
-                animate={{ backgroundColor: openIndex === index ? 'rgb(248, 246, 243)' : 'white' }}
+                animate={{ 
+                  backgroundColor: openIndex === index ? 'rgb(248, 246, 243)' : 'white',
+                  boxShadow: openIndex === index ? '0 4px 6px -1px rgba(0, 0, 0, 0.1)' : 'none'
+                }}
                 transition={{ duration: 0.2 }}
               >
                 <button
-                  className="w-full flex items-center justify-between p-6 text-left focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                  className={`
+                    w-full flex items-center justify-between p-6 text-left 
+                    focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2
+                    hover:bg-[#F8F6F3] transition-colors
+                  `}
                   onClick={() => handleToggle(index)}
                   aria-expanded={openIndex === index}
                   aria-controls={`faq-answer-${index}`}
                   id={`faq-question-${index}`}
                   aria-label={`${faq.question}${openIndex === index ? ' (Click to collapse)' : ' (Click to expand)'}`}
                 >
-                  <span className="font-semibold text-[#2F2F2F]">{faq.question}</span>
+                  <span className="font-semibold text-[#2F2F2F] pr-8">{faq.question}</span>
                   <motion.div
                     animate={{ rotate: openIndex === index ? 180 : 0 }}
                     transition={{ duration: 0.2 }}
                     aria-hidden="true"
+                    className="shrink-0"
                   >
                     {openIndex === index ? (
-                      <Minus className="w-5 h-5 text-primary shrink-0" />
+                      <Minus className="w-5 h-5 text-primary" />
                     ) : (
-                      <Plus className="w-5 h-5 text-primary shrink-0" />
+                      <Plus className="w-5 h-5 text-primary" />
                     )}
                   </motion.div>
                 </button>
@@ -104,9 +113,10 @@ export function ProcessFAQ(): React.JSX.Element {
                       animate={{ height: 'auto', opacity: 1 }}
                       exit={{ height: 0, opacity: 0 }}
                       transition={{ duration: 0.2 }}
+                      className="border-t border-gray-100"
                     >
-                      <div className="px-6 pb-6">
-                        <p className="text-gray-600">{faq.answer}</p>
+                      <div className="px-6 py-4">
+                        <p className="text-gray-600 leading-relaxed">{faq.answer}</p>
                       </div>
                     </motion.div>
                   )}
@@ -116,6 +126,6 @@ export function ProcessFAQ(): React.JSX.Element {
           </div>
         </div>
       </div>
-    </section>
+    </div>
   )
 } 
