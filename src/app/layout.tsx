@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Montserrat, Playfair_Display, Playfair_Display_SC, PT_Serif, DM_Sans, Dancing_Script } from 'next/font/google';
+import { Montserrat, PT_Serif, Dancing_Script, Playfair_Display_SC } from 'next/font/google';
 import "./globals.css";
 import { Header } from '@/components/shared/header'
 import { Footer } from '@/components/shared/footer/footer'
@@ -9,41 +9,28 @@ import { SkipLink } from '@/components/ui/skip-link'
 
 const montserrat = Montserrat({ 
   subsets: ['latin'],
-  variable: '--font-montserrat',
   display: 'swap',
-});
-
-const playfairDisplaySC = Playfair_Display_SC({
-  subsets: ['latin'],
-  variable: '--font-playfair-display-sc',
-  display: 'swap',
-  weight: ['400', '700', '900'],
-});
-
-const playfairDisplay = Playfair_Display({
-  subsets: ['latin'],
-  variable: '--font-playfair-display',
-  display: 'swap',
-  weight: ['400', '500', '600', '700', '900'],
+  variable: '--font-montserrat'
 });
 
 const ptSerif = PT_Serif({ 
-  subsets: ['latin'],
-  variable: '--font-pt-serif',
-  display: 'swap',
   weight: ['400', '700'],
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-pt-serif'
 });
 
-const dmSans = DM_Sans({ 
+const dancingScript = Dancing_Script({
   subsets: ['latin'],
-  variable: '--font-dm-sans',
   display: 'swap',
+  variable: '--font-dancing-script'
 });
 
-const dancingScript = Dancing_Script({ 
+const playfairDisplaySC = Playfair_Display_SC({
+  weight: ['400', '700', '900'],
   subsets: ['latin'],
-  variable: '--font-dancing-script',
   display: 'swap',
+  variable: '--font-playfair-display-sc'
 });
 
 export const metadata: Metadata = {
@@ -95,8 +82,16 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" className={`${playfairDisplaySC.variable} ${montserrat.variable} ${ptSerif.variable}`}>
-      <body>
+    <html 
+      lang="en" 
+      className={`
+        ${montserrat.variable}
+        ${ptSerif.variable}
+        ${dancingScript.variable}
+        ${playfairDisplaySC.variable}
+      `}
+    >
+      <body className={montserrat.className}>
         <Header />
         <AccessibilityProvider>
           <ErrorBoundary>

@@ -23,14 +23,14 @@ export function ProductExplorer() {
   }
 
   return (
-    <section className="w-full py-20 bg-white">
+    <section className="w-full py-12 bg-white">
       <div className="container mx-auto px-4">
         <ScrollReveal>
-          <div className="text-center mb-16">
+          <div className="text-center mb-8">
             <h2 className="font-pt-serif text-4xl text-[#2F2F2F] mb-4">
               Create Your Perfect Bathroom
             </h2>
-            <p className="text-gray-600 text-lg max-w-3xl mx-auto mb-6">
+            <p className="text-gray-600 text-lg max-w-3xl mx-auto mb-4">
               From classic to contemporary, choose from our wide selection of premium styles and features to bring your vision to life.
             </p>
             <div className="bg-[#F8F6F3] py-3 px-4 rounded-sm inline-block">
@@ -41,8 +41,30 @@ export function ProductExplorer() {
           </div>
         </ScrollReveal>
 
-        {/* Category Selection - Horizontally scrollable on mobile */}
-        <div className="flex justify-center gap-2 mb-12 -mx-4 px-4 overflow-x-auto pb-4">
+        {/* Mobile-Optimized Category Selection */}
+        <div className="lg:hidden mb-6">
+          <select 
+            className="w-full p-3 border rounded-sm bg-white text-[#2F2F2F]"
+            value={selectedCategory.id}
+            onChange={(e) => {
+              const category = productCategories.find(c => c.id === e.target.value)
+              if (category) {
+                setSelectedCategory(category)
+                setSelectedSubcategory(category.subcategories[0])
+                handleOptionSelect(category.subcategories[0].options[0])
+              }
+            }}
+          >
+            {productCategories.map((category) => (
+              <option key={category.id} value={category.id}>
+                {category.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Desktop Category Tabs - Hidden on Mobile */}
+        <div className="hidden lg:flex justify-center gap-2 mb-12 -mx-4 px-4 overflow-x-auto pb-4">
           <div className="flex gap-2 min-w-min">
             {productCategories.map((category) => (
               <button
@@ -67,10 +89,31 @@ export function ProductExplorer() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          {/* Main Display Area - Takes up 8 columns */}
+          {/* Main Display Area */}
           <div className="lg:col-span-8 order-2 lg:order-1">
+            {/* Mobile Subcategory Selection */}
+            <div className="lg:hidden mb-6">
+              <select 
+                className="w-full p-3 border rounded-sm bg-white text-[#2F2F2F]"
+                value={selectedSubcategory.id}
+                onChange={(e) => {
+                  const subcat = selectedCategory.subcategories.find(s => s.id === e.target.value)
+                  if (subcat) {
+                    setSelectedSubcategory(subcat)
+                    handleOptionSelect(subcat.options[0])
+                  }
+                }}
+              >
+                {selectedCategory.subcategories.map((subcat) => (
+                  <option key={subcat.id} value={subcat.id}>
+                    {subcat.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
             {/* Main Image Display */}
-            <div className="relative aspect-[4/3] mb-8">
+            <div className="relative aspect-[4/3] mb-6">
               <Image
                 src={selectedGlassType?.image || selectedOption.image}
                 alt={selectedGlassType?.name || selectedOption.name}
@@ -119,8 +162,8 @@ export function ProductExplorer() {
               </div>
             )}
 
-            {/* Thumbnails */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+            {/* Mobile-Optimized Thumbnails */}
+            <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 md:gap-4">
               {selectedSubcategory.options.map((option) => (
                 <button
                   key={option.id}
@@ -135,15 +178,15 @@ export function ProductExplorer() {
                     alt={option.name}
                     fill
                     className="object-cover"
-                    sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                    sizes="(max-width: 640px) 33vw, (max-width: 1024px) 25vw, 16vw"
                   />
                 </button>
               ))}
             </div>
           </div>
 
-          {/* Subcategory Tabs - Takes up 4 columns on the right */}
-          <div className="lg:col-span-4 order-1 lg:order-2">
+          {/* Desktop Subcategory Tabs - Hidden on Mobile */}
+          <div className="hidden lg:block lg:col-span-4 order-1 lg:order-2">
             {/* Horizontally scrollable on mobile, vertical on desktop */}
             <div className="flex lg:flex-col overflow-x-auto lg:overflow-visible -mx-4 px-4 lg:mx-0 lg:px-0 pb-4 lg:pb-0 gap-2 lg:gap-1">
               {selectedCategory.subcategories.map((subcategory) => (

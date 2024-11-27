@@ -120,7 +120,7 @@ export function MainNav({ isCondensed = false }: MainNavProps) {
         <Link 
           href="/" 
           className={`
-            font-playfair-sc transition-all duration-300 ease-in-out
+            font-logo transition-all duration-300 ease-in-out
             py-4 md:py-0 text-center max-w-[400px]
             ${isCondensed ? 'text-xl md:text-2xl' : 'text-2xl md:text-3xl lg:text-4xl'}
           `}

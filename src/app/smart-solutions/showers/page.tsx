@@ -1,8 +1,9 @@
 import { SmartHero } from '@/components/sections/smart-solutions/hero'
 import { InstallationOptions } from '@/components/sections/smart-solutions/installation'
-import { ProductExplorer } from '@/components/sections/smart-solutions/product-explorer'
+import { StyleExplorer } from '@/components/sections/smart-solutions/style-explorer'
 import { SolutionBenefits } from '@/components/sections/smart-solutions/benefits'
-import { DesignOptions } from '@/components/sections/smart-solutions/design-options'
+import { SafetyFeatures } from '@/components/sections/smart-solutions/safety-features'
+import { TrustedBrands } from '@/components/sections/smart-solutions/trusted-brands'
 import { ConsultationCTA } from '@/components/shared/consultation-cta'
 
 export default function SmartShowerPage() {
@@ -10,9 +11,10 @@ export default function SmartShowerPage() {
     <>
       <SmartHero />
       <InstallationOptions />
-      <ProductExplorer />
+      <StyleExplorer />
       <SolutionBenefits />
-      <DesignOptions />
+      <SafetyFeatures />
+      <TrustedBrands />
       <ConsultationCTA variant="white" />
     </>
   )

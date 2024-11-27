@@ -7,7 +7,7 @@ import Image from 'next/image'
 export function HomeHero(): React.JSX.Element {
   return (
     <section className="relative h-[60vh] w-full overflow-hidden">
-      {/* Background Image with Gradient Overlay */}
+      {/* Background Image with Responsive Gradient Overlay */}
       <div className="absolute inset-0">
         <Image
           src="/images/home/hero/tubwomanchildcrop.jpeg"
@@ -17,16 +17,25 @@ export function HomeHero(): React.JSX.Element {
           className="object-cover"
           sizes="100vw"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-primary/90 to-primary/50" />
+        {/* Desktop gradient - combining black and primary color */}
+        <div className="absolute inset-0 hidden md:block">
+          <div className="absolute inset-0 bg-gradient-to-r from-black/50 via-primary/50 to-transparent" />
+        </div>
+        
+        {/* Mobile gradient - stronger black base with primary accent */}
+        <div className="absolute inset-0 md:hidden">
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/40 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-primary/50 via-primary/30 to-transparent" />
+        </div>
       </div>
 
       {/* Content */}
       <div className="container relative h-full mx-auto px-4">
         <div className="flex flex-col justify-center h-full max-w-2xl">
-          <h1 className="font-pt-serif text-5xl md:text-6xl lg:text-7xl text-white mb-6">
+          <h1 className="font-pt-serif text-5xl md:text-6xl lg:text-7xl text-white mb-6 drop-shadow-md">
             Transform Your Bathroom In As Little As One Day
           </h1>
-          <p className="text-white/90 text-xl mb-8">
+          <p className="text-white/90 text-xl mb-8 drop-shadow">
             From simple updates to complete transformations, we have solutions for every budget.
           </p>
           <div className="flex flex-col md:flex-row gap-4">

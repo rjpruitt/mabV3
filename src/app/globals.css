@@ -3,12 +3,42 @@
 @tailwind utilities;
 
 :root {
+  /* Colors */
+  --color-primary: #016369;
+  --color-primary-light: #0A7C7C;
+  --color-primary-dark: #013F42;
+  --color-accent: #F5875F;
+  
+  /* Layout variables */
   --background: #ffffff;
   --foreground: #171717;
   --top-banner-height: 40px;
   --nav-height: 130px;
   --header-height-normal: calc(var(--top-banner-height) + var(--nav-height));
   --header-height-condensed: 80px;
+
+  /* Font variables */
+  --font-montserrat: var(--font-montserrat);
+  --font-pt-serif: var(--font-pt-serif);
+  --font-dancing-script: var(--font-dancing-script);
+  --font-playfair: var(--font-playfair-display-sc);
+}
+
+/* Font utility classes */
+.font-montserrat {
+  font-family: var(--font-montserrat);
+}
+
+.font-pt-serif {
+  font-family: var(--font-pt-serif);
+}
+
+.font-dancing {
+  font-family: var(--font-dancing-script);
+}
+
+.font-playfair {
+  font-family: var(--font-playfair-display-sc);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -49,3 +79,4 @@ body {
   margin-top: calc(-1 * var(--header-height-normal));
   padding-top: var(--header-height-normal);
 }
+

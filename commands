@@ -1,0 +1,35 @@
+mkdir -p public/images/solutions/smart-solutions/shared
+mkdir -p public/images/solutions/smart-solutions/showers/benefits
+mkdir -p public/images/solutions/smart-solutions/showers/products
+mkdir -p public/images/solutions/smart-solutions/showers/installation
+mkdir -p public/images/solutions/smart-solutions/showers/gallery
+mkdir -p public/images/solutions/smart-solutions/bathtubs/benefits
+mkdir -p public/images/solutions/smart-solutions/bathtubs/products
+mkdir -p public/images/solutions/smart-solutions/bathtubs/installation
+mkdir -p public/images/solutions/smart-solutions/bathtubs/gallery
+mkdir -p public/images/solutions/smart-solutions/showers/hero
+mkdir -p public/images/solutions/smart-solutions/bathtubs/hero
+
+# Add .gitkeep files to track empty directories
+touch public/images/solutions/smart-solutions/shared/.gitkeep
+touch public/images/solutions/smart-solutions/showers/benefits/.gitkeep
+touch public/images/solutions/smart-solutions/showers/products/.gitkeep
+touch public/images/solutions/smart-solutions/showers/installation/.gitkeep
+touch public/images/solutions/smart-solutions/showers/gallery/.gitkeep
+touch public/images/solutions/smart-solutions/bathtubs/benefits/.gitkeep
+touch public/images/solutions/smart-solutions/bathtubs/products/.gitkeep
+touch public/images/solutions/smart-solutions/bathtubs/installation/.gitkeep
+touch public/images/solutions/smart-solutions/bathtubs/gallery/.gitkeep
+touch public/images/solutions/smart-solutions/showers/hero/.gitkeep
+touch public/images/solutions/smart-solutions/bathtubs/hero/.gitkeep
+
+# Create directory for alternative version
+mkdir -p src/components/sections/smart-solutions-alt
+
+# Create component files
+touch src/components/sections/smart-solutions-alt/hero.tsx
+touch src/components/sections/smart-solutions-alt/installation.tsx
+touch src/components/sections/smart-solutions-alt/style-explorer.tsx
+touch src/components/sections/smart-solutions-alt/benefits.tsx
+touch src/components/sections/smart-solutions-alt/safety.tsx
+touch src/components/sections/smart-solutions-alt/trust-badges.tsx 

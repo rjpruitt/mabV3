@@ -4,9 +4,13 @@ import { ScrollReveal } from '@/components/ui/scroll-reveal'
 
 type ConsultationCTAProps = {
   variant?: 'tan' | 'white' | 'teal'
+  features?: string[]
 }
 
-export function ConsultationCTA({ variant = 'white' }: ConsultationCTAProps) {
+export function ConsultationCTA({ 
+  variant = 'white',
+  features = []
+}: ConsultationCTAProps) {
   const styles = {
     background: {
       tan: 'bg-[#F8F6F3]',
@@ -53,6 +57,23 @@ export function ConsultationCTA({ variant = 'white' }: ConsultationCTAProps) {
             <h2 className={`font-pt-serif text-4xl mb-6 ${styles.text.heading[variant]}`}>
               Ready To Speak With A Mid America Bathworks Expert?
             </h2>
+            
+            {features.length > 0 && (
+              <div className="mb-8">
+                <ul className="flex flex-col md:flex-row justify-center gap-4 md:gap-8">
+                  {features.map((feature, index) => (
+                    <li 
+                      key={index}
+                      className={`flex items-center gap-2 ${styles.text.body[variant]}`}
+                    >
+                      <div className="w-1.5 h-1.5 bg-accent rounded-full" />
+                      <span>{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
             <p className={`text-lg mb-8 ${styles.text.body[variant]}`}>
               Book a FREE consultation by calling us at{' '}
               <span className={styles.accent[variant]}>1 (555) 555-5555</span>{' '}

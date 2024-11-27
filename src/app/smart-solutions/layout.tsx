@@ -8,18 +8,7 @@ export default function SmartSolutionsLayout({
   children: React.ReactNode
 }) {
   return (
-    <div className="flex min-h-screen flex-col">
-      <style jsx global>{`
-        header#main-header {
-          display: none !important;
-        }
-        
-        /* Reset margin that accounts for main header */
-        section:first-child {
-          margin-top: 0 !important;
-        }
-      `}</style>
-      
+    <div className="smart-solutions-campaign flex min-h-screen flex-col">
       <CampaignHeader />
       <main>{children}</main>
     </div>

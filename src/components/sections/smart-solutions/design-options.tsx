@@ -81,10 +81,10 @@ const wallColors = [
 
 export function DesignOptions() {
   return (
-    <section className="w-full py-20 bg-white">
+    <section className="w-full py-12 bg-white">
       <div className="container mx-auto px-4">
         <ScrollReveal>
-          <div className="text-center mb-16">
+          <div className="text-center mb-8">
             <h2 className="font-pt-serif text-4xl text-[#2F2F2F] mb-4">
               Designer Wall Collection
             </h2>
