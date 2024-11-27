@@ -8,6 +8,7 @@ import { SafetyWithProcess } from '@/components/sections/smart-solutions-alt/saf
 import { TrustBadges } from '@/components/sections/smart-solutions-alt/trust-badges'
 import { ConsultationCTA } from '@/components/shared/consultation-cta'
 import { ShieldCheck, Star, CheckCircle, Calendar } from 'lucide-react'
+import { SectionDivider } from '@/components/ui/section-divider'
 
 const floatingBadges = [
   { icon: ShieldCheck, text: 'Fully Insured' },
@@ -21,11 +22,37 @@ const processSteps = [
     title: 'Free Consultation', 
     time: '1 hour',
     icon: Calendar,
-    animation: 'pulse' as const
+    animation: 'pulse' as const,
+    image: 'https://placehold.co/400x300/016369/FFFFFF/png?text=Consultation',
+    imageAlt: 'Design consultant discussing options with homeowner'
   },
-  { step: 2, title: 'Professional Measurement', time: '1 hour', icon: Calendar, animation: 'pulse' as const },
-  { step: 3, title: 'One-Day Installation', time: '8 hours', icon: Calendar, animation: 'pulse' as const },
-  { step: 4, title: 'Final Inspection', time: '30 minutes', icon: Calendar, animation: 'pulse' as const }
+  { 
+    step: 2, 
+    title: 'Professional Measurement', 
+    time: '1 hour', 
+    icon: Calendar, 
+    animation: 'pulse' as const,
+    image: 'https://placehold.co/400x300/016369/FFFFFF/png?text=Measurement',
+    imageAlt: 'Professional taking precise measurements'
+  },
+  { 
+    step: 3, 
+    title: 'One-Day Installation', 
+    time: '8 hours', 
+    icon: Calendar, 
+    animation: 'pulse' as const,
+    image: 'https://placehold.co/400x300/016369/FFFFFF/png?text=Installation',
+    imageAlt: 'Expert installer working on shower installation'
+  },
+  { 
+    step: 4, 
+    title: 'Final Inspection', 
+    time: '30 minutes', 
+    icon: Calendar, 
+    animation: 'pulse' as const,
+    image: 'https://placehold.co/400x300/016369/FFFFFF/png?text=Inspection',
+    imageAlt: 'Final quality inspection of completed installation'
+  }
 ]
 
 const cleanlinessGuarantee = {
@@ -37,47 +64,69 @@ export default function SmartSolutionsAltPage() {
   return (
     <>
       <SmartHeroWithBadges />
-      <InstallationWithTimeline 
-        processSteps={processSteps}
-        cleanlinessGuarantee={cleanlinessGuarantee}
-      />
-      <StyleExplorerWithSupport 
-        expertGuidance={{
-          title: 'Expert Support Every Step',
-          consultantInfo: 'Our design experts help you choose',
-          sampleInfo: 'See and feel materials in your home'
-        }}
-        decisionSupport={{
-          preDesigned: 'Choose from designer-curated collections',
-          custom: 'Or create your own perfect combination'
-        }}
-      />
-      <BenefitsWithGuarantees 
-        warranties={[
-          { type: 'Product', years: 'Lifetime' },
-          { type: 'Installation', years: '5 Years' },
-          { type: 'Workmanship', years: '2 Years' }
-        ]}
-        qualityPromise={{
-          title: 'Our Quality Promise',
-          details: 'Premium materials, expert installation, lasting beauty'
-        }}
-      />
-      <SafetyWithProcess 
-        teamInfo={{
-          title: 'Meet Your Installation Team',
-          experience: '15+ Years Average Experience',
-          training: 'Factory-Certified Installers',
-          background: 'Background Checked & Drug Tested'
-        }}
-        timelineInfo={{
-          title: 'Your Installation Day',
-          morning: 'Setup & Protection',
-          midday: 'Installation Progress',
-          afternoon: 'Completion & Cleanup'
-        }}
-      />
-      <TrustBadges />
+      <SectionDivider />
+      
+      <div className="bg-[#F8F6F3]">
+        <InstallationWithTimeline 
+          processSteps={processSteps}
+          cleanlinessGuarantee={cleanlinessGuarantee}
+        />
+      </div>
+      <SectionDivider />
+
+      <div className="bg-white">
+        <StyleExplorerWithSupport 
+          expertGuidance={{
+            title: 'Expert Support Every Step',
+            consultantInfo: 'Our design experts help you choose',
+            sampleInfo: 'See and feel materials in your home'
+          }}
+          decisionSupport={{
+            preDesigned: 'Choose from designer-curated collections',
+            custom: 'Or create your own perfect combination'
+          }}
+        />
+      </div>
+      <SectionDivider />
+
+      <div className="bg-[#F8F6F3]">
+        <BenefitsWithGuarantees 
+          warranties={[
+            { type: 'Product', years: 'Lifetime' },
+            { type: 'Installation', years: '5 Years' },
+            { type: 'Workmanship', years: '2 Years' }
+          ]}
+          qualityPromise={{
+            title: 'Our Quality Promise',
+            details: 'Premium materials, expert installation, lasting beauty'
+          }}
+        />
+      </div>
+      <SectionDivider />
+
+      <div className="bg-white">
+        <SafetyWithProcess 
+          teamInfo={{
+            title: 'Meet Your Installation Team',
+            experience: '15+ Years Average Experience',
+            training: 'Factory-Certified Installers',
+            background: 'Background Checked & Drug Tested'
+          }}
+          timelineInfo={{
+            title: 'Your Installation Day',
+            morning: 'Setup & Protection',
+            midday: 'Installation Progress',
+            afternoon: 'Completion & Cleanup'
+          }}
+        />
+      </div>
+      <SectionDivider />
+
+      <div className="bg-[#F8F6F3]">
+        <TrustBadges />
+      </div>
+      <SectionDivider />
+
       <ConsultationCTA 
         variant="white"
         features={[
