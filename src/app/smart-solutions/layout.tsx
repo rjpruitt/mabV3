@@ -8,7 +8,10 @@ export default function SmartSolutionsLayout({
   children: React.ReactNode
 }) {
   return (
-    <div className="smart-solutions-campaign flex min-h-screen flex-col">
+    <div 
+      className="smart-solutions-campaign flex min-h-screen flex-col"
+      style={{ '--campaign-header-height': '48px' } as React.CSSProperties}
+    >
       <CampaignHeader />
       <main>{children}</main>
     </div>

@@ -75,7 +75,7 @@ export function SmartHeroWithBadges() {
   }, [])
 
   return (
-    <section className="relative w-full pb-6 bg-white overflow-x-hidden">
+    <section className="relative w-full pb-6 bg-white overflow-x-hidden mt-[var(--campaign-header-height)]">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
           <ScrollReveal 
