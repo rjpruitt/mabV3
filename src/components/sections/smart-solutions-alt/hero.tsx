@@ -99,12 +99,12 @@ export function SmartHeroWithBadges() {
             <ScrollReveal delay={0.2}>
               <div className="relative aspect-[4/3] hero-image">
                 <Image
-                  src="/images/solutions/smart-solutions/showers/hero/lowesmaxxutil.jpeg"
-                  alt="Modern walk-in shower transformation featuring a frameless sliding glass door system"
+                  src="/images/solutions/smart-solutions/showers/alt/hero/lowesmaxxutil.jpeg"
+                  alt="Luxurious walk-in shower transformation"
                   fill
                   priority
-                  sizes="(max-width: 1024px) 100vw, 50vw"
-                  className="object-cover rounded-sm"
+                  className="object-cover"
+                  sizes="100vw"
                 />
               </div>
             </ScrollReveal>

@@ -6,16 +6,22 @@ import Image from 'next/image'
 
 export function HomeHero(): React.JSX.Element {
   return (
-    <section className="relative h-[60vh] w-full overflow-hidden">
+    <section className="
+      relative w-full overflow-hidden
+      h-[500px]                    
+      sm:h-[600px]                 
+      md:h-[700px]                 
+      lg:h-[800px]
+    ">
       {/* Background Image with Responsive Gradient Overlay */}
-      <div className="absolute inset-0">
+      <div className="absolute inset-0 max-w-[1920px] mx-auto left-0 right-0">
         <Image
-          src="/images/home/hero/tubwomanchildcrop.jpeg"
+          src="/images/home/hero/homehero.jpeg"
           alt="Woman and child enjoying their new bathtub"
           fill
           priority
-          className="object-cover"
-          sizes="100vw"
+          className="object-cover object-bottom"
+          sizes="(min-width: 1920px) 1920px, 100vw"
         />
         {/* Desktop gradient - combining black and primary color */}
         <div className="absolute inset-0 hidden md:block">
@@ -30,7 +36,7 @@ export function HomeHero(): React.JSX.Element {
       </div>
 
       {/* Content */}
-      <div className="container relative h-full mx-auto px-4">
+      <div className="container relative h-full mx-auto px-4 mt-[var(--nav-height)]">
         <div className="flex flex-col justify-center h-full max-w-2xl">
           <h1 className="font-pt-serif text-5xl md:text-6xl lg:text-7xl text-white mb-6 drop-shadow-md">
             Transform Your Bathroom In As Little As One Day

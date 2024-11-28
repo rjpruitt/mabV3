@@ -8,12 +8,9 @@ import { BeforeAfter } from '@/components/sections/home/before-after'
 import { DesignToolsShowcase } from '@/components/shared/design-tools-showcase'
 import { Testimonials } from '@/components/sections/home/testimonials'
 
-export default function Home() {
+export default function HomePage() {
   return (
-    <main 
-      role="main"
-      aria-label="Main content"
-    >
+    <div className="page-standard">
       <HomeHero />
       <FeaturesBanner />
       <WhyChooseUs />
@@ -23,6 +20,6 @@ export default function Home() {
       <BeforeAfter />
       <DesignToolsShowcase />
       <Testimonials />
-    </main>
+    </div>
   )
 }

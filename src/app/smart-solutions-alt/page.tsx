@@ -7,7 +7,7 @@ import { BenefitsWithGuarantees } from '@/components/sections/smart-solutions-al
 import { SafetyWithProcess } from '@/components/sections/smart-solutions-alt/safety'
 import { TrustBadges } from '@/components/sections/smart-solutions-alt/trust-badges'
 import { ConsultationCTA } from '@/components/shared/consultation-cta'
-import { ShieldCheck, Star, CheckCircle, Calendar } from 'lucide-react'
+import { ShieldCheck, Star, CheckCircle, Calendar, Ruler, Wrench, CheckSquare } from 'lucide-react'
 
 const floatingBadges = [
   { icon: ShieldCheck, text: 'Fully Insured' },
@@ -21,11 +21,57 @@ const processSteps = [
     title: 'Free Consultation', 
     time: '1 hour',
     icon: Calendar,
-    animation: 'pulse' as const
+    animation: 'pulse' as const,
+    benefits: [
+      'Meet your dedicated project team',
+      'Discuss your vision and needs',
+      'Get expert design recommendations',
+      'Receive transparent, accurate pricing'
+    ],
+    customerValue: 'No salespeople, no pressure - just honest advice from the experts who will handle your project.'
   },
-  { step: 2, title: 'Professional Measurement', time: '1 hour', icon: Calendar, animation: 'pulse' as const },
-  { step: 3, title: 'One-Day Installation', time: '8 hours', icon: Calendar, animation: 'pulse' as const },
-  { step: 4, title: 'Final Inspection', time: '30 minutes', icon: Calendar, animation: 'pulse' as const }
+  { 
+    step: 2, 
+    title: 'Professional Measurement', 
+    time: '1 hour', 
+    icon: Ruler,
+    animation: 'pulse' as const,
+    benefits: [
+      'Precise measurements by your installer',
+      'Identify any structural considerations',
+      'Confirm design and material choices',
+      'Finalize installation timeline'
+    ],
+    customerValue: 'Your installer personally measures to ensure a perfect fit and smooth installation day.'
+  },
+  { 
+    step: 3, 
+    title: 'Installation Day', 
+    time: '8 hours', 
+    icon: Wrench,
+    animation: 'pulse' as const,
+    benefits: [
+      'Expert installation by your project team',
+      'Careful protection of your home',
+      'Continuous communication',
+      'Most projects completed in 1-3 days'
+    ],
+    customerValue: 'The same experts you\'ve been working with handle your installation with care and precision.'
+  },
+  { 
+    step: 4, 
+    title: 'Final Inspection', 
+    time: '30 minutes', 
+    icon: CheckSquare,
+    animation: 'pulse' as const,
+    benefits: [
+      'Thorough quality inspection',
+      'Usage and maintenance tutorial',
+      'Answer any questions',
+      'Ensure complete satisfaction'
+    ],
+    customerValue: 'Your project team ensures everything meets our high standards and you\'re delighted with the results.'
+  }
 ]
 
 const cleanlinessGuarantee = {

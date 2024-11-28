@@ -7,6 +7,44 @@
    - Installation section with process steps
    - Basic layout and routing
 
+## Latest Session Status (Visual Hierarchy Improvements)
+1. Successfully implemented:
+   - Section dividers using subtle line and dot design
+   - Alternating section backgrounds (white and #F8F6F3)
+   - Initial hero text animation with ScrollReveal
+
+2. Current Work:
+   - Working on process steps section enhancements
+   - Started adding placeholder images to processSteps array
+   - Need to implement image display in InstallationWithTimeline component
+
+3. Latest Changes:
+   - Added section dividers with:
+     * w-32 h-[1px] line in primary color (20% opacity)
+     * w-2 h-2 dot in accent color (30% opacity)
+   - Added ScrollReveal animation to hero text:
+     * fadeInUp variant
+     * 0.2s delay
+     * 0.8s duration (Note: duration prop causing type error)
+
+4. Current Issues:
+   - ScrollReveal type error in hero component:
+     ```
+     Type '{ children: Element; variant: "fadeInUp"; delay: number; duration: number; className: string; }' 
+     is not assignable to type 'IntrinsicAttributes & ScrollRevealProps'
+     ```
+   - Need to resolve before continuing with process steps images
+
+5. Next Steps:
+   - Fix ScrollReveal type error
+   - Complete process steps image implementation
+   - Continue with visual hierarchy improvements:
+     * Typography enhancements
+     * Content grouping with cards
+     * Visual anchors
+     * Interactive elements
+     * Content priority indicators
+
 ## Recent Issues
 1. Font configuration was lost/broken
    - Using Next.js font system in layout.tsx
@@ -190,3 +228,128 @@ These errors need to be fixed in order of impact:
 1. ConsultationCTA first (prop name mismatch)
 2. ProcessStep animation (type constraint)
 3. Product Explorer (discriminated union)
+
+## Visual Hierarchy Implementation Details
+1. Section Divider Component Location and Implementation:
+   - Located at: src/components/ui/section-divider.tsx
+   - Working implementation:
+     ```typescript
+     export function SectionDivider() {
+       return (
+         <div className="flex items-center justify-center py-8">
+           <div className="w-32 h-[1px] bg-[#016369]/20 relative">
+             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-[#F5875F]/30" />
+           </div>
+         </div>
+       )
+     }
+     ```
+
+2. Process Steps Data Structure:
+   - Located in: src/app/smart-solutions-alt/page.tsx
+   - Current structure:
+     ```typescript
+     const processSteps = [
+       { 
+         step: 1, 
+         title: 'Free Consultation', 
+         time: '1 hour',
+         icon: Calendar,
+         animation: 'pulse' as const,
+         // Ready to add:
+         // image: 'https://placehold.co/400x300/016369/FFFFFF/png?text=Consultation',
+         // imageAlt: 'Design consultant discussing options with homeowner'
+       },
+       // ... other steps
+     ]
+     ```
+
+3. ScrollReveal Usage Context:
+   - Component: src/components/sections/smart-solutions-alt/hero.tsx
+   - Current implementation causing type error with duration prop
+   - Need to check ScrollRevealProps interface before next session
+   - May need to modify ScrollReveal component to accept duration
+
+4. Section Background Pattern:
+   - Alternating colors: white and #F8F6F3
+   - Implementation in page.tsx using wrapper divs
+   - Each section is wrapped in background div before SectionDivider
+
+5. Branch Information:
+   - Currently on: feature/visual-hierarchy
+   - Main changes in:
+     * section-divider.tsx
+     * smart-solutions-alt/page.tsx
+     * smart-solutions-alt/hero.tsx
+
+6. Placeholder Image Pattern:
+   - Using placehold.co with format:
+     https://placehold.co/400x300/016369/FFFFFF/png?text=[Step]
+   - Size: 400x300
+   - Colors: Primary (#016369) background, White text
+
+## Next Component Changes
+1. InstallationWithTimeline Component:
+   - Need to add image display to process steps
+   - Current layout is grid md:grid-cols-4
+   - Need to decide on image placement:
+     * Above step number
+     * Below step content
+     * Or new layout pattern needed
+
+2. ScrollReveal Component Issue:
+   - Current props: variant, delay, className
+   - Need to either:
+     * Remove duration prop from hero.tsx
+     * Or extend ScrollRevealProps to include duration
+   - Check if other components using ScrollReveal need updates
+
+3. Visual Hierarchy Next Steps Order:
+    1. Fix ScrollReveal type error in hero
+    2. Add images to process steps
+    3. Then proceed with other visual improvements
+
+## Note to Self:
+- Do not attempt multiple component changes at once
+- Test each change before moving to next
+- Keep track of any new type errors that emerge
+
+## Files to Check for ScrollReveal Fix
+1. src/components/ui/scroll-reveal.tsx
+   - Need to check current props interface
+   - See if duration can be added safely
+
+2. Other components using ScrollReveal:
+   - src/components/sections/smart-solutions-alt/hero.tsx (current issue)
+   - src/components/sections/smart-solutions-alt/installation.tsx
+   - src/components/sections/smart-solutions-alt/benefits.tsx
+   - src/components/shared/consultation-cta.tsx
+   - Any changes need to be applied consistently
+
+3. Order of Investigation:
+    1. Check ScrollReveal component definition
+    2. Review all current usage
+    3. Decide whether to:
+       * Remove duration prop everywhere
+       * Or extend component to support it
+    4. Apply consistent fix across all components
+
+## Git Status and Progress
+1. Current Branch State:
+   - On feature/visual-hierarchy
+   - Successfully committed:
+     * Section divider implementation
+     * Alternating backgrounds
+     * Hero text animation (with type error)
+   - Not yet committed:
+     * Process steps image data structure changes
+
+2. Before Next Session:
+   - Need to check out feature/visual-hierarchy branch
+   - Verify all changes from last session were committed
+   - May need to resolve any conflicts if main was updated
+
+3. Remember:
+   - Do not merge to main until ScrollReveal type error is fixed
+   - Keep commits focused on single concerns
+   - Test each change before committing

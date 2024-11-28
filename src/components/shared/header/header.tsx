@@ -75,6 +75,7 @@ export function Header() {
   return (
     <div 
       className={`
+        header
         fixed w-full top-0 left-0 right-0 z-50
         transform-gpu transition-transform duration-200 ease-out
         ${isVisible ? 'translate-y-0' : '-translate-y-full'}
