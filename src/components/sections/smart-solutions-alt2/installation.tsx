@@ -2,7 +2,7 @@
 
 import React from 'react'
 import { ScrollReveal } from '@/components/ui/scroll-reveal'
-import { Calendar, Ruler, Wrench, CheckSquare, Shield } from 'lucide-react'
+import { Calendar, Ruler, Wrench, CheckSquare } from 'lucide-react'
 
 const steps = [
   {
@@ -79,10 +79,10 @@ export function InstallationProcess(): React.JSX.Element {
           {/* Timeline Connector - Desktop */}
           <div className="hidden lg:block absolute top-[100px] left-[calc(25%+24px)] right-[calc(25%+24px)] h-[2px] bg-primary/20" />
           
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 auto-rows-fr">
             {steps.map((step, index) => (
               <ScrollReveal key={index} delay={index * 0.2}>
-                <div className="group bg-white rounded-sm p-6 shadow-sm hover:shadow-md transition-all">
+                <div className="group bg-white rounded-sm p-6 shadow-sm hover:shadow-md transition-all h-full flex flex-col">
                   {/* Step Number and Icon */}
                   <div className="flex items-center gap-4 mb-6">
                     <div className="relative">
@@ -105,7 +105,7 @@ export function InstallationProcess(): React.JSX.Element {
                   </p>
 
                   {/* Step Details */}
-                  <ul className="space-y-2">
+                  <ul className="space-y-2 mt-auto">
                     {step.details.map((detail, i) => (
                       <li key={i} className="flex items-center gap-2 text-sm text-gray-600">
                         <div className="w-1 h-1 rounded-full bg-accent" />
@@ -118,24 +118,6 @@ export function InstallationProcess(): React.JSX.Element {
             ))}
           </div>
         </div>
-
-        {/* Clean Job Site Promise */}
-        <ScrollReveal>
-          <div className="mt-16 bg-[#F8F6F3] p-8 rounded-sm">
-            <div className="flex items-start gap-6">
-              <Shield className="w-12 h-12 text-primary shrink-0" />
-              <div>
-                <h3 className="text-2xl font-semibold text-[#2F2F2F] mb-2">
-                  Our Clean Job Site Promise
-                </h3>
-                <p className="text-gray-600">
-                  We protect your home during installation and leave your space spotless. 
-                  Daily cleanup, dust barriers, and thorough final cleaning included.
-                </p>
-              </div>
-            </div>
-          </div>
-        </ScrollReveal>
       </div>
     </section>
   )

@@ -3,7 +3,7 @@
 import React from 'react'
 import Image from 'next/image'
 
-const brands = [
+export const brands = [
   {
     name: 'Kohler',
     logo: '/images/home/brands/Kohler_Logo_CORP_2012-11-21_BLK.png'

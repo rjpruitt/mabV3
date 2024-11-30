@@ -94,16 +94,16 @@ export function TransformationHero(): React.JSX.Element {
             {/* CTAs */}
             <div 
               className={`
-                flex flex-col sm:flex-row gap-4 mt-8
+                flex flex-col sm:flex-row gap-3 mt-8
                 transform transition-all duration-700
                 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}
               `}
               style={{ transitionDelay: '1400ms' }}
             >
-              <button className="bg-accent text-white px-8 py-4 rounded-sm text-lg font-semibold hover:bg-accent/90 transition-colors">
+              <button className="w-full sm:w-auto bg-accent text-white px-8 py-4 rounded-sm text-lg font-semibold hover:bg-accent/90 transition-colors">
                 Start Your Transformation
               </button>
-              <button className="bg-white/80 backdrop-blur-sm text-gray-800 px-8 py-4 rounded-sm text-lg font-semibold hover:bg-white/90 transition-colors">
+              <button className="w-full sm:w-auto bg-white/80 backdrop-blur-sm text-gray-800 px-8 py-4 rounded-sm text-lg font-semibold hover:bg-white/90 transition-colors">
                 View Gallery
               </button>
             </div>
