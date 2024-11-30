@@ -1,0 +1,39 @@
+<svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Outer circle with spikes -->
+  <path d="M60 0
+           C60 0 65 5 70 5 75 5 80 0 80 0
+           C80 0 85 5 90 5 95 5 100 0 100 0
+           C100 0 105 5 110 5 115 5 120 0 120 0
+           V120
+           C120 120 115 115 110 115 105 115 100 120 100 120
+           C100 120 95 115 90 115 85 115 80 120 80 120
+           C80 120 75 115 70 115 65 115 60 120 60 120
+           C60 120 55 115 50 115 45 115 40 120 40 120
+           C40 120 35 115 30 115 25 115 20 120 20 120
+           C20 120 15 115 10 115 5 115 0 120 0 120
+           V0
+           C0 0 5 5 10 5 15 5 20 0 20 0
+           C20 0 25 5 30 5 35 5 40 0 40 0
+           C40 0 45 5 50 5 55 5 60 0 60 0Z" 
+    fill="#004C9B"/>
+  
+  <!-- Inner circle with text -->
+  <circle cx="60" cy="60" r="50" fill="#004C9B"/>
+  <path d="M60 15
+           A45 45 0 1 1 60 105
+           A45 45 0 1 1 60 15Z" 
+    fill="white"/>
+  
+  <!-- Circular text -->
+  <path id="curve" d="M60 20
+           A40 40 0 1 1 60 100
+           A40 40 0 1 1 60 20Z" 
+    fill="none"/>
+  <text fill="#004C9B" font-family="Arial, sans-serif" font-weight="bold" font-size="10">
+    <textPath href="#curve" startOffset="5%">AMERICANS WITH DISABILITIES ACT</textPath>
+  </text>
+  
+  <!-- Center text -->
+  <text x="60" y="50" text-anchor="middle" fill="#004C9B" font-family="Arial, sans-serif" font-weight="bold" font-size="24">ADA</text>
+  <text x="60" y="70" text-anchor="middle" fill="#004C9B" font-family="Arial, sans-serif" font-weight="bold" font-size="12">COMPLIANT</text>
+</svg> 
