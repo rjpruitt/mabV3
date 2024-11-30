@@ -6,8 +6,11 @@ import { ConversationStep, ConsultationResponse } from './types'
 import { conversationFlow } from './conversation-flow'
 import { OpenQuestion } from './questions/open-question'
 import { MultiSelect } from './questions/multi-select'
+import { SingleSelect } from './questions/single-select'
 import { PhotoUpload } from './questions/photo-upload'
 import { StyleSelect } from './questions/style-select'
+import { ContactForm } from './questions/contact-form'
+import { SuccessMessage } from '@/components/ui/success-message'
 
 interface DesignConsultationProps {
   isOpen: boolean
@@ -19,6 +22,8 @@ export function DesignConsultation({ isOpen, onClose, onComplete }: DesignConsul
   const [step, setStep] = useState(0)
   const [responses, setResponses] = useState<ConsultationResponse>({})
   const modalRef = useRef<HTMLDivElement>(null)
+  const [showSuccess, setShowSuccess] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   React.useEffect(() => {
     if (modalRef.current) {
@@ -31,12 +36,51 @@ export function DesignConsultation({ isOpen, onClose, onComplete }: DesignConsul
 
   const currentStep = conversationFlow[step]
 
+  const handleSubmit = async () => {
+    const contactData = responses['contact-info']
+    if (!contactData?.isValid) {
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      // Similar to main app:
+      // 1. Send to Google Sheets
+      // 2. Send confirmation email via SendGrid
+      // 3. Show success message
+      setShowSuccess(true)
+    } catch (error) {
+      console.error('Submission error:', error)
+      // Handle error
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleSuccessClose = () => {
+    setShowSuccess(false)
+    onClose()
+  }
+
   const handleNext = () => {
+    if ((currentStep.type === 'multiselect' || currentStep.type === 'single-select') && currentStep.required) {
+      const stepResponse = responses[currentStep.id]
+      if (!stepResponse || !stepResponse.isValid) {
+        setResponses(prev => ({
+          ...prev,
+          [currentStep.id]: {
+            ...prev[currentStep.id],
+            showError: true
+          }
+        }))
+        return
+      }
+    }
+
     if (step < conversationFlow.length - 1) {
       setStep(step + 1)
     } else {
-      onComplete(responses)
-      onClose()
+      handleSubmit()
     }
   }
 
@@ -82,6 +126,22 @@ export function DesignConsultation({ isOpen, onClose, onComplete }: DesignConsul
       case 'style':
         return (
           <StyleSelect
+            value={responses[currentStep.id]}
+            onChange={(value) => updateResponse(currentStep.id, value)}
+            step={currentStep}
+          />
+        )
+      case 'contact':
+        return (
+          <ContactForm
+            value={responses[currentStep.id]}
+            onChange={(value) => updateResponse(currentStep.id, value)}
+            step={currentStep}
+          />
+        )
+      case 'single-select':
+        return (
+          <SingleSelect
             value={responses[currentStep.id]}
             onChange={(value) => updateResponse(currentStep.id, value)}
             step={currentStep}
@@ -142,14 +202,36 @@ export function DesignConsultation({ isOpen, onClose, onComplete }: DesignConsul
           >
             Back
           </button>
-          <button
-            onClick={handleNext}
-            className="bg-accent text-white px-6 py-3 rounded-sm hover:bg-accent/90 transition-colors"
-          >
-            {step === conversationFlow.length - 1 ? 'Complete' : 'Continue'}
-          </button>
+          <div className="flex flex-col items-end">
+            <button
+              onClick={handleNext}
+              disabled={
+                (currentStep.type === 'contact' && !responses['contact-info']?.isValid) ||
+                ((currentStep.type === 'multiselect' || currentStep.type === 'single-select') && 
+                  currentStep.required && !responses[currentStep.id]?.isValid)
+              }
+              className={`
+                bg-accent text-white px-6 py-3 rounded-sm transition-colors
+                ${(currentStep.type === 'contact' && !responses['contact-info']?.isValid) ||
+                  ((currentStep.type === 'multiselect' || currentStep.type === 'single-select') && 
+                    currentStep.required && !responses[currentStep.id]?.isValid)
+                  ? 'opacity-50 cursor-not-allowed' 
+                  : 'hover:bg-accent/90'
+                }
+              `}
+            >
+              {step === conversationFlow.length - 1 ? 'Complete' : 'Continue'}
+            </button>
+            {(currentStep.type === 'multiselect' || currentStep.type === 'single-select') && 
+              responses[currentStep.id]?.showError && (
+              <p className="text-sm text-red-500 mt-2">
+                Please select at least one option to continue
+              </p>
+            )}
+          </div>
         </div>
       </div>
+      {showSuccess && <SuccessMessage onClose={handleSuccessClose} />}
     </div>
   )
 } 

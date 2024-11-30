@@ -1,4 +1,4 @@
-export type QuestionType = 'open' | 'choice' | 'photo' | 'multiselect' | 'style'
+export type QuestionType = 'open' | 'choice' | 'photo' | 'multiselect' | 'style' | 'contact' | 'single-select' | 'bathroom-info'
 
 export interface Option {
   id: string
@@ -12,6 +12,7 @@ export interface ConversationStep {
   question: string
   subtext?: string
   type: QuestionType
+  required?: boolean
   options?: Option[]
 }
 
