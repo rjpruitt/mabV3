@@ -1,355 +1,386 @@
 # Project Status and TODOs - Updated [Current Date]
 
-## Current Status
-1. Working on Smart Solutions alternative campaign page
-2. Successfully implemented:
-   - Hero section with animated trust badges
-   - Installation section with process steps
-   - Basic layout and routing
-
-## Latest Session Status (Visual Hierarchy Improvements)
+## Latest Session Status (ROI Messaging & Value Proposition)
 1. Successfully implemented:
-   - Section dividers using subtle line and dot design
+   - ValueBanner component with Zillow ROI data
+   - Updated StyleExplorer value points to be feature-based
+   - Removed unsupported ROI claims from individual styles
+   - Created roi-and-sources.md to track claims and sources
+
+2. Current Campaign Structure:
+   - Using alt2 version as primary
+   - All components functional
+   - Images loading correctly
+   - No current errors to address
+
+3. ROI Messaging Strategy:
+   - Global ROI claims only in banners with direct source attribution
+   - Style-specific messaging focuses on features and benefits
+   - Zillow data ($1.71 return) prominently displayed
+   - Ready to add more banners as we get additional credible sources
+
+4. StyleExplorer Improvements:
+   - Removed unsupported ROI claims
+   - Updated value points to be feature-focused
+   - Maintained consistent image paths
+   - All styles have correct features and images
+
+5. Important Context:
+   - ROI claims must be directly sourceable
+   - Keep style-specific value points feature-based
+   - Banners are our vehicle for sourced ROI claims
+   - Marketing psychology drives all messaging decisions
+
+## Documentation Status
+1. Key Documents:
+   - marketing-psychology.md: Core strategy guide
+   - roi-and-sources.md: Claims tracking and verification
+   - project-status-and-todos.txt: Session continuity
+
+2. Source Management:
+   - Zillow data verified and implemented
+   - Heather Murphy Group data documented
+   - Gehman Remodeling insights incorporated
+   - Ready for additional credible sources
+
+## Next Steps
+1. Potential Improvements:
+   - Source additional ROI data from NAR, NKBA
+   - Create additional value banners as sources verified
+   - Review other components for unsupported claims
+   - Enhance value proposition messaging
+
+2. Content Review:
+   - Verify all ROI claims have sources
+   - Check feature descriptions for accuracy
+   - Ensure consistent messaging across components
+   - Look for opportunities to add sourced value claims
+
+## Component Status
+1. ValueBanner:
+   - Implemented with Zillow data
+   - Clear source attribution
+   - Ready for additional versions
+
+2. StyleExplorer:
+   - Updated with feature-based value points
+   - All images loading correctly
+   - ROI messaging aligned with sources
+   - No current errors
+
+3. Other Components:
+   - All functioning correctly
+   - No current errors to address
+   - Ready for value proposition review
+
+## Marketing Psychology Implementation
+1. Current Focus:
+   - Addressing financial fears with verified ROI data
+   - Building trust through sourced claims
+   - Reducing decision anxiety with clear features
+   - Maintaining emotional connection while being factual
+
+2. Value Proposition Strategy:
+   - Global ROI claims in banners
+   - Feature-specific value in style cards
+   - Clear, verifiable benefits
+   - Source-backed statements
+
+## Critical Details for Next Session
+1. ROI Claims:
+   - Zillow: $1.71 return per $1 spent
+   - Only use in banners with attribution
+   - Keep style-specific content feature-focused
+
+2. File Structure:
+   - All image paths verified and working
+   - Component hierarchy maintained
+   - Documentation up to date
+
+3. Next Focus Areas:
+   - Source additional ROI data
+   - Review other components for messaging
+   - Consider additional value banners
+   - Enhance feature descriptions
+
+Remember:
+- Always verify claims with sources
+- Keep ROI messaging in banners
+- Focus on features in style cards
+- Maintain documentation of sources
+
+## Project Overview
+1. Core Objective:
+   - Creating ultimate lead-generating landing page for smart solutions showers
+   - Maximizing marketing psychology principles
+   - Focus on conversion and engagement
+   - Multiple campaign versions (alt, alt2) for testing
+
+2. Key Files & Locations:
+   - Main campaign: src/app/smart-solutions-alt2/page.tsx
+   - Components: src/components/sections/smart-solutions-alt2/*
+   - Documentation: docs/marketing-psychology.md, docs/roi-and-sources.md
+   - Images: public/images/solutions/smart-solutions/showers/alt2/*
+
+3. Current Version Status:
+   - Alt2 is primary version
+   - Using component-based architecture
+   - Each section addresses specific psychological barriers
+   - Flow follows marketing psychology document guidelines
+
+## Component Architecture
+1. Page Flow:
+   - TransformationHero (emotional hook)
+   - FinanceBanner (financial concerns)
+   - ValueBanner (ROI messaging)
+   - BeforeAfterGallery (proof)
+   - StyleExplorer (guided choices)
+   - [List continues with each component and its purpose]
+
+2. Key Components Implementation:
+   - StyleExplorer: Feature-based value points, no unsupported claims
+   - ValueBanner: Source-attributed ROI claims
+   - AccessibilitySolutions: Certifications and safety features
+   - [Other important component details]
+
+## Marketing Psychology Implementation
+1. Fear Addressing:
+   - Financial: ROI data, value banners, feature benefits
+   - Process: Installation timeline, clean job promise
+   - Decision: Curated styles, guided choices
+   - Quality: Warranties, certifications, social proof
+
+2. Trust Building:
+   - Sourced claims only
+   - Professional certifications
+   - Real customer testimonials
+   - Brand associations
+
+## Development Rules
+1. ROI Claims:
+   - Must be in banners with attribution
+   - Never in style-specific content
+   - Always linked to source document
+   - Only from verified sources
+
+2. Component Guidelines:
+   - Feature-focused value points
+   - No unsupported claims
+   - Clear psychological purpose
+   - Consistent messaging
+
+## Current Campaign Versions
+1. Alt2 (Primary):
+   - Most polished version
+   - Full-screen hero with floating content panel
+   - Animated trust points
+   - Section dividers with dot accent
    - Alternating section backgrounds (white and #F8F6F3)
-   - Initial hero text animation with ScrollReveal
 
-2. Current Work:
-   - Working on process steps section enhancements
-   - Started adding placeholder images to processSteps array
-   - Need to implement image display in InstallationWithTimeline component
+2. Alt:
+   - Split-screen hero
+   - Animated badges
+   - Process steps with benefits
+   - Currently not active focus
 
-3. Latest Changes:
-   - Added section dividers with:
-     * w-32 h-[1px] line in primary color (20% opacity)
-     * w-2 h-2 dot in accent color (30% opacity)
-   - Added ScrollReveal animation to hero text:
-     * fadeInUp variant
-     * 0.2s delay
-     * 0.8s duration (Note: duration prop causing type error)
+## Brand Elements
+1. Colors:
+   - Primary: #016369
+   - Primary-dark: #013F42
+   - Accent: #F0A500
+   - Text: #2F2F2F
 
-4. Current Issues:
-   - ScrollReveal type error in hero component:
-     ```
-     Type '{ children: Element; variant: "fadeInUp"; delay: number; duration: number; className: string; }' 
-     is not assignable to type 'IntrinsicAttributes & ScrollRevealProps'
-     ```
-   - Need to resolve before continuing with process steps images
+2. Fonts:
+   - Montserrat
+   - PT Serif
+   - Font variables defined in globals.css
 
-5. Next Steps:
-   - Fix ScrollReveal type error
-   - Complete process steps image implementation
-   - Continue with visual hierarchy improvements:
-     * Typography enhancements
-     * Content grouping with cards
-     * Visual anchors
-     * Interactive elements
-     * Content priority indicators
+## Recent Work Context
+- Focused on ROI messaging accuracy
+- Created ValueBanner for sourced claims
+- Updated StyleExplorer to be feature-focused
+- All image paths verified and working
+- Ready to add more banners as we get credible sources
 
-## Recent Issues
-1. Font configuration was lost/broken
-   - Using Next.js font system in layout.tsx
-   - Font variables defined but not properly referenced
-   - Need to ensure fonts are properly loaded and applied
+## Important Reminders
+- Check marketing-psychology.md before making UX decisions
+- Verify roi-and-sources.md before making value claims
+- Keep campaign changes isolated from main app
+- Test thoroughly before committing
 
-2. Global styling conflicts
-   - Added styles affecting all pages unintentionally
-   - Need to properly scope campaign-specific styles
+## Certification Status
+1. Current Badges:
+   - ADA Compliant (using official ADA blue #004C9B)
+   - CAPS Certified (from NAHB)
+   - NKBA KBIS Universal Design
 
-## For Next Session
-1. Font Configuration Needs:
-   - Verify font imports in layout.tsx:
-     * Montserrat
-     * PT Serif
-     * Dancing Script
-     * Playfair Display SC
-   - Check font variable references in components
-   - Ensure proper class names are being used
+2. Badge Implementation:
+   - Located in AccessibilitySolutions component
+   - Using WebP/SVG formats
+   - Paths verified and working
+   - Ready to update when official badges acquired
 
-2. Current Component Status:
-   - Hero: Working with animated badges
-   - Installation: Process steps implemented
-   - Trust Badges: Between-sections animation concept started
-   - Other sections: Basic implementation
+## Image Management
+1. Directory Structure:
+   - /images/solutions/smart-solutions/showers/alt2/
+     - /hero
+     - /styles
+     - /accessibility
+   - /images/badges/certifications/
 
-3. Known Issues to Fix:
-   - ConsultationCTA props mismatch (features vs guarantees)
-   - ProcessStep type issues in installation component
-   - Product explorer glass options type error
+2. Image Status:
+   - All style images verified
+   - Certification badges implemented
+   - Hero images loading correctly
+   - Proper Next.js Image optimization
 
-4. Next Development Steps:
-   - Complete trust badges between-sections animation
-   - Refine installation section timeline
-   - Implement remaining section enhancements from improvement-ideas.md
+## Psychological Flow Mapping
+1. Customer Fear Addressing:
+   - "I can't afford this" -> ValueBanner, FinanceBanner, ROI messaging
+   - "My house will be torn up" -> CleanJobPromise, InstallationProcess
+   - "I'll make the wrong choice" -> StyleExplorer (curated collections)
+   - "Is it poor quality?" -> QualityValue, BrandTrust sections
+   - "Will I be pressured?" -> NoPressurePromise section
 
-## Required Context for New Session
-1. Project Structure:
-   - Main app at src/app/page.tsx
-   - Campaign version at src/app/smart-solutions/showers/page.tsx
-   - Alternative version at src/app/smart-solutions-alt/page.tsx
+2. Flow Strategy:
+   - Open with transformation (emotional hook)
+   - Build trust before asking for action
+   - Address objections proactively
+   - Close with social proof and clear next steps
 
-2. Design System:
-   - Colors:
-     * primary: '#016369'
-     * primary-light: '#0A7C7C'
-     * primary-dark: '#013F42'
-     * accent: '#F0A500'
-   - Fonts: See font configuration above
+3. Conversion Points:
+   - Hero CTA (emotional decision)
+   - Style Explorer (post-education)
+   - Consultation CTA (after trust built)
+   - Final transformation CTA (urgency)
 
-3. Key Files to Review:
-   - src/app/layout.tsx (root layout)
-   - src/app/smart-solutions/layout.tsx (campaign layout)
-   - src/components/sections/smart-solutions-alt/* (alternative components)
+4. Trust Building Sequence:
+   - Professional certifications (AccessibilitySolutions)
+   - Process transparency (InstallationProcess)
+   - Brand associations (BrandTrust)
+   - Customer testimonials (SocialProof)
 
-## Immediate Priority
-1. Fix font configuration
-2. Resolve type errors
-3. Continue with section enhancements
+## Value Proposition & Messaging Guide
+1. ROI Messaging:
+   - Primary: "Bathroom remodels yield the biggest returns in boosting home value" (Zillow)
+   - Secondary: "$1.71 return for every $1 spent on minor updates" (Zillow)
+   - Supporting: "102% ROI on minor bathroom renovations" (Heather Murphy)
 
-## Long-term TODOs
-1. Implement remaining improvements from improvement-ideas.md
-2. Add analytics tracking
-3. Optimize images and performance
-4. Add more interactive features
+2. Feature Value Messaging:
+   - "Walk-in showers increase home value" (Gehman)
+   - "Glass doors are high-impact upgrades" (Gehman)
+   - "Premium features buyers want"
+   - "Built-in storage adds value"
 
-## Critical Context for Font Issues
-1. Original Font Configuration:
-   - Next.js font loading in layout.tsx
-   - Font variables defined and exported
-   - CSS variables referencing font variables
-   - Components using font-{name} classes
+3. Approved Value Terms:
+   - "Premium" (when referring to actual features)
+   - "Quality" (when describing materials/workmanship)
+   - "Professional" (for certified installers)
+   - "Expert" (for certified team members)
 
-2. What Broke:
-   - Lost connection between Next.js font variables and CSS
-   - Need to check font class usage in components
-   - May have incorrect font variable references
+4. Messaging Don'ts:
+   - No unsourced ROI claims
+   - No style-specific value claims
+   - No superlatives without proof
+   - No pressure-based urgency
 
-3. Steps to Fix:
-   - Review layout.tsx font configuration
-   - Check CSS variable references
-   - Verify component font class usage
+## Testing & Validation Checklist
+1. Component Testing:
+   - Image loading and optimization
+   - Responsive behavior
+   - Animation performance
+   - Interactive elements
 
-## Type Error Details
-1. Product Explorer:
-   - glassOptions optional property causing type errors
-   - Need to properly type option interfaces
-   - Add proper type guards
+2. Content Validation:
+   - All ROI claims match sources
+   - Feature descriptions accurate
+   - Value points supported
+   - Messaging consistency
 
-2. ConsultationCTA:
-   - Props mismatch between features/guarantees
-   - Check component interface definition
-   - Update all usage locations
+3. Performance Checks:
+   - Image optimization working
+   - Animation smoothness
+   - Load time optimization
+   - Mobile responsiveness
 
-3. ProcessStep:
-   - Animation type needs to be constrained
-   - Current error in smart-solutions-alt implementation
-   - Need to align types across components
+4. Pre-Commit Checklist:
+   - No console errors
+   - All images loading
+   - Responsive on all breakpoints
+   - Claims verified against sources
+   - Marketing psychology alignment
 
-## Current Development State
-1. Last Working State:
-   - Hero animations working
-   - Basic layout structure in place
-   - Color system restored
+## Accessibility & Compliance
+1. ADA Considerations:
+   - Zero-threshold entries featured
+   - Safety features highlighted
+   - Clear accessibility messaging
+   - Proper alt text on all images
 
-2. Current Issues:
-   - Font system broken
-   - Type errors preventing clean build
-   - Need to verify section transitions
+2. Web Accessibility:
+   - ARIA labels on interactive elements
+   - Proper heading hierarchy
+   - Keyboard navigation support
+   - Color contrast compliance
 
-3. Next Steps:
-   - Fix font configuration
-   - Resolve type errors
-   - Continue section enhancements
+3. Compliance Documentation:
+   - ADA compliance badge verified
+   - CAPS certification accurate
+   - NKBA KBIS badge implemented
+   - Ready for official badge updates
 
-   ## Critical Details for Next Session
+4. Future Compliance Needs:
+   - Monitor for updated ADA guidelines
+   - Watch for new certification requirements
+   - Keep accessibility features current
+   - Document all compliance measures
 
-1. Type Error Fixes:
-   - ConsultationCTA: Change 'guarantees' prop to 'features' in alt page
-   - ProcessStep: Animation type must be 'pulse' | 'spin' | 'bounce' | 'glow'
-   - Product Explorer: Need discriminated union for options with/without glassOptions
+## Analytics & Tracking Strategy
+1. Conversion Points to Track:
+   - Hero CTA clicks
+   - Style Explorer interactions
+   - Consultation form submissions
+   - Phone call clicks
 
-2. Current Working Features:
-   - Hero section with scroll-triggered trust badges
-   - Color system restored (#016369, #F0A500, etc.)
-   - Basic layout and navigation
+2. User Behavior Metrics:
+   - Time spent on styles
+   - Scroll depth
+   - Value banner visibility
+   - Section engagement
 
-3. Next Steps:
-   - Fix type errors one at a time
-   - Test each fix before moving to next
-   - Keep font system as is until type errors resolved
+3. ROI Message Impact:
+   - Banner visibility time
+   - Post-banner conversions
+   - Style selection after value messaging
+   - Click patterns after ROI exposure
 
-4. Do Not Change:
-   - Layout.tsx font configuration
-   - Global CSS variables
-   - Smart solutions campaign layout
+4. Future Analysis Needs:
+   - A/B test different ROI messages
+   - Track certification badge impact
+   - Monitor style popularity
+   - Measure value proposition effectiveness
 
-   ## Type Error Specifics and Solutions
+## Current Priorities & Open Items
+1. ROI Enhancement:
+   - Research NAR Cost vs. Value Report
+   - Look for local market data
+   - Monitor for new Zillow insights
+   - Seek additional credible sources
 
-1. ConsultationCTA Error:
-   ```typescript
-   Type '{ variant: "white"; guarantees: string[]; }' is not assignable to type 'IntrinsicAttributes & ConsultationCTAProps'
-   ```
-   Solution: Change `guarantees` to `features` in alt page usage
+2. Content Opportunities:
+   - Additional value banners
+   - More social proof examples
+   - Enhanced feature descriptions
+   - New certification badges
 
-2. ProcessStep Animation Error:
-   ```typescript
-   Type 'string' is not assignable to type '"pulse" | "spin" | "bounce" | "glow"'
-   ```
-   Solution: Update processSteps array to use specific animation types
+3. Optimization Needs:
+   - Mobile experience review
+   - Load time improvements
+   - Animation performance
+   - Interaction refinements
 
-3. Product Explorer Error:
-   ```typescript
-   Property 'glassOptions' does not exist on type '{ id: string; name: string; image: string; }'
-   ```
-   Solution: Add proper type guard for options with/without glassOptions
-
-These are the exact errors we need to fix when we restart.
-
-## Exact Linter Errors to Fix
-
-1. Product Explorer Error:
-```
-Property 'glassOptions' does not exist on type '{ id: string; name: string; glassOptions: { id: string; name: string; image: string; }[]; image: string; } | { id: string; name: string; image: string; }'.
-Property 'glassOptions' does not exist on type '{ id: string; name: string; image: string; }'.
-```
-
-2. ProcessStep Animation Error:
-```
-Type '{ step: number; title: string; time: string; icon: ForwardRefExoticComponent<...>; animation: string; }[]' is not assignable to type 'ProcessStep[]'.
-Type 'string' is not assignable to type '"pulse" | "spin" | "bounce" | "glow"'.
-```
-
-3. ConsultationCTA Error:
-```
-Type '{ variant: "white"; guarantees: string[]; }' is not assignable to type 'IntrinsicAttributes & ConsultationCTAProps'.
-Property 'guarantees' does not exist on type 'IntrinsicAttributes & ConsultationCTAProps'.
-```
-
-These errors need to be fixed in order of impact:
-1. ConsultationCTA first (prop name mismatch)
-2. ProcessStep animation (type constraint)
-3. Product Explorer (discriminated union)
-
-## Visual Hierarchy Implementation Details
-1. Section Divider Component Location and Implementation:
-   - Located at: src/components/ui/section-divider.tsx
-   - Working implementation:
-     ```typescript
-     export function SectionDivider() {
-       return (
-         <div className="flex items-center justify-center py-8">
-           <div className="w-32 h-[1px] bg-[#016369]/20 relative">
-             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-[#F5875F]/30" />
-           </div>
-         </div>
-       )
-     }
-     ```
-
-2. Process Steps Data Structure:
-   - Located in: src/app/smart-solutions-alt/page.tsx
-   - Current structure:
-     ```typescript
-     const processSteps = [
-       { 
-         step: 1, 
-         title: 'Free Consultation', 
-         time: '1 hour',
-         icon: Calendar,
-         animation: 'pulse' as const,
-         // Ready to add:
-         // image: 'https://placehold.co/400x300/016369/FFFFFF/png?text=Consultation',
-         // imageAlt: 'Design consultant discussing options with homeowner'
-       },
-       // ... other steps
-     ]
-     ```
-
-3. ScrollReveal Usage Context:
-   - Component: src/components/sections/smart-solutions-alt/hero.tsx
-   - Current implementation causing type error with duration prop
-   - Need to check ScrollRevealProps interface before next session
-   - May need to modify ScrollReveal component to accept duration
-
-4. Section Background Pattern:
-   - Alternating colors: white and #F8F6F3
-   - Implementation in page.tsx using wrapper divs
-   - Each section is wrapped in background div before SectionDivider
-
-5. Branch Information:
-   - Currently on: feature/visual-hierarchy
-   - Main changes in:
-     * section-divider.tsx
-     * smart-solutions-alt/page.tsx
-     * smart-solutions-alt/hero.tsx
-
-6. Placeholder Image Pattern:
-   - Using placehold.co with format:
-     https://placehold.co/400x300/016369/FFFFFF/png?text=[Step]
-   - Size: 400x300
-   - Colors: Primary (#016369) background, White text
-
-## Next Component Changes
-1. InstallationWithTimeline Component:
-   - Need to add image display to process steps
-   - Current layout is grid md:grid-cols-4
-   - Need to decide on image placement:
-     * Above step number
-     * Below step content
-     * Or new layout pattern needed
-
-2. ScrollReveal Component Issue:
-   - Current props: variant, delay, className
-   - Need to either:
-     * Remove duration prop from hero.tsx
-     * Or extend ScrollRevealProps to include duration
-   - Check if other components using ScrollReveal need updates
-
-3. Visual Hierarchy Next Steps Order:
-    1. Fix ScrollReveal type error in hero
-    2. Add images to process steps
-    3. Then proceed with other visual improvements
-
-## Note to Self:
-- Do not attempt multiple component changes at once
-- Test each change before moving to next
-- Keep track of any new type errors that emerge
-
-## Files to Check for ScrollReveal Fix
-1. src/components/ui/scroll-reveal.tsx
-   - Need to check current props interface
-   - See if duration can be added safely
-
-2. Other components using ScrollReveal:
-   - src/components/sections/smart-solutions-alt/hero.tsx (current issue)
-   - src/components/sections/smart-solutions-alt/installation.tsx
-   - src/components/sections/smart-solutions-alt/benefits.tsx
-   - src/components/shared/consultation-cta.tsx
-   - Any changes need to be applied consistently
-
-3. Order of Investigation:
-    1. Check ScrollReveal component definition
-    2. Review all current usage
-    3. Decide whether to:
-       * Remove duration prop everywhere
-       * Or extend component to support it
-    4. Apply consistent fix across all components
-
-## Git Status and Progress
-1. Current Branch State:
-   - On feature/visual-hierarchy
-   - Successfully committed:
-     * Section divider implementation
-     * Alternating backgrounds
-     * Hero text animation (with type error)
-   - Not yet committed:
-     * Process steps image data structure changes
-
-2. Before Next Session:
-   - Need to check out feature/visual-hierarchy branch
-   - Verify all changes from last session were committed
-   - May need to resolve any conflicts if main was updated
-
-3. Remember:
-   - Do not merge to main until ScrollReveal type error is fixed
-   - Keep commits focused on single concerns
-   - Test each change before committing
+4. Documentation Updates:
+   - Keep ROI sources current
+   - Track new certifications
+   - Document style popularity
+   - Monitor conversion data
