@@ -8,6 +8,18 @@ export function MultiSelect({ value = [], onChange, step }: BaseQuestionProps) {
   const [selections, setSelections] = useState<string[]>(value?.selections || [])
   const [otherText, setOtherText] = useState(value?.otherText || '')
 
+  const isValid = selections.length > 0 || (selections.includes('other') && otherText.trim().length > 0)
+
+  React.useEffect(() => {
+    if (step.required) {
+      onChange({ 
+        selections, 
+        otherText,
+        isValid: false
+      })
+    }
+  }, [])
+
   const toggleSelection = (optionId: string) => {
     let newSelections: string[]
     if (selections.includes(optionId)) {
@@ -16,16 +28,35 @@ export function MultiSelect({ value = [], onChange, step }: BaseQuestionProps) {
       newSelections = [...selections, optionId]
     }
     setSelections(newSelections)
-    onChange({ selections: newSelections, otherText })
+    onChange({ 
+      selections: newSelections, 
+      otherText,
+      isValid: newSelections.length > 0 || (newSelections.includes('other') && otherText.trim().length > 0)
+    })
   }
 
   const handleOtherText = (text: string) => {
     setOtherText(text)
-    onChange({ selections, otherText: text })
+    onChange({ 
+      selections, 
+      otherText: text,
+      isValid: selections.length > 0 || (selections.includes('other') && text.trim().length > 0)
+    })
   }
 
   return (
     <div className="space-y-4">
+      {step.required && (
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-gray-600">
+            {step.options?.length === 1 
+              ? "Please make a selection to continue"
+              : "Please select at least one option to continue"
+            }
+          </span>
+          <span className="text-red-500">*</span>
+        </div>
+      )}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         {step.options?.map((option) => (
           <button
