@@ -3,21 +3,23 @@
 import { LucideIcon } from 'lucide-react'
 
 interface PromisePointProps {
-  icon: LucideIcon
+  icon: React.ElementType
   title: string
   description: string
 }
 
 export function PromisePoint({ icon: Icon, title, description }: PromisePointProps) {
   return (
-    <div className="bg-white rounded-sm p-6 text-center">
-      <div className="bg-primary/10 w-16 h-16 rounded-sm flex items-center justify-center mx-auto mb-4">
-        <Icon className="w-8 h-8 text-primary" />
+    <div className="bg-white p-6 rounded-sm shadow-sm hover:shadow-md transition-all h-full flex flex-col">
+      <div className="flex items-center gap-4 mb-4">
+        <div className="bg-primary/10 p-3 rounded-sm">
+          <Icon className="w-6 h-6 text-primary" />
+        </div>
+        <h3 className="text-xl font-semibold text-[#2F2F2F]">
+          {title}
+        </h3>
       </div>
-      <h3 className="text-xl font-semibold text-[#2F2F2F] mb-2">
-        {title}
-      </h3>
-      <p className="text-gray-600">
+      <p className="text-gray-600 flex-grow">
         {description}
       </p>
     </div>

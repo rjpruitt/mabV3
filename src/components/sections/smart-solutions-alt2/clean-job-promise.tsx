@@ -48,7 +48,7 @@ export function CleanJobPromise() {
           </div>
         </ScrollReveal>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
           {promisePoints.map((point, index) => (
             <ScrollReveal key={index} delay={index * 0.1}>
               <PromisePoint {...point} />
