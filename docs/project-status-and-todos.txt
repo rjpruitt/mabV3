@@ -384,3 +384,135 @@ Remember:
    - Track new certifications
    - Document style popularity
    - Monitor conversion data
+
+COMPLETED:
+- Design consultation flow structure
+- Single-select question type
+- Required field validation
+- Card height fixes in Clean Job Promise section
+- Success message component
+- Basic form validation
+
+IN PROGRESS:
+- Contact form validation (linter error needs fixing)
+- Form submission handling
+- Lead data capture integration
+
+TODO:
+- Fix contact form preferredContact type issue
+- Add form submission loading states
+- Integrate with SendGrid for email notifications
+- Add Google Sheets integration for lead data
+- Add Twilio integration for SMS (pending account review)
+- Add form validation error messages
+- Add form submission success/error handling
+- Add form submission analytics tracking
+
+KNOWN ISSUES:
+- Contact form linter error with preferredContact type
+- Continue button active state needs improvement
+- Form validation messaging needs to be more consistent
+
+## Design Consultation Flow Status
+CURRENT FOCUS: Form validation and submission handling
+
+Latest Work:
+- Implemented single-select questions for bathroom info (age, type, size)
+- Added required field validation with visual indicators
+- Created success message component for form completion
+- Fixed card height issues in Clean Job Promise section
+
+Critical Context:
+- First step uses single-select for required questions
+- Contact form has preselected 'phone' causing validation confusion
+- Need to maintain validation state without blocking progress
+- Form submission will integrate with SendGrid and Google Sheets
+
+Current Blocker:
+- Contact form linter error with preferredContact type checking
+- Need to fix type comparison: formData.preferredContact !== ''
+
+Next Steps:
+1. Fix contact form type issue
+2. Complete form validation
+3. Add submission handling
+4. Integrate with external services
+
+Remember:
+- Validation should guide users without blocking
+- Required fields need clear indicators
+- Success/error states must be user-friendly
+- Keep form flow aligned with marketing psychology
+
+## DESIGN CONSULTATION FLOW - IMPORTANT NOTE:
+All components and code for this flow have been completed, tested, and are working correctly.
+DO NOT modify, recode, or redesign any aspect unless specifically requested.
+
+CRITICAL REMINDER:
+The success message was working correctly with a 3-second timeout.
+When removing the timeout, additional changes were made that broke the success message.
+Need to revert only the timeout removal, keeping all other code unchanged.
+
+DESIGN CONSULTATION FLOW STRUCTURE
+Location: src/components/ui/design-consultation/
+
+Core Files:
+- design-consultation.tsx: Main modal component that orchestrates the flow
+  - Manages step navigation
+  - Collects responses
+  - Handles form submission
+  - Shows success/rental messages
+
+- conversation-flow.ts: Defines the consultation steps sequence
+  - Questions for each step
+  - Options for selections
+  - Required/optional status
+  - Input type needed
+
+- types.ts: TypeScript definitions
+  - Response data structures
+  - Question types
+  - Step configurations
+  - Component props
+
+Question Components (in questions/):
+- bathroom-info.tsx: Multi-part bathroom details form
+- contact-form.tsx: Contact information collection
+- multi-select.tsx: Multiple choice selection
+- single-select.tsx: Single choice selection
+- photo-upload.tsx: Photo upload handling
+- style-select.tsx: Style preference selection
+
+Flow Operation:
+1. Starts with ownership screening
+2. If renter -> Shows rental message and stops
+3. If owner -> Continues through consultation steps:
+   - Bathroom info
+   - Pain points
+   - Photos (optional)
+   - Style preferences
+   - Timeline
+   - Contact info
+4. Shows success message on completion
+
+CURRENT STATUS:
+COMPLETED AND TESTED - DO NOT MODIFY:
+- All flow components
+- All question components
+- Form validation
+- Multi-select contact preferences
+- Privacy message placement
+- Rental path handling
+- Style preferences without images
+- Basic flow structure
+- All validation logic
+- Contact form with multi-select preferences
+
+SINGLE REMAINING ISSUE:
+- Success message needs to be restored to working state but without the 3-second timeout
+- Only modify the timeout removal, do not change any other code
+
+IMPORTANT:
+- Do not attempt to rewrite or redesign any components
+- Do not modify any working code
+- Only fix the specific timeout issue when requested

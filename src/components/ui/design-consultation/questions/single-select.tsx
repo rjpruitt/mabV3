@@ -1,10 +1,16 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { BaseQuestionProps } from './types'
+import { BaseQuestionProps, SelectionValue, ConversationStep, Option } from '../types'
 import { CheckCircle } from 'lucide-react'
 
-export function SingleSelect({ value = {}, onChange, step }: BaseQuestionProps) {
+interface SingleSelectProps extends Omit<BaseQuestionProps, 'value' | 'onChange'> {
+  value?: SelectionValue
+  onChange: (value: SelectionValue) => void
+  step: ConversationStep & { options: Option[] }
+}
+
+export function SingleSelect({ value = { selection: '', isValid: false }, onChange, step }: SingleSelectProps) {
   const [selection, setSelection] = useState<string>(value?.selection || '')
 
   const isValid = selection !== ''
@@ -40,6 +46,7 @@ export function SingleSelect({ value = {}, onChange, step }: BaseQuestionProps) 
       <div className="grid grid-cols-1 gap-3">
         {step.options?.map((option) => (
           <button
+            data-testid={`option-${option.id}`}
             key={option.id}
             onClick={() => handleSelection(option.id)}
             className={`

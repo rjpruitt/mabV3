@@ -1,21 +1,35 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { BaseQuestionProps } from './types'
+import { BaseQuestionProps, SelectionValue, ConversationStep, Option } from '../types'
 import { SingleSelect } from './single-select'
-import { OpenQuestion } from './open-question'
 
-interface BathroomInfo {
-  age?: string
-  type?: string
-  size?: string
+interface BathroomInfoValue {
+  age?: SelectionValue
+  type?: SelectionValue
+  size?: SelectionValue
   notes?: string
+  isValid: boolean
 }
 
-export function BathroomInfo({ value = {}, onChange, step }: BaseQuestionProps) {
-  const [info, setInfo] = useState<BathroomInfo>(value)
+interface BathroomInfoProps extends Omit<BaseQuestionProps, 'value' | 'onChange'> {
+  value?: BathroomInfoValue
+  onChange: (value: BathroomInfoValue) => void
+  step: ConversationStep
+}
 
-  const isValid = info.age && info.type && info.size
+export function BathroomInfo({ 
+  value = { isValid: false }, 
+  onChange, 
+  step 
+}: BathroomInfoProps) {
+  const [info, setInfo] = useState<BathroomInfoValue>(value)
+
+  const isValid = Boolean(
+    info.age?.isValid && 
+    info.type?.isValid && 
+    info.size?.isValid
+  )
 
   useEffect(() => {
     onChange({
@@ -23,6 +37,33 @@ export function BathroomInfo({ value = {}, onChange, step }: BaseQuestionProps) 
       isValid
     })
   }, [info])
+
+  useEffect(() => {
+    console.log('Bathroom Info mounted', { info, step })
+  }, [])
+
+  const ageOptions: Option[] = [
+    { id: 'less-5', text: "Less than 5 years" },
+    { id: '5-10', text: "5-10 years" },
+    { id: '10-20', text: "10-20 years" },
+    { id: 'more-20', text: "More than 20 years" },
+    { id: 'not-sure', text: "Not sure" }
+  ]
+
+  const typeOptions: Option[] = [
+    { id: 'tub-shower', text: "Tub with shower" },
+    { id: 'tub-only', text: "Tub only" },
+    { id: 'stand-up', text: "Stand-up shower" },
+    { id: 'walk-in', text: "Walk-in shower" },
+    { id: 'multiple', text: "Multiple bathrooms", description: "We'll discuss details during your consultation" }
+  ]
+
+  const sizeOptions: Option[] = [
+    { id: 'very-small', text: "Very small" },
+    { id: 'average', text: "Average size" },
+    { id: 'spacious', text: "Spacious" },
+    { id: 'not-sure-size', text: "Not sure of dimensions" }
+  ]
 
   return (
     <div className="space-y-8">
@@ -33,15 +74,13 @@ export function BathroomInfo({ value = {}, onChange, step }: BaseQuestionProps) 
           <span className="text-red-500">*</span>
         </h4>
         <SingleSelect
-          value={{ selection: info.age }}
-          onChange={(val) => setInfo({ ...info, age: val.selection })}
-          options={[
-            { id: 'less-5', text: "Less than 5 years" },
-            { id: '5-10', text: "5-10 years" },
-            { id: '10-20', text: "10-20 years" },
-            { id: 'more-20', text: "More than 20 years" },
-            { id: 'not-sure', text: "Not sure" }
-          ]}
+          value={info.age}
+          onChange={(val) => setInfo({ ...info, age: val })}
+          step={{
+            ...step,
+            options: ageOptions,
+            required: true
+          }}
         />
       </div>
 
@@ -52,15 +91,13 @@ export function BathroomInfo({ value = {}, onChange, step }: BaseQuestionProps) 
           <span className="text-red-500">*</span>
         </h4>
         <SingleSelect
-          value={{ selection: info.type }}
-          onChange={(val) => setInfo({ ...info, type: val.selection })}
-          options={[
-            { id: 'tub-shower', text: "Tub with shower" },
-            { id: 'tub-only', text: "Tub only" },
-            { id: 'stand-up', text: "Stand-up shower" },
-            { id: 'walk-in', text: "Walk-in shower" },
-            { id: 'multiple', text: "Multiple bathrooms", description: "We'll discuss details during your consultation" }
-          ]}
+          value={info.type}
+          onChange={(val) => setInfo({ ...info, type: val })}
+          step={{
+            ...step,
+            options: typeOptions,
+            required: true
+          }}
         />
       </div>
 
@@ -71,14 +108,13 @@ export function BathroomInfo({ value = {}, onChange, step }: BaseQuestionProps) 
           <span className="text-red-500">*</span>
         </h4>
         <SingleSelect
-          value={{ selection: info.size }}
-          onChange={(val) => setInfo({ ...info, size: val.selection })}
-          options={[
-            { id: 'very-small', text: "Very small" },
-            { id: 'average', text: "Average size" },
-            { id: 'spacious', text: "Spacious" },
-            { id: 'not-sure-size', text: "Not sure of dimensions" }
-          ]}
+          value={info.size}
+          onChange={(val) => setInfo({ ...info, size: val })}
+          step={{
+            ...step,
+            options: sizeOptions,
+            required: true
+          }}
         />
       </div>
 

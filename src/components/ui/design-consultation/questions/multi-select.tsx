@@ -1,10 +1,16 @@
 'use client'
 
 import React, { useState } from 'react'
-import { BaseQuestionProps } from './types'
+import { BaseQuestionProps, MultiSelectValue, ConversationStep, Option } from '../types'
 import { CheckCircle } from 'lucide-react'
 
-export function MultiSelect({ value = [], onChange, step }: BaseQuestionProps) {
+interface MultiSelectProps extends Omit<BaseQuestionProps, 'value' | 'onChange'> {
+  value?: MultiSelectValue
+  onChange: (value: MultiSelectValue) => void
+  step: ConversationStep & { options: Option[] }
+}
+
+export function MultiSelect({ value = { selections: [], isValid: false }, onChange, step }: MultiSelectProps) {
   const [selections, setSelections] = useState<string[]>(value?.selections || [])
   const [otherText, setOtherText] = useState(value?.otherText || '')
 

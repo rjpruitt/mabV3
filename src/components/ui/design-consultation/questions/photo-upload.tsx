@@ -1,15 +1,29 @@
 'use client'
 
 import React, { useState, useCallback } from 'react'
-import { BaseQuestionProps } from './types'
+import { BaseQuestionProps } from '../types'
 import { Camera, X, Upload } from 'lucide-react'
+
+interface PhotoUploadValue {
+  files: File[]
+  isValid: boolean
+}
+
+interface PhotoUploadProps extends Omit<BaseQuestionProps, 'value' | 'onChange'> {
+  value?: PhotoUploadValue
+  onChange: (value: PhotoUploadValue) => void
+}
 
 const MAX_PHOTOS = 3
 const ACCEPTED_TYPES = ['image/jpeg', 'image/png', 'image/heic']
 const MAX_SIZE = 10 * 1024 * 1024 // 10MB
 
-export function PhotoUpload({ value = [], onChange, step }: BaseQuestionProps) {
-  const [photos, setPhotos] = useState<File[]>(value)
+export function PhotoUpload({ 
+  value = { files: [], isValid: true }, 
+  onChange, 
+  step 
+}: PhotoUploadProps) {
+  const [photos, setPhotos] = useState<File[]>(value.files)
   const [error, setError] = useState<string>('')
 
   const handlePhotos = useCallback((files: FileList | null) => {
@@ -34,13 +48,19 @@ export function PhotoUpload({ value = [], onChange, step }: BaseQuestionProps) {
 
     const newPhotos = [...photos, file]
     setPhotos(newPhotos)
-    onChange(newPhotos)
+    onChange({ 
+      files: newPhotos,
+      isValid: true // Photos are optional, so always valid
+    })
   }, [photos, onChange])
 
   const removePhoto = (index: number) => {
     const newPhotos = photos.filter((_, i) => i !== index)
     setPhotos(newPhotos)
-    onChange(newPhotos)
+    onChange({ 
+      files: newPhotos,
+      isValid: true
+    })
   }
 
   return (
