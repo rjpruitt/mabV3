@@ -6,6 +6,7 @@ import { ScrollReveal } from '@/components/ui/scroll-reveal'
 import { CheckCircle, ArrowRight, ChevronLeft, ChevronRight, TrendingUp } from 'lucide-react'
 import useEmblaCarousel from 'embla-carousel-react'
 import { DesignConsultation } from '@/components/ui/design-consultation'
+import type { ConsultationResponse } from '@/components/ui/design-consultation'
 
 const styles = [
   {
@@ -297,7 +298,7 @@ export function StyleExplorer(): React.JSX.Element {
         <DesignConsultation
           isOpen={showConsultation}
           onClose={() => setShowConsultation(false)}
-          onComplete={(responses) => {
+          onComplete={(responses: ConsultationResponse) => {
             console.log('Consultation responses:', responses)
             // Handle consultation completion
           }}

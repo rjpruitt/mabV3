@@ -13,18 +13,6 @@ interface SingleSelectProps extends Omit<BaseQuestionProps, 'value' | 'onChange'
 export function SingleSelect({ value = { selection: '', isValid: false }, onChange, step }: SingleSelectProps) {
   const [selection, setSelection] = useState<string>(value?.selection || '')
 
-  const isValid = selection !== ''
-
-  // Initialize with invalid state if required
-  useEffect(() => {
-    if (step.required) {
-      onChange({ 
-        selection,
-        isValid: false
-      })
-    }
-  }, [])
-
   const handleSelection = (optionId: string) => {
     setSelection(optionId)
     onChange({ 
@@ -35,18 +23,9 @@ export function SingleSelect({ value = { selection: '', isValid: false }, onChan
 
   return (
     <div className="space-y-4">
-      {step.required && (
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-gray-600">
-            Please make a selection to continue
-          </span>
-          <span className="text-red-500">*</span>
-        </div>
-      )}
       <div className="grid grid-cols-1 gap-3">
         {step.options?.map((option) => (
           <button
-            data-testid={`option-${option.id}`}
             key={option.id}
             onClick={() => handleSelection(option.id)}
             className={`

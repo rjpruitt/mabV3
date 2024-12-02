@@ -16,7 +16,7 @@ export const conversationFlow: ConversationStep[] = [
     id: 'bathroom-info',
     question: "Tell us about your bathroom",
     subtext: "Please answer all questions to continue",
-    type: 'bathroom-info',
+    type: 'open',
     required: true
   },
   {

@@ -8,12 +8,18 @@ interface BathroomQuestions {
   age?: string
   type?: string
   size?: string
+  notes?: string
+  isValid: boolean
 }
 
 export function BathroomQuestions({ value = {}, onChange, step }: BaseQuestionProps) {
-  const [answers, setAnswers] = useState<BathroomQuestions>(value)
+  const [answers, setAnswers] = useState<BathroomQuestions>({ 
+    ...value,
+    isValid: false 
+  })
 
-  const isValid = answers.age && answers.type && answers.size
+  // Check if all required fields are filled
+  const isValid = Boolean(answers.age && answers.type && answers.size)
 
   useEffect(() => {
     onChange({
@@ -24,9 +30,8 @@ export function BathroomQuestions({ value = {}, onChange, step }: BaseQuestionPr
 
   return (
     <div className="space-y-8">
-      <p className="text-sm text-gray-600 flex items-center gap-2">
+      <p className="text-sm text-gray-600">
         Please answer all questions to continue
-        <span className="text-red-500">*</span>
       </p>
 
       {/* Age Question */}
@@ -36,15 +41,19 @@ export function BathroomQuestions({ value = {}, onChange, step }: BaseQuestionPr
           <span className="text-red-500">*</span>
         </h4>
         <SingleSelect
-          value={{ selection: answers.age }}
+          value={{ selection: answers.age || '', isValid: Boolean(answers.age) }}
           onChange={(val) => setAnswers(prev => ({ ...prev, age: val.selection }))}
-          options={[
-            { id: 'less-5', text: "Less than 5 years" },
-            { id: '5-10', text: "5-10 years" },
-            { id: '10-20', text: "10-20 years" },
-            { id: 'more-20', text: "More than 20 years" },
-            { id: 'not-sure', text: "Not sure" }
-          ]}
+          step={{
+            ...step,
+            options: [
+              { id: 'less-5', text: "Less than 5 years" },
+              { id: '5-10', text: "5-10 years" },
+              { id: '10-20', text: "10-20 years" },
+              { id: 'more-20', text: "More than 20 years" },
+              { id: 'not-sure', text: "Not sure" }
+            ],
+            required: true
+          }}
         />
       </div>
 
@@ -55,15 +64,19 @@ export function BathroomQuestions({ value = {}, onChange, step }: BaseQuestionPr
           <span className="text-red-500">*</span>
         </h4>
         <SingleSelect
-          value={{ selection: answers.type }}
+          value={{ selection: answers.type || '', isValid: Boolean(answers.type) }}
           onChange={(val) => setAnswers(prev => ({ ...prev, type: val.selection }))}
-          options={[
-            { id: 'tub-shower', text: "Tub with shower" },
-            { id: 'tub-only', text: "Tub only" },
-            { id: 'stand-up', text: "Stand-up shower" },
-            { id: 'walk-in', text: "Walk-in shower" },
-            { id: 'multiple', text: "Multiple bathrooms", description: "We'll discuss details during your consultation" }
-          ]}
+          step={{
+            ...step,
+            options: [
+              { id: 'tub-shower', text: "Tub with shower" },
+              { id: 'tub-only', text: "Tub only" },
+              { id: 'stand-up', text: "Stand-up shower" },
+              { id: 'walk-in', text: "Walk-in shower" },
+              { id: 'multiple', text: "Multiple bathrooms", description: "We'll discuss details during your consultation" }
+            ],
+            required: true
+          }}
         />
       </div>
 
@@ -74,14 +87,31 @@ export function BathroomQuestions({ value = {}, onChange, step }: BaseQuestionPr
           <span className="text-red-500">*</span>
         </h4>
         <SingleSelect
-          value={{ selection: answers.size }}
+          value={{ selection: answers.size || '', isValid: Boolean(answers.size) }}
           onChange={(val) => setAnswers(prev => ({ ...prev, size: val.selection }))}
-          options={[
-            { id: 'very-small', text: "Very small" },
-            { id: 'average', text: "Average size" },
-            { id: 'spacious', text: "Spacious" },
-            { id: 'not-sure-size', text: "Not sure of dimensions" }
-          ]}
+          step={{
+            ...step,
+            options: [
+              { id: 'very-small', text: "Very small" },
+              { id: 'average', text: "Average size" },
+              { id: 'spacious', text: "Spacious" },
+              { id: 'not-sure-size', text: "Not sure of dimensions" }
+            ],
+            required: true
+          }}
+        />
+      </div>
+
+      {/* Additional Notes */}
+      <div className="space-y-4">
+        <h4 className="font-medium text-[#2F2F2F]">
+          Anything else you'd like to tell us about your bathroom?
+        </h4>
+        <textarea
+          value={answers.notes || ''}
+          onChange={(e) => setAnswers(prev => ({ ...prev, notes: e.target.value }))}
+          placeholder="Share any other details that would help us understand your space better..."
+          className="w-full h-24 p-3 border rounded-sm text-[#2F2F2F] focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent resize-none"
         />
       </div>
     </div>

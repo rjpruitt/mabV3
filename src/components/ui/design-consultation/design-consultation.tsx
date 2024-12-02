@@ -22,6 +22,7 @@ import { StyleSelect } from './questions/style-select'
 import { ContactForm } from './questions/contact-form'
 import { SuccessMessage } from './success-message'
 import { BathroomInfo } from './questions/bathroom-info'
+import { BathroomQuestions } from './questions/bathroom-questions'
 
 interface DesignConsultationProps {
   isOpen: boolean
@@ -111,7 +112,7 @@ export function DesignConsultation({ isOpen, onClose, onComplete }: DesignConsul
       case 'single-select':
       case 'multiselect':
       case 'contact':
-      case 'bathroom-info':
+      case 'open':
         return currentResponse?.isValid
       case 'photo':
         return true // Photos are optional
@@ -162,14 +163,12 @@ export function DesignConsultation({ isOpen, onClose, onComplete }: DesignConsul
   }
 
   const renderQuestion = () => {
-    const value = getStepResponse(currentStep.id)
-    
     switch (currentStep.type) {
-      case 'bathroom-info':
+      case 'open':
         return (
-          <BathroomInfo
-            value={value as BathroomInfoValue}
-            onChange={(val) => updateResponse(currentStep.id, val)}
+          <BathroomQuestions
+            value={responses[currentStep.id]}
+            onChange={(value) => updateResponse(currentStep.id, value)}
             step={currentStep}
           />
         )
@@ -178,7 +177,7 @@ export function DesignConsultation({ isOpen, onClose, onComplete }: DesignConsul
         if (!isStepWithOptions(currentStep)) return null
         return (
           <MultiSelect
-            value={value as MultiSelectValue}
+            value={responses[currentStep.id] as MultiSelectValue}
             onChange={(val) => updateResponse(currentStep.id, val)}
             step={currentStep}
           />
@@ -186,7 +185,7 @@ export function DesignConsultation({ isOpen, onClose, onComplete }: DesignConsul
       case 'photo':
         return (
           <PhotoUpload
-            value={value as PhotoUploadValue}
+            value={responses[currentStep.id] as PhotoUploadValue}
             onChange={(val) => updateResponse(currentStep.id, val)}
             step={currentStep}
           />
@@ -194,7 +193,7 @@ export function DesignConsultation({ isOpen, onClose, onComplete }: DesignConsul
       case 'open':
         return (
           <OpenQuestion
-            value={value}
+            value={responses[currentStep.id]}
             onChange={(value) => updateResponse(currentStep.id, value)}
             step={currentStep}
           />
@@ -202,7 +201,7 @@ export function DesignConsultation({ isOpen, onClose, onComplete }: DesignConsul
       case 'contact':
         return (
           <ContactForm
-            value={value as ContactFormValue}
+            value={responses[currentStep.id] as ContactFormValue}
             onChange={(value) => updateResponse(currentStep.id, value)}
             step={currentStep}
           />
@@ -211,7 +210,7 @@ export function DesignConsultation({ isOpen, onClose, onComplete }: DesignConsul
         if (!isStepWithOptions(currentStep)) return null
         return (
           <SingleSelect
-            value={value as SelectionValue}
+            value={responses[currentStep.id] as SelectionValue}
             onChange={(val) => updateResponse(currentStep.id, val)}
             step={currentStep}
           />
@@ -300,25 +299,16 @@ export function DesignConsultation({ isOpen, onClose, onComplete }: DesignConsul
                 <button
                   data-testid="consultation-next"
                   onClick={handleNext}
-                  disabled={!canProceed() || isSubmitting}
+                  disabled={!canProceed()}
                   className={`
-                    bg-accent text-white px-6 py-3 rounded-sm transition-all relative
-                    ${(!canProceed() || isSubmitting) 
+                    bg-accent text-white px-6 py-3 rounded-sm transition-all
+                    ${!canProceed()
                       ? 'opacity-50 cursor-not-allowed bg-gray-400' 
                       : 'hover:bg-accent/90'
                     }
                   `}
                 >
-                  {isSubmitting ? (
-                    <>
-                      <span className="opacity-0">Complete</span>
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      </div>
-                    </>
-                  ) : (
-                    step === conversationFlow.length - 1 ? 'Complete' : 'Continue'
-                  )}
+                  {step === conversationFlow.length - 1 ? 'Complete' : 'Continue'}
                 </button>
                 {(currentStep.type === 'multiselect' || currentStep.type === 'single-select') && 
                   responses[currentStep.id]?.showError && (
