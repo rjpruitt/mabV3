@@ -448,71 +448,49 @@ Remember:
 All components and code for this flow have been completed, tested, and are working correctly.
 DO NOT modify, recode, or redesign any aspect unless specifically requested.
 
-CRITICAL REMINDER:
-The success message was working correctly with a 3-second timeout.
-When removing the timeout, additional changes were made that broke the success message.
-Need to revert only the timeout removal, keeping all other code unchanged.
-
-DESIGN CONSULTATION FLOW STRUCTURE
-Location: src/components/ui/design-consultation/
-
-Core Files:
-- design-consultation.tsx: Main modal component that orchestrates the flow
-  - Manages step navigation
-  - Collects responses
-  - Handles form submission
-  - Shows success/rental messages
-
-- conversation-flow.ts: Defines the consultation steps sequence
-  - Questions for each step
-  - Options for selections
-  - Required/optional status
-  - Input type needed
-
-- types.ts: TypeScript definitions
-  - Response data structures
-  - Question types
-  - Step configurations
-  - Component props
-
-Question Components (in questions/):
-- bathroom-info.tsx: Multi-part bathroom details form
-- contact-form.tsx: Contact information collection
-- multi-select.tsx: Multiple choice selection
-- single-select.tsx: Single choice selection
-- photo-upload.tsx: Photo upload handling
-- style-select.tsx: Style preference selection
-
-Flow Operation:
-1. Starts with ownership screening
-2. If renter -> Shows rental message and stops
-3. If owner -> Continues through consultation steps:
-   - Bathroom info
-   - Pain points
-   - Photos (optional)
-   - Style preferences
-   - Timeline
-   - Contact info
-4. Shows success message on completion
-
-CURRENT STATUS:
-COMPLETED AND TESTED - DO NOT MODIFY:
-- All flow components
-- All question components
-- Form validation
-- Multi-select contact preferences
-- Privacy message placement
-- Rental path handling
-- Style preferences without images
-- Basic flow structure
-- All validation logic
-- Contact form with multi-select preferences
-
-SINGLE REMAINING ISSUE:
-- Success message needs to be restored to working state but without the 3-second timeout
-- Only modify the timeout removal, do not change any other code
-
-IMPORTANT:
-- Do not attempt to rewrite or redesign any components
-- Do not modify any working code
-- Only fix the specific timeout issue when requested
++ ## ACCESSIBILITY ASSESSMENT FLOW - CURRENT FOCUS
++ Location: src/components/ui/accessibility-consultation/
++ 
++ Current Status:
++ - Created folder structure mirroring design consultation
++ - Moved success-message.tsx to accessibility-consultation folder
++ - Created initial components and types
++ - Working on type compatibility issues
++ 
++ Files Created/Modified:
++ - accessibility-consultation.tsx (main modal)
++ - success-message.tsx (moved from ui/)
++ - types.ts (accessibility-specific types)
++ - conversation-flow.ts (accessibility flow)
++ - questions/ownership-questions.tsx
++ - questions/medicare-status.tsx
++ - questions/single-select.tsx (copied from design)
++ - questions/multi-select.tsx (copied from design)
++ - questions/contact-form.tsx (copied from design)
++ 
++ Current Issue:
++ - Type error in accessibility-consultation.tsx:
++   SingleSelect component expects ConversationStep but receives AccessibilityStep
++ - Need to update SingleSelect to use our own types
++ 
++ Next Steps:
++ 1. Update SingleSelect component to use AccessibilityStep type
++ 2. Ensure complete independence from design consultation
++ 3. Test full flow functionality
++ 
++ Critical Context:
++ - Each flow (design and accessibility) must be completely independent
++ - No cross-dependencies between flows
++ - Each flow has its own components and types
++ - Deleting one flow should not affect the other
++ 
++ Current Error:
++ Type 'AccessibilityStep' is not assignable to type 'ConversationStep'
++ Types of property 'id' are incompatible
++ Type 'AccessibilityStepId' is not assignable to type 'StepId'
++ 
++ Remember:
++ - Do not modify design consultation files
++ - Keep flows completely separate
++ - Copy components instead of sharing
++ - Use local types for each flow

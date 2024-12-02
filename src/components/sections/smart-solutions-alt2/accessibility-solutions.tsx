@@ -1,9 +1,10 @@
 'use client'
 
-import React from 'react'
+import React, { useState } from 'react'
 import Image from 'next/image'
 import { ScrollReveal } from '@/components/ui/scroll-reveal'
 import { Shield, Heart, HandHeart, Download, Award } from 'lucide-react'
+import { AccessibilityConsultation } from '@/components/ui/accessibility-consultation/accessibility-consultation'
 
 const safetyFeatures = [
   {
@@ -50,6 +51,8 @@ const accessibilityTestimonial = {
 }
 
 export function AccessibilitySolutions() {
+  const [showConsultation, setShowConsultation] = useState(false)
+
   return (
     <section className="py-8 md:py-16">
       <div className="container mx-auto px-4">
@@ -153,7 +156,10 @@ export function AccessibilitySolutions() {
               </div>
 
               <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
-                <button className="w-full sm:w-auto bg-accent text-white px-6 py-3 rounded-sm hover:bg-accent/90 transition-colors">
+                <button 
+                  onClick={() => setShowConsultation(true)}
+                  className="w-full sm:w-auto bg-accent text-white px-6 py-3 rounded-sm hover:bg-accent/90 transition-colors"
+                >
                   Schedule Assessment
                 </button>
                 <button className="w-full sm:w-auto bg-white text-primary px-6 py-3 rounded-sm hover:bg-white/90 transition-colors flex items-center justify-center gap-2">
@@ -164,6 +170,15 @@ export function AccessibilitySolutions() {
             </div>
           </div>
         </ScrollReveal>
+
+        <AccessibilityConsultation
+          isOpen={showConsultation}
+          onClose={() => setShowConsultation(false)}
+          onComplete={(responses) => {
+            console.log('Consultation responses:', responses)
+            setShowConsultation(false)
+          }}
+        />
       </div>
     </section>
   )
