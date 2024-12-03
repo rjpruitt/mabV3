@@ -10,13 +10,14 @@ import { QualityValue } from '@/components/sections/smart-solutions-alt2/quality
 import { SocialProof } from '@/components/sections/smart-solutions-alt2/social-proof'
 import { TransformationCTA } from '@/components/sections/smart-solutions-alt2/cta'
 import { BrandTrust } from '@/components/sections/smart-solutions-alt2/brand-trust'
-import { FinanceBanner } from '@/components/ui/finance-banner'
+import { FinanceBanner } from '@/components/sections/smart-solutions-alt2/finance-banner'
 import { SectionDivider } from '@/components/ui/section-divider'
 import { CleanJobPromise } from '@/components/sections/smart-solutions-alt2/clean-job-promise'
 import { CleanJobBanner } from '@/components/ui/clean-job-banner'
 import { TeamAtWork } from '@/components/sections/smart-solutions-alt2/team-at-work'
 import { AccessibilitySolutions } from '@/components/sections/smart-solutions-alt2/accessibility-solutions'
 import { ValueBanner } from '@/components/ui/value-banner'
+import { FullBathroomBanner } from '@/components/ui/full-bathroom-banner'
 
 export default function SmartSolutionsAlt2Page() {
   return (
@@ -39,6 +40,7 @@ export default function SmartSolutionsAlt2Page() {
       
       <div className="bg-[#F8F6F3]">
         <StyleExplorer />
+        <FullBathroomBanner />
       </div>
       <SectionDivider />
       

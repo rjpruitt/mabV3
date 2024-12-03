@@ -494,3 +494,47 @@ DO NOT modify, recode, or redesign any aspect unless specifically requested.
 + - Keep flows completely separate
 + - Copy components instead of sharing
 + - Use local types for each flow
+
+I added this on 12/2/2024 because you weren't functional enough to do it
+
+## Main App Consultation Flow - CURRENT FOCUS
+
+Current Investigation:
+1. Resource Lead Form Files:
+   - src/components/shared/resource-lead-form/index.tsx
+   - src/components/shared/resource-lead-form.tsx (standalone)
+   - Have seen two resource pages using folder version:
+     * medicare-guide/page.tsx
+     * planning-guide/page.tsx
+   - Need to verify other resource pages:
+     * bathroom-safety-checklist/page.tsx
+     * care-guide/page.tsx
+
+2. Consultation Related Files:
+   - src/components/shared/consultation-cta.tsx
+   - src/components/ui/design-consultation-modal.tsx
+   - src/components/ui/design-consultation/design-consultation.tsx
+   - src/components/ui/design-consultation/success-message.tsx
+   - src/components/ui/success-message.tsx
+
+Current Issues:
+- Main app CTA buttons hit /consultation with 404s
+- Multiple success message implementations need investigation
+- Resource lead form has two versions needing review
+- Need to understand design-consultation-modal.tsx purpose
+
+Critical Context:
+- Must maintain separation between:
+  * Campaign consultation flows (self-contained)
+  * Main app consultation
+  * Resource lead forms
+- Need to verify actual implementations
+- Don't assume file relationships without seeing contents
+
+Next Steps:
+1. Check remaining resource pages
+2. Review standalone resource-lead-form.tsx
+3. Understand success message usage
+4. Fix main app consultation page
+
+[Rest of file remains unchanged...]

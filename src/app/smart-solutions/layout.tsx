@@ -1,6 +1,7 @@
 'use client'
 
 import { CampaignHeader } from '@/components/smart-solutions/campaign-header'
+import { CampaignFooter } from '@/components/smart-solutions/campaign-footer'
 
 export default function SmartSolutionsLayout({
   children,
@@ -14,6 +15,7 @@ export default function SmartSolutionsLayout({
     >
       <CampaignHeader />
       <main>{children}</main>
+      <CampaignFooter />
     </div>
   )
 } 
