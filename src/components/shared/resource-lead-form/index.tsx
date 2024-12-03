@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { LoadingSpinner } from '@/components/ui/loading-spinner'
 import { ValidationMessage } from '@/components/ui/validation-message'
-import { SuccessMessage } from '@/components/ui/success-message'
+import { GlobalSuccessMessage } from '@/components/shared/global-success-message'
 import { maskPhoneNumber } from '@/lib/input-mask'
 import { isValidEmail, isValidPhone } from '@/lib/validation'
 import { resources } from '@/config/resources'
@@ -75,7 +75,7 @@ export function ResourceLeadForm({ resourceId, isOpen, onClose }: ResourceLeadFo
   return (
     <>
       {showSuccess && (
-        <SuccessMessage 
+        <GlobalSuccessMessage 
           title="Thank you!"
           message={resource.thankYouMessage}
           onClose={() => setShowSuccess(false)}

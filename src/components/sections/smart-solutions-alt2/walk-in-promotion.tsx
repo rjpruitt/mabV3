@@ -4,6 +4,7 @@ import React, { useState } from 'react'
 import { ScrollReveal } from '@/components/ui/scroll-reveal'
 import { ArrowRight, ShowerHead, Bath } from 'lucide-react'
 import { OfferModal } from '@/components/ui/offer-modal'
+import { DesignConsultation } from '@/components/ui/design-consultation'
 
 const options = [
   {
@@ -64,6 +65,13 @@ const showerOffer = {
 export function WalkInPromotion() {
   const [showTubModal, setShowTubModal] = useState(false)
   const [showShowerModal, setShowShowerModal] = useState(false)
+  const [showConsultation, setShowConsultation] = useState(false)
+
+  const handleConsultationStart = () => {
+    setShowTubModal(false)
+    setShowShowerModal(false)
+    setShowConsultation(true)
+  }
 
   return (
     <section className="py-12 bg-[#F8F6F3]">
@@ -135,6 +143,7 @@ export function WalkInPromotion() {
           title={tubOffer.title}
           offer={tubOffer.offer}
           type="tub-conversion"
+          onConsultationClick={handleConsultationStart}
         />
 
         <OfferModal
@@ -143,6 +152,16 @@ export function WalkInPromotion() {
           title={showerOffer.title}
           offer={showerOffer.offer}
           type="shower-replacement"
+          onConsultationClick={handleConsultationStart}
+        />
+
+        <DesignConsultation
+          isOpen={showConsultation}
+          onClose={() => setShowConsultation(false)}
+          onComplete={(responses: ConsultationResponse) => {
+            console.log('Consultation responses:', responses)
+            setShowConsultation(false)
+          }}
         />
       </div>
     </section>

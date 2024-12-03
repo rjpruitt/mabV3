@@ -1,6 +1,8 @@
 'use client'
 
+import { useState } from 'react'
 import { ScrollReveal } from '@/components/ui/scroll-reveal'
+import { useRouter } from 'next/navigation'
 
 type ConsultationCTAProps = {
   variant?: 'tan' | 'white' | 'teal'
@@ -11,6 +13,8 @@ export function ConsultationCTA({
   variant = 'white',
   features = []
 }: ConsultationCTAProps) {
+  const router = useRouter()
+
   const styles = {
     background: {
       tan: 'bg-[#F8F6F3]',
@@ -80,6 +84,7 @@ export function ConsultationCTA({
               or by using the link below to book a preferred date and time!
             </p>
             <button 
+              onClick={() => router.push('/consultation')}
               className={`${styles.button.base} ${styles.button.variant[variant]}`}
             >
               BOOK A FREE CONSULTATION
