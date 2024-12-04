@@ -10,22 +10,22 @@ const promisePoints = [
   {
     icon: Shield,
     title: 'Protected Spaces',
-    description: 'We use protective barriers and coverings to keep your home clean and safe'
+    description: 'We use protective barriers and coverings to keep your home clean and safe.'
   },
   {
     icon: Brush,
     title: 'Daily Cleanup',
-    description: 'Our team thoroughly cleans the work area at the end of each day'
+    description: 'Our team thoroughly cleans the work area at the end of each day.'
   },
   {
     icon: HardHat,
     title: 'Professional Team',
-    description: 'Uniformed, background-checked installers who respect your home'
+    description: 'Uniformed, background-checked installers who respect your home.'
   },
   {
     icon: Sparkles,
     title: 'Final Detailing',
-    description: 'Deep cleaning and inspection before we consider the job complete'
+    description: 'Deep cleaning and inspection before we consider the job complete.'
   }
 ]
 

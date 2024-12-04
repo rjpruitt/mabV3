@@ -9,21 +9,24 @@ const reviews = [
   {
     name: 'Sarah M.',
     location: 'Kansas City',
-    image: 'https://placehold.co/200x200/8B7355/FFFFFF/png?text=S',
+    image: '/images/Alt2-Campaign/social-proof/SarahM.jpeg',
+    imagePosition: 'object-[50%_30%]',
     rating: 5,
     text: 'Working directly with the installation team made all the difference. No sales pressure, just honest advice and excellent work.'
   },
   {
     name: 'Michael R.',
     location: 'Overland Park',
-    image: 'https://placehold.co/200x200/2F4F4F/FFFFFF/png?text=M',
+    image: '/images/Alt2-Campaign/social-proof/MichaelR.jpeg',
+    imagePosition: 'object-[50%_35%]',
     rating: 5,
     text: 'They transformed our bathroom in just two days. The quality is outstanding and the team was professional throughout.'
   },
   {
     name: 'Jennifer L.',
     location: 'Lee\'s Summit',
-    image: 'https://placehold.co/200x200/016369/FFFFFF/png?text=J',
+    image: '/images/Alt2-Campaign/social-proof/JenniferL.jpeg',
+    imagePosition: 'object-[50%_40%]',
     rating: 5,
     text: 'Love our new walk-in shower! The design team helped us choose the perfect style and features for our space.'
   }
@@ -58,7 +61,8 @@ export function SocialProof(): React.JSX.Element {
                       src={review.image}
                       alt={review.name}
                       fill
-                      className="object-cover"
+                      className={`object-cover ${review.imagePosition}`}
+                      sizes="48px"
                     />
                   </div>
                   <div>
@@ -78,28 +82,6 @@ export function SocialProof(): React.JSX.Element {
             </ScrollReveal>
           ))}
         </div>
-
-        {/* Trust Stats */}
-        <ScrollReveal>
-          <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-            <div>
-              <div className="text-4xl font-bold text-primary mb-2">15+</div>
-              <div className="text-gray-600">Years of Experience</div>
-            </div>
-            <div>
-              <div className="text-4xl font-bold text-primary mb-2">5,000+</div>
-              <div className="text-gray-600">Projects Completed</div>
-            </div>
-            <div>
-              <div className="text-4xl font-bold text-primary mb-2">4.9</div>
-              <div className="text-gray-600">Average Rating</div>
-            </div>
-            <div>
-              <div className="text-4xl font-bold text-primary mb-2">98%</div>
-              <div className="text-gray-600">Satisfaction Rate</div>
-            </div>
-          </div>
-        </ScrollReveal>
       </div>
     </section>
   )

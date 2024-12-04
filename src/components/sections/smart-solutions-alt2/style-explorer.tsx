@@ -15,17 +15,17 @@ const styles = [
     tag: 'Most Popular',
     roi: 'Premium Features',
     valuePoints: [
-      'Premium glass doors add value',
-      'Modern fixtures buyers want',
-      'Built-in storage features',
-      'Contemporary design appeal'
+      'Premium glass doors add value.',
+      'Modern fixtures buyers want.',
+      'Built-in storage features.',
+      'Contemporary design appeal.'
     ],
     image: '/images/solutions/smart-solutions/showers/alt2/styles/modernblackrainfall.jpeg',
     features: [
-      'Frameless glass design',
-      'Rainfall shower head',
-      'Zero-threshold entry',
-      'Built-in storage'
+      'Frameless glass design.',
+      'Rainfall shower head.',
+      'Zero-threshold entry.',
+      'Built-in storage.'
     ]
   },
   {
@@ -34,17 +34,17 @@ const styles = [
     tag: 'Designer Choice',
     roi: 'High-Value Design',
     valuePoints: [
-      'Built-in storage niche',
-      'Premium modern fixtures',
-      'Clean geometric patterns',
-      'Quality material finishes'
+      'Built-in storage niche.',
+      'Premium modern fixtures.',
+      'Clean geometric patterns.',
+      'Quality material finishes.'
     ],
     image: '/images/solutions/smart-solutions/showers/alt2/styles/geometricwhite.jpeg',
     features: [
-      'Frameless glass design',
-      'Rainfall shower head',
-      'Zero-threshold entry',
-      'Built-in storage'
+      'Frameless glass design.',
+      'Rainfall shower head.',
+      'Zero-threshold entry.',
+      'Built-in storage.'
     ]
   },
   {
@@ -53,17 +53,17 @@ const styles = [
     tag: 'Universal Appeal',
     roi: 'Broad Market Value',
     valuePoints: [
-      'Premium shower system',
-      'Built-in storage space',
-      'Quality fixtures included',
-      'Durable material choices'
+      'Premium shower system.',
+      'Built-in storage space.',
+      'Quality fixtures included.',
+      'Durable material choices.'
     ],
     image: '/images/solutions/smart-solutions/showers/alt2/styles/transitionalrainfall.jpeg',
     features: [
-      'Frameless glass design',
-      'Rainfall shower head',
-      'Zero-threshold entry',
-      'Built-in storage'
+      'Frameless glass design.',
+      'Rainfall shower head.',
+      'Zero-threshold entry.',
+      'Built-in storage.'
     ]
   },
   {
@@ -72,17 +72,17 @@ const styles = [
     tag: 'Smart Investment',
     roi: 'Long-Term Value',
     valuePoints: [
-      'ADA compliant features',
-      'Zero-threshold entry',
-      'Built-in safety features',
-      'Easy maintenance design'
+      'ADA compliant features.',
+      'Zero-threshold entry.',
+      'Built-in safety features.',
+      'Easy maintenance design.'
     ],
     image: '/images/solutions/smart-solutions/showers/alt2/styles/seatgrabrainfall.jpeg',
     features: [
-      'Frameless glass design',
-      'Rainfall shower head',
-      'Zero-threshold entry',
-      'Built-in storage'
+      'Frameless glass design.',
+      'Rainfall shower head.',
+      'Zero-threshold entry.',
+      'Built-in storage.'
     ]
   },
   {
@@ -91,17 +91,17 @@ const styles = [
     tag: 'Always in Style',
     roi: 'Timeless Value',
     valuePoints: [
-      'Easy-clean surfaces',
-      'Built-in storage space',
-      'Quality white finish',
-      'Durable materials'
+      'Easy-clean surfaces.',
+      'Built-in storage space.',
+      'Quality white finish.',
+      'Durable materials.'
     ],
     image: '/images/solutions/smart-solutions/showers/alt2/styles/subway.jpeg',
     features: [
-      'Frameless glass design',
-      'Rainfall shower head',
-      'Zero-threshold entry',
-      'Built-in storage'
+      'Frameless glass design.',
+      'Rainfall shower head.',
+      'Zero-threshold entry.',
+      'Built-in storage.'
     ]
   },
   {
@@ -110,17 +110,17 @@ const styles = [
     tag: 'Premium Choice',
     roi: 'Luxury Market Value',
     valuePoints: [
-      'Premium material finish',
-      'Built-in storage design',
-      'Quality fixtures included',
-      'Easy-care surfaces'
+      'Premium material finish.',
+      'Built-in storage design.',
+      'Quality fixtures included.',
+      'Easy-care surfaces.'
     ],
     image: '/images/solutions/smart-solutions/showers/alt2/styles/carrarrasmall.jpeg',
     features: [
-      'Frameless glass design',
-      'Rainfall shower head',
-      'Zero-threshold entry',
-      'Built-in storage'
+      'Frameless glass design.',
+      'Rainfall shower head.',
+      'Zero-threshold entry.',
+      'Built-in storage.'
     ]
   }
 ]

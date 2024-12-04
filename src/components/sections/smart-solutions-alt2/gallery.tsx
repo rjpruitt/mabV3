@@ -11,19 +11,19 @@ const transformations = [
     title: 'Modern Elegance',
     before: '/images/solutions/smart-solutions/showers/alt2/before/before1.jpeg',
     after: '/images/solutions/smart-solutions/showers/alt2/after/after1.jpeg',
-    description: 'From dated tub to spa-like shower'
+    description: 'From dated tub to spa-like shower.'
   },
   {
     title: 'Accessible Comfort',
     before: 'https://placehold.co/1200x900/8B7355/FFFFFF/png?text=Old+Shower+Before',
     after: 'https://placehold.co/1200x900/016369/FFFFFF/png?text=Accessible+Shower+After',
-    description: 'Safe, stylish, and easily accessible'
+    description: 'Safe, stylish, and easily accessible.'
   },
   {
     title: 'Spa-Inspired Luxury',
     before: 'https://placehold.co/1200x900/8B7355/FFFFFF/png?text=Basic+Shower+Before',
     after: 'https://placehold.co/1200x900/016369/FFFFFF/png?text=Luxury+Shower+After',
-    description: 'Transform your daily routine into a spa experience'
+    description: 'Transform your daily routine into a spa experience.'
   }
 ]
 

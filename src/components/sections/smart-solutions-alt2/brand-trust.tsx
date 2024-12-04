@@ -14,8 +14,11 @@ export function BrandTrust() {
       <div className="container mx-auto px-4">
         <ScrollReveal>
           <div className="text-center mb-12">
+            <span className="text-accent font-medium mb-4 block">
+              Quality Brands You Trust*
+            </span>
             <h2 className="font-pt-serif text-4xl text-[#2F2F2F] mb-4">
-              Premium Brands You Trust
+              Premium Products from Leading Manufacturers
             </h2>
             <p className="text-gray-600 text-lg max-w-2xl mx-auto">
               We exclusively use products from industry-leading manufacturers, backed 

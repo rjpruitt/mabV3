@@ -8,22 +8,22 @@ const benefits = [
   {
     icon: Users,
     title: 'Your Dedicated Team',
-    description: 'Work directly with expert installers from consultation to completion - no salespeople'
+    description: 'Work directly with expert installers from consultation to completion - no salespeople.'
   },
   {
     icon: ShieldCheck,
     title: 'Transparent Process',
-    description: 'Clear pricing, honest timelines, and straightforward communication'
+    description: 'Clear pricing, honest timelines, and straightforward communication.'
   },
   {
     icon: Clock,
     title: 'Efficient Timeline',
-    description: 'Most projects completed in 1-3 days with minimal disruption'
+    description: 'Most projects completed in 1-3 days with minimal disruption.'
   },
   {
     icon: Sparkles,
     title: 'Quality Guaranteed',
-    description: 'Premium materials and expert installation, backed by our warranties'
+    description: 'Premium materials and expert installation, backed by our warranties.'
   }
 ]
 

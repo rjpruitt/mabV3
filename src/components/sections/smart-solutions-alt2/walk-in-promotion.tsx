@@ -10,22 +10,22 @@ const options = [
   {
     icon: Bath,
     title: "Tub-to-Shower Conversion",
-    description: "Transform your outdated tub into a modern walk-in shower",
+    description: "Transform your outdated tub into a modern walk-in shower.",
     benefits: [
-      "Maximize your space",
-      "One-day installation available",
-      "Modern, easy-clean design"
+      "Maximize your space.",
+      "One-day installation available.",
+      "Modern, easy-clean design."
     ],
     id: 'tub'
   },
   {
     icon: ShowerHead,
     title: "Shower Replacement",
-    description: "Upgrade to a premium walk-in shower system",
+    description: "Upgrade to a premium walk-in shower system.",
     benefits: [
-      "Premium fixtures included",
-      "Custom storage solutions",
-      "Low-maintenance materials"
+      "Premium fixtures included.",
+      "Custom storage solutions.",
+      "Low-maintenance materials."
     ],
     id: 'shower'
   }
@@ -127,14 +127,6 @@ export function WalkInPromotion() {
             </ScrollReveal>
           ))}
         </div>
-
-        <ScrollReveal>
-          <div className="mt-8 text-center">
-            <p className="text-gray-600">
-              Ask about our special pricing and flexible financing options
-            </p>
-          </div>
-        </ScrollReveal>
 
         {/* Modals */}
         <OfferModal

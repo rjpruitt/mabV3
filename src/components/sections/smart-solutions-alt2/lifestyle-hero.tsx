@@ -9,17 +9,17 @@ const emotionalTriggers = [
   {
     icon: Heart,
     text: "Fall in Love with Your Bathroom Again",
-    description: "Experience the joy of a beautifully updated space"
+    description: "Experience the joy of a beautifully updated space."
   },
   {
     icon: Clock,
     text: "Transform Your Daily Routine",
-    description: "Start and end each day in your personal sanctuary"
+    description: "Start and end each day in your personal sanctuary."
   },
   {
     icon: Shield,
     text: "Peace of Mind Installation",
-    description: "Expert team handling everything for you"
+    description: "Expert team handling everything for you."
   }
 ]
 
@@ -29,46 +29,57 @@ export function LifestyleHero() {
   const animationStarted = useRef(false)
 
   useEffect(() => {
-    const handleScroll = () => {
-      const heroSection = document.querySelector('.lifestyle-hero')
-      if (!heroSection) return
+    // Check if mobile/small screen
+    const isMobile = window.innerWidth < 768 // md breakpoint in Tailwind
 
-      const rect = heroSection.getBoundingClientRect()
-      const viewportHeight = window.innerHeight
-      const scrollingDown = window.scrollY > lastScrollY.current
+    if (isMobile) {
+      // Immediate animation for mobile
+      setMessageVisibility([true, false, false])
+      setTimeout(() => setMessageVisibility([true, true, false]), 500)
+      setTimeout(() => setMessageVisibility([true, true, true]), 1000)
+    } else {
+      // Existing scroll animation for desktop
+      const handleScroll = () => {
+        const heroSection = document.querySelector('.lifestyle-hero')
+        if (!heroSection) return
 
-      // Trigger when 20% scrolled for earlier engagement
-      const inView = rect.top <= viewportHeight && rect.bottom >= 0
-      const scrolledEnough = rect.top < viewportHeight * 0.2
+        const rect = heroSection.getBoundingClientRect()
+        const viewportHeight = window.innerHeight
+        const scrollingDown = window.scrollY > lastScrollY.current
 
-      if (inView && scrolledEnough && scrollingDown && !animationStarted.current) {
-        animationStarted.current = true
-        setMessageVisibility([true, false, false])
-        setTimeout(() => setMessageVisibility([true, true, false]), 500)
-        setTimeout(() => setMessageVisibility([true, true, true]), 1000)
+        // Trigger when 20% scrolled for earlier engagement
+        const inView = rect.top <= viewportHeight && rect.bottom >= 0
+        const scrolledEnough = rect.top < viewportHeight * 0.2
+
+        if (inView && scrolledEnough && scrollingDown && !animationStarted.current) {
+          animationStarted.current = true
+          setMessageVisibility([true, false, false])
+          setTimeout(() => setMessageVisibility([true, true, false]), 500)
+          setTimeout(() => setMessageVisibility([true, true, true]), 1000)
+        }
+        else if ((!inView || !scrolledEnough) && !scrollingDown) {
+          setMessageVisibility([false, false, false])
+          animationStarted.current = false
+        }
+
+        lastScrollY.current = window.scrollY
       }
-      else if ((!inView || !scrolledEnough) && !scrollingDown) {
-        setMessageVisibility([false, false, false])
-        animationStarted.current = false
+
+      // Existing scroll listener setup
+      let ticking = false
+      const scrollListener = () => {
+        if (!ticking) {
+          window.requestAnimationFrame(() => {
+            handleScroll()
+            ticking = false
+          })
+          ticking = true
+        }
       }
 
-      lastScrollY.current = window.scrollY
+      window.addEventListener('scroll', scrollListener, { passive: true })
+      return () => window.removeEventListener('scroll', scrollListener)
     }
-
-    // Throttled scroll listener
-    let ticking = false
-    const scrollListener = () => {
-      if (!ticking) {
-        window.requestAnimationFrame(() => {
-          handleScroll()
-          ticking = false
-        })
-        ticking = true
-      }
-    }
-
-    window.addEventListener('scroll', scrollListener, { passive: true })
-    return () => window.removeEventListener('scroll', scrollListener)
   }, [])
 
   return (
