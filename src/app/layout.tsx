@@ -51,8 +51,8 @@ export default function RootLayout({
       `}
     >
       <body className={montserrat.className}>
-        <Header />
         <ClientWrapper>
+          <Header />
           <main 
             id="main"
             tabIndex={-1}
