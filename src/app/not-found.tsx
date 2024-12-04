@@ -1,6 +1,12 @@
+import { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'Page Not Found - Mid America Bathworks',
+}
+
 export default function NotFound() {
   return (
-    <div className="min-h-[60vh] flex items-center justify-center">
+    <main className="min-h-[60vh] flex items-center justify-center">
       <div className="text-center">
         <h1 className="text-4xl font-semibold mb-4">Page Not Found</h1>
         <p className="text-gray-600 mb-8">
@@ -13,6 +19,6 @@ export default function NotFound() {
           Return Home
         </a>
       </div>
-    </div>
+    </main>
   )
 } 
