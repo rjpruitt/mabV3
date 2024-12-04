@@ -8,9 +8,10 @@ interface ScrollRevealProps {
   className?: string
   variant?: 'fadeIn' | 'fadeInUp' | 'slideIn' | 'scale'
   delay?: number
+  duration?: number
 }
 
-export function ScrollReveal({ children, className, variant = 'fadeIn', delay = 0 }: ScrollRevealProps) {
+export function ScrollReveal({ children, className, variant = 'fadeIn', delay = 0, duration = 0.9 }: ScrollRevealProps) {
   const ref = useRef(null)
   const isInView = useInView(ref, { once: true })
 
@@ -45,7 +46,7 @@ export function ScrollReveal({ children, className, variant = 'fadeIn', delay = 
       className={className}
       style={{
         ...getVariantStyles(),
-        transition: `all 0.9s cubic-bezier(0.17, 0.55, 0.55, 1) ${delay}s`
+        transition: `all ${duration}s cubic-bezier(0.17, 0.55, 0.55, 1) ${delay}s`
       }}
     >
       {children}
