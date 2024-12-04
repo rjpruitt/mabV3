@@ -2,15 +2,18 @@ import { SendGridConfig } from '@/lib/integrations/sendgrid/types'
 import { ResourceLead } from '@/types/resources'
 import sgMail from '@sendgrid/mail'
 
-// Initialize SendGrid with API key
-const apiKey = process.env.SENDGRID_API_KEY
-if (!apiKey) {
-  console.error('SendGrid API key is not configured')
+const initializeSendGrid = () => {
+  const apiKey = process.env.SENDGRID_API_KEY
+  if (!apiKey?.startsWith('SG.')) {
+    throw new Error('SendGrid API key is not configured correctly')
+  }
+  sgMail.setApiKey(apiKey)
+  return sgMail
 }
-sgMail.setApiKey(apiKey!)
 
 export async function sendResourceEmail(config: SendGridConfig) {
   try {
+    const client = initializeSendGrid()
     console.log('SendGrid Config:', {
       apiKey: process.env.SENDGRID_API_KEY?.substring(0, 10) + '...',
       fromEmail: process.env.SENDGRID_FROM_EMAIL,
@@ -31,7 +34,7 @@ export async function sendResourceEmail(config: SendGridConfig) {
     }
 
     console.log('Attempting to send resource email...')
-    const [response] = await sgMail.send(msg)
+    const [response] = await client.send(msg)
     console.log('SendGrid Response:', {
       statusCode: response.statusCode,
       headers: response.headers,
@@ -47,6 +50,7 @@ export async function sendResourceEmail(config: SendGridConfig) {
 
 export async function sendNotificationEmail(lead: ResourceLead) {
   try {
+    const client = initializeSendGrid()
     console.log('Sending notification email:', {
       toEmail: process.env.SALES_EMAIL,
       fromEmail: process.env.SENDGRID_FROM_EMAIL,
@@ -106,7 +110,7 @@ export async function sendNotificationEmail(lead: ResourceLead) {
     }
 
     console.log('Attempting to send notification email with config:', msg)
-    const [response] = await sgMail.send(msg)
+    const [response] = await client.send(msg)
     console.log('Notification Email Response:', {
       statusCode: response.statusCode,
       headers: response.headers,
