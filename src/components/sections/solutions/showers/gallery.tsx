@@ -39,13 +39,13 @@ const galleryItems = [
 
 export function ShowersGallery() {
   return (
-    <Section 
-      className="w-full py-20 bg-[#F8F6F3]"
-      title="See The Transformation"
-      titleClassName="font-pt-serif text-4xl text-center mb-4"
-      description="Browse our gallery of shower transformations and find inspiration for your project."
-      descriptionClassName="text-gray-600 text-center max-w-3xl mx-auto mb-16"
-    >
+    <Section className="w-full py-20 bg-[#F8F6F3]">
+      <h2 className="font-pt-serif text-4xl text-center mb-4">
+        See The Transformation
+      </h2>
+      <p className="text-gray-600 text-center max-w-3xl mx-auto mb-16">
+        Browse our gallery of shower transformations and find inspiration for your project.
+      </p>
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {galleryItems.map((item) => {
