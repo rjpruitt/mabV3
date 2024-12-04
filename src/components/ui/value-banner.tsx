@@ -6,7 +6,7 @@ import { TrendingUp } from 'lucide-react'
 
 export function ValueBanner() {
   return (
-    <div className="bg-primary text-white py-3">
+    <div className="bg-[#334B6E] text-white py-3">
       <ScrollReveal>
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-center gap-3 text-center">

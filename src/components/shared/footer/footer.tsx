@@ -2,127 +2,104 @@
 
 import React from 'react'
 import Link from 'next/link'
-import { Facebook, Instagram, Twitter, Phone, Mail } from 'lucide-react'
+import { Facebook, Instagram, X, Phone, Mail } from 'lucide-react'
 
-const serviceAreas = [
-  'Tulsa and surrounding areas',
-  'Oklahoma City and surrounding areas',
-  'Central Oklahoma communities'
-]
-
-const solutions = [
-  { name: 'Bathtubs', href: '/solutions/bathtubs' },
-  { name: 'Showers', href: '/solutions/showers' },
-  { name: 'Accessibility & Safety', href: '/solutions/accessibility' },
-  { name: 'Walls & Surrounds', href: '/solutions/walls' }
-]
-
-const company = [
-  { name: 'About Us', href: '/about' },
-  { name: 'Our Process', href: '/process' },
-  { name: 'Commercial', href: '/commercial' },
-  { name: 'Careers', href: '/careers' }
-]
-
-const resources = [
-  { name: 'Design Gallery', href: '/gallery' },
-  { name: 'Blog', href: '/blog' },
-  { name: 'FAQs', href: '/faqs' },
-  { name: 'Financing', href: '/financing' }
-]
+const serviceAreas = {
+  tulsa: {
+    main: 'Tulsa Metro Area',
+    description: 'Serving Tulsa and surrounding communities within a 50-mile radius',
+    cities: [
+      'Tulsa', 'Broken Arrow', 'Owasso', 'Bixby', 'Jenks', 'Sand Springs', 
+      'Sapulpa', 'Glenpool', 'Claremore', 'Catoosa', 'Collinsville'
+    ]
+  },
+  okc: {
+    main: 'Oklahoma City Metro Area',
+    description: 'Serving OKC and surrounding communities within a 50-mile radius',
+    cities: [
+      'Oklahoma City', 'Edmond', 'Norman', 'Moore', 'Midwest City', 'Del City',
+      'Yukon', 'Mustang', 'Bethany', 'El Reno', 'Choctaw'
+    ]
+  },
+  central: {
+    main: 'Central Oklahoma',
+    description: 'Serving Seminole and surrounding communities within a 50-mile radius',
+    cities: [
+      'Seminole', 'Shawnee', 'Ada', 'Holdenville', 'Wewoka', 
+      'Prague', 'Okemah', 'Wetumka', 'Konawa', 'Meeker',
+      'Tecumseh', 'Stroud', 'Chandler', 'Henryetta', 'McAlester'
+    ]
+  }
+}
 
 export function Footer() {
   return (
     <footer className="bg-[#F8F6F3] pt-20 pb-8">
       <div className="container mx-auto px-4">
-        {/* Main Footer Content */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
-          {/* Company Info */}
-          <div>
-            <Link href="/">
-              <div className="font-playfair-sc text-2xl text-[#2F2F2F] mb-6">
-                Mid America<br />Bathworks
+        {/* Service Areas - Primary Focus */}
+        <div className="mb-16">
+          <h2 className="text-center font-pt-serif text-3xl text-[#2F2F2F] mb-8">
+            Service Areas
+          </h2>
+          <div className="grid md:grid-cols-3 gap-8">
+            {Object.values(serviceAreas).map((region) => (
+              <div key={region.main} className="text-center">
+                <h3 className="font-semibold text-xl text-[#2F2F2F] mb-2">
+                  {region.main}
+                </h3>
+                <p className="text-gray-600 mb-4">
+                  {region.description}
+                </p>
+                <div className="flex flex-wrap justify-center gap-2">
+                  {region.cities.map((city) => (
+                    <span key={city} className="bg-white px-3 py-1 rounded-sm text-sm text-gray-600">
+                      {city}
+                    </span>
+                  ))}
+                </div>
               </div>
-            </Link>
-            <div className="space-y-4 text-gray-600">
-              <div className="flex items-center gap-2">
-                <Phone size={16} />
-                <a href="tel:15555555555" className="hover:text-primary">1 (555) 555-5555</a>
-              </div>
-              <div className="flex items-center gap-2">
-                <Mail size={16} />
-                <a href="mailto:info@midamericabathworks.com" className="hover:text-primary">
-                  info@midamericabathworks.com
-                </a>
-              </div>
-              <div className="flex gap-4 pt-4">
-                <a href="#" className="text-gray-600 hover:text-primary">
-                  <Facebook size={20} />
-                </a>
-                <a href="#" className="text-gray-600 hover:text-primary">
-                  <Instagram size={20} />
-                </a>
-                <a href="#" className="text-gray-600 hover:text-primary">
-                  <Twitter size={20} />
-                </a>
-              </div>
-            </div>
-          </div>
-
-          {/* Solutions */}
-          <div>
-            <h3 className="font-semibold text-lg mb-4 text-[#2F2F2F]">Solutions</h3>
-            <ul className="space-y-3">
-              {solutions.map((item) => (
-                <li key={item.name}>
-                  <Link href={item.href} className="text-gray-600 hover:text-primary">
-                    {item.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Company */}
-          <div>
-            <h3 className="font-semibold text-lg mb-4 text-[#2F2F2F]">Company</h3>
-            <ul className="space-y-3">
-              {company.map((item) => (
-                <li key={item.name}>
-                  <Link href={item.href} className="text-gray-600 hover:text-primary">
-                    {item.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Resources & Service Areas */}
-          <div>
-            <h3 className="font-semibold text-lg mb-4 text-[#2F2F2F]">Resources</h3>
-            <ul className="space-y-3 mb-8">
-              {resources.map((item) => (
-                <li key={item.name}>
-                  <Link href={item.href} className="text-gray-600 hover:text-primary">
-                    {item.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-            
-            <h3 className="font-semibold text-lg mb-4 text-[#2F2F2F]">Service Areas</h3>
-            <ul className="space-y-2">
-              {serviceAreas.map((area) => (
-                <li key={area} className="text-gray-600">
-                  {area}
-                </li>
-              ))}
-            </ul>
+            ))}
           </div>
         </div>
 
-        {/* Bottom Bar */}
+        {/* Company Info - Secondary */}
         <div className="border-t border-gray-200 pt-8">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-8">
+            <div className="text-center md:text-left">
+              <Link href="/">
+                <div className="font-playfair-sc text-2xl text-[#2F2F2F] mb-4">
+                  Mid America<br />Bathworks
+                </div>
+              </Link>
+              <div className="space-y-2 text-gray-600">
+                <div className="flex items-center gap-2 justify-center md:justify-start">
+                  <Phone size={16} />
+                  <a href="tel:15555555555" className="hover:text-primary">1 (555) 555-5555</a>
+                </div>
+                <div className="flex items-center gap-2 justify-center md:justify-start">
+                  <Mail size={16} />
+                  <a href="mailto:info@midamericabathworks.com" className="hover:text-primary">
+                    info@midamericabathworks.com
+                  </a>
+                </div>
+              </div>
+            </div>
+            <div className="flex gap-4">
+              <a href="#" className="text-gray-600 hover:text-primary">
+                <Facebook size={20} />
+              </a>
+              <a href="#" className="text-gray-600 hover:text-primary">
+                <Instagram size={20} />
+              </a>
+              <a href="#" className="text-gray-600 hover:text-primary">
+                <X size={20} />
+              </a>
+            </div>
+          </div>
+        </div>
+
+        {/* Legal Footer */}
+        <div className="border-t border-gray-200 mt-8 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-gray-600">
             <div>
               © {new Date().getFullYear()} Mid America Bathworks. All rights reserved.
