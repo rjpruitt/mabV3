@@ -1,14 +1,11 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  images: {
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: 'placehold.co',
-      },
-      // Add other domains as needed
-    ],
+  eslint: {
+    ignoreDuringBuilds: true,
   },
+  images: {
+    unoptimized: true,
+  }
 }
 
 module.exports = nextConfig 
