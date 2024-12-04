@@ -3,9 +3,7 @@ import { Montserrat, PT_Serif, Dancing_Script, Playfair_Display_SC } from 'next/
 import "./globals.css";
 import { Header } from '@/components/shared/header'
 import { Footer } from '@/components/shared/footer/footer'
-import { AccessibilityProvider } from '@/providers/accessibility-provider'
-import { ErrorBoundary } from '@/components/ui/error-boundary'
-import { SkipLink } from '@/components/ui/skip-link'
+import { ClientWrapper } from '@/components/layouts/client-wrapper'
 
 const montserrat = Montserrat({ 
   subsets: ['latin'],
@@ -54,19 +52,16 @@ export default function RootLayout({
     >
       <body className={montserrat.className}>
         <Header />
-        <AccessibilityProvider>
-          <ErrorBoundary>
-            <SkipLink />
-            <main 
-              id="main"
-              tabIndex={-1}
-              className="focus:outline-none"
-            >
-              {children}
-            </main>
-            <Footer />
-          </ErrorBoundary>
-        </AccessibilityProvider>
+        <ClientWrapper>
+          <main 
+            id="main"
+            tabIndex={-1}
+            className="focus:outline-none"
+          >
+            {children}
+          </main>
+          <Footer />
+        </ClientWrapper>
       </body>
     </html>
   )
