@@ -1,8 +1,8 @@
-type BudgetTier = 'economy' | 'premium' | 'luxury'
+type BudgetTier = 'smart' | 'premium' | 'luxury'
 
 export function getBudgetBadgeStyles(budget: BudgetTier) {
   switch (budget) {
-    case 'economy':
+    case 'smart':
       return {
         background: 'bg-green-100',
         text: 'text-green-800',
