@@ -1,11 +1,6 @@
 'use client'
 
-import { Metadata } from 'next'
 import Link from 'next/link'
-
-export const metadata: Metadata = {
-  title: 'Page Not Found - Mid America Bathworks',
-}
 
 export default function NotFound() {
   return (
