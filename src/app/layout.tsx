@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Montserrat, PT_Serif, Dancing_Script, Playfair_Display_SC } from 'next/font/google';
 import "./globals.css";
-import { Header } from '@/components/shared/header'
+import { Header } from '@/components/shared/header/header'
 import { Footer } from '@/components/shared/footer/footer'
 import { ClientWrapper } from '@/components/layouts/client-wrapper'
 
