@@ -1,5 +1,5 @@
 import { Montserrat, PT_Serif, Dancing_Script, Playfair_Display_SC } from 'next/font/google'
-import { Header } from '@/components/shared/header'
+import { Header } from '@/components/shared/header/header'
 import { Footer } from '@/components/shared/footer/footer'
 import { AccessibilityProvider } from '@/providers/accessibility-provider'
 import { ErrorBoundary } from '@/components/ui/error-boundary'
