@@ -4,7 +4,7 @@ import React, { useState } from 'react'
 import { ScrollReveal } from '@/components/ui/scroll-reveal'
 import { ArrowRight, ShowerHead, Bath } from 'lucide-react'
 import { OfferModal } from '@/components/ui/offer-modal'
-import { DesignConsultation } from '@/components/ui/design-consultation'
+import { DesignConsultation, ConsultationResponse } from '@/components/ui/design-consultation'
 
 const options = [
   {

@@ -13,6 +13,8 @@ interface GalleryItemProps {
   onKeyDown: (e: React.KeyboardEvent<HTMLDivElement>, itemId: number) => void
 }
 
+type BudgetTier = 'premium' | 'luxury' | 'smart'
+
 export function GalleryItem({ item, onKeyDown }: GalleryItemProps) {
   const sliderRef = useRef<HTMLDivElement>(null)
   const { position, setPosition } = useComparisonSlider({
