@@ -1,9 +1,5 @@
 import Link from 'next/link'
 
-export const metadata = {
-  title: 'Page Not Found - Mid America Bathworks',
-}
-
 export default function NotFound() {
   return (
     <main className="min-h-[60vh] flex items-center justify-center">
