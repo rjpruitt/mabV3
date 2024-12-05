@@ -52,17 +52,17 @@ export default function RootLayout({
       `}
     >
       <body className={montserrat.className}>
-        <ClientWrapper>
-          <Header />
-          <main 
-            id="main"
-            tabIndex={-1}
-            className="focus:outline-none"
-          >
+        <Header />
+        <main 
+          id="main"
+          tabIndex={-1}
+          className="focus:outline-none"
+        >
+          <ClientWrapper>
             {children}
-          </main>
-          <Footer />
-        </ClientWrapper>
+          </ClientWrapper>
+        </main>
+        <Footer />
       </body>
     </html>
   )
