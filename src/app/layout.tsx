@@ -53,15 +53,19 @@ export default function RootLayout({
     >
       <body className={montserrat.className}>
         <Header />
-        <main 
-          id="main"
-          tabIndex={-1}
-          className="focus:outline-none"
-        >
-          <ClientWrapper>
-            {children}
-          </ClientWrapper>
-        </main>
+        {(children as any).type?.name === 'NotFound' ? (
+          children
+        ) : (
+          <main 
+            id="main"
+            tabIndex={-1}
+            className="focus:outline-none"
+          >
+            <ClientWrapper>
+              {children}
+            </ClientWrapper>
+          </main>
+        )}
         <Footer />
       </body>
     </html>
