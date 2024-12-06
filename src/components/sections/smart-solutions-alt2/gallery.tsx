@@ -9,8 +9,8 @@ import { ChevronLeft, ChevronRight } from 'lucide-react'
 const transformations = [
   {
     title: 'Modern Elegance',
-    before: '/images/Alt2-Campaign/before-after/before1.JPEG',
-    after: '/images/Alt2-Campaign/before-after/after1.JPEG',
+    before: '/images/Alt2-Campaign/before-after/before1.JPEG?v=1',
+    after: '/images/Alt2-Campaign/before-after/after1.JPEG?v=1',
     description: 'From dated tub to spa-like shower.'
   },
   {
