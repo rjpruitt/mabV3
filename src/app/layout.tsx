@@ -4,6 +4,7 @@ import "./globals.css";
 import { Header } from '@/components/shared/header/header'
 import { Footer } from '@/components/shared/footer/footer'
 import { ClientWrapper } from '@/components/layouts/client-wrapper'
+import { AuthProvider } from '@/components/providers/auth-provider'
 
 const montserrat = Montserrat({ 
   subsets: ['latin'],
@@ -53,19 +54,21 @@ export default function RootLayout({
     >
       <body className={montserrat.className}>
         <Header />
-        {(children as any).type?.name === 'NotFound' ? (
-          children
-        ) : (
-          <main 
-            id="main"
-            tabIndex={-1}
-            className="focus:outline-none"
-          >
-            <ClientWrapper>
-              {children}
-            </ClientWrapper>
-          </main>
-        )}
+        <AuthProvider>
+          {(children as any).type?.name === 'NotFound' ? (
+            children
+          ) : (
+            <main 
+              id="main"
+              tabIndex={-1}
+              className="focus:outline-none"
+            >
+              <ClientWrapper>
+                {children}
+              </ClientWrapper>
+            </main>
+          )}
+        </AuthProvider>
         <Footer />
       </body>
     </html>
