@@ -1,0 +1,97 @@
+Current Status:
+1. Working on build error in Next.js app
+2. Main error: Metadata export conflict with 'use client' directive
+3. Error trace shows: src/app/layout.tsx -> src/pages/404.tsx
+
+Recent Changes Made:
+1. Created ClientWrapper for client components
+2. Fixed import paths for Header and Footer
+3. Moved Header inside ClientWrapper in root layout
+4. Created PagesLayout and moved to pages directory (wrong approach)
+5. Disabled Twilio integration temporarily
+6. Made SendGrid initialization lazy
+
+Current Error:
+"You are attempting to export 'metadata' from a component marked with 'use client'"
+
+Key Files:
+- src/app/layout.tsx (has metadata export)
+- src/pages/404.tsx (using PagesLayout)
+- src/components/layouts/pages-layout.tsx
+- src/components/shared/header/header.tsx (client component)
+- src/components/layouts/client-wrapper.tsx (wraps client components)
+- src/app/not-found.tsx (needs to be created to replace pages/404.tsx)
+
+Next Steps:
+1. Remove pages directory approach entirely
+2. Move back to app router with app/not-found.tsx
+3. Fix metadata/client issue in app router directly
+
+Important Notes:
+1. Should use app router exclusively
+2. Header is a client component with scroll behavior
+3. All client components should be wrapped in ClientWrapper
+4. Need to maintain metadata in app/layout.tsx
+5. Mixing routers was a wrong turn in problem-solving
+6. All client components are already properly wrapped except for 404 handling
+7. Integration files (sendgrid, twilio, sheets) have been fixed and are not part of current issue
+
+File Relationships:
+1. App Router Files:
+   - src/app/layout.tsx (root layout with metadata)
+   - src/app/not-found.tsx (to be created)
+   - src/app/process/page.tsx (example of working app route)
+
+2. Client Components:
+   - src/components/shared/header/header.tsx
+   - src/components/layouts/client-wrapper.tsx
+
+3. Integration Files (Already Fixed):
+   - src/lib/integrations/sendgrid/index.ts
+   - src/lib/integrations/twilio/index.ts
+   - src/lib/integrations/sheets/index.ts
+   - src/app/api/submit-resource-lead/route.ts
+
+4. To Be Removed:
+   - src/pages/404.tsx
+   - src/components/layouts/pages-layout.tsx
+
+Error Pattern Understanding:
+1. Error only appears during build, not in development
+2. Error trace consistently shows path: layout.tsx -> 404.tsx
+3. Previous fixes focused on symptoms (wrapping components) rather than root cause (mixing routers)
+4. Error persists despite proper client component wrapping, suggesting structural issue
+5. Similar working pages (like process/page.tsx) don't trigger this error
+
+Solution Strategy:
+1. First Step:
+   - Remove pages directory files
+   - Create app/not-found.tsx
+   - Verify build error changes
+
+2. If Error Persists:
+   - Check for remaining references to pages router
+   - Review client component boundaries
+   - Compare with working routes (process/page.tsx)
+
+3. Success Criteria:
+   - Build completes without metadata error
+   - 404 handling works correctly
+   - All client components remain wrapped
+   - No regression in existing routes
+
+Relevant Files for New Session:
+1. Primary Focus:
+   - src/pages/404.tsx (to be removed)
+   - src/app/layout.tsx (fix metadata issue)
+   - src/components/layouts/pages-layout.tsx (to be removed)
+
+2. Secondary Files:
+   - src/components/shared/header/header.tsx (client component)
+   - src/components/shared/footer/footer.tsx (verify imports)
+
+3. Already Fixed (Reference Only):
+   - src/lib/integrations/twilio/index.ts
+   - src/lib/integrations/sendgrid/index.ts
+   - src/lib/integrations/sheets/index.ts
+   - src/app/api/submit-resource-lead/route.ts

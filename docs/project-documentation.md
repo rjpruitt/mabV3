@@ -1,78 +1,158 @@
 # MAB Collections System Documentation
 
-## Quick Resume Notes
+## 🚨 CURRENT STATE SNAPSHOT - March 19, 2024 4:00 PM
 
-### Current Priority
-Implementing collection creation after fixing auth flow. Next steps in order:
-1. Add collection creation back to test UI (removed during auth implementation)
-2. Test with authenticated user
-3. Implement proper RLS
+### ACTIVE ISSUE: Auth Token Security
+PROBLEM:
+- Auth tokens exposed in URL after Google OAuth
+- URL shows: @http://0.0.0.0:3000/#access_token=[token-exposed]
+- Security risk: Tokens visible in browser history
 
-### Key Files to Focus On
-1. src/app/test/collections/page.tsx
-   - Just removed collection creation
-   - Need to add back with auth context
+REPRODUCTION STEPS:
+1. Start dev server
+2. Visit /login
+3. Click "Sign in with Google"
+4. Complete Google auth
+5. Observe token in URL after redirect
 
-2. src/lib/services/collection-service.ts
-   - Currently using permissive RLS
-   - Need to update for auth
+ATTEMPTED SOLUTIONS:
+1. Auth Callback Route (src/app/auth/callback/route.ts):
+   ```typescript
+   export async function GET(request: Request) {
+     const requestUrl = new URL(request.url)
+     const code = requestUrl.searchParams.get('code')
+     const next = requestUrl.searchParams.get('next') || '/'
+   
+     if (code) {
+       const supabase = createRouteHandlerClient({ cookies })
+       await supabase.auth.exchangeCodeForSession(code)
+     }
+   
+     return NextResponse.redirect(new URL(next, requestUrl.origin), {
+       status: 302
+     })
+   }
+   ```
 
-### Recent Debugging
-1. Fixed header overlap with pt-24
-2. Resolved HTML nesting issues in layout
-3. Google OAuth working after proper setup
+2. Login Page Config (src/app/login/page.tsx):
+   ```typescript
+   <Auth
+     supabaseClient={supabase}
+     providers={['google']}
+     view="sign_in"
+     showLinks={false}
+     redirectTo={`${window.location.origin}/auth/callback?next=/`}
+   />
+   ```
 
-### Implementation Patterns
-Currently using:
-```typescript
-// Pattern for protected components
-if (authLoading) return <Loading />
-if (!session) return <SignIn />
+CURRENT STATE:
+✅ Working:
+- Google OAuth flow completes
+- User gets logged in
+- Session persists
+- Login UI displays correctly (pt-[300px] spacing)
 
-// Pattern for service calls
-const data = await collectionService.listCollections(
-  session?.user?.id || 'test-user',
-  'customer'
-)
+❌ Not Working:
+- Token still exposed in URL
+- Hash fragment (#) remains
+- Clean redirect chain
+
+ENVIRONMENT:
+```bash
+# Required in .env.local:
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
+NEXT_PUBLIC_SUPABASE_URL=https://nucqtzkrooiuuaisraks.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=[key]
 ```
 
-### Database State
-- Tables created but empty
-- Test data needed for development
-- Current RLS allows all operations
+RESEARCH NEEDED:
+1. Supabase Auth UI configuration options
+2. Token handling best practices
+3. Alternative OAuth flow patterns
 
-### Auth State
-- Google OAuth configured and tested
-- Redirect working to /test/collections
-- Session management implemented
-- Need error boundaries
+NEXT STEPS:
+1. Research Supabase docs for auth configuration
+2. Test custom callback implementation
+3. Consider client-side token cleanup
 
-### Last Working Test
-1. Sign in flow:
-   - Click sign in
-   - Google OAuth redirect
-   - Return to /test/collections
-   - Session loaded
+FILES TO CHECK:
+1. src/app/auth/callback/route.ts - Main callback handler
+2. src/app/login/page.tsx - Login UI configuration
+3. src/providers/auth-provider.tsx - Session management
 
-2. Collection operations:
-   - List working but empty
-   - Create removed temporarily
-   - Need to implement with auth
+TEST ACCOUNT:
+- Email: rjpruitt@gmail.com
+- Provider: Google
+- Status: Working but needs URL cleanup
 
-### Required Setup for New Session
-1. Environment:
-   - .env.local with Supabase keys
-   - Google OAuth credentials
-   - Local dev server (npm run dev)
+DEBUGGING CONTEXT:
+- Token appears after Google OAuth redirect
+- Happens before our callback route executes
+- Likely default Supabase Auth UI behavior
+- No console errors present
 
-2. Test Account:
-   - Google account: [your-test-email]
-   - Added to OAuth test users
+RELATED DOCUMENTATION:
+- Supabase Auth Docs: https://supabase.com/docs/guides/auth
+- Next.js Auth Helpers: https://supabase.com/docs/guides/auth/auth-helpers/nextjs
 
-3. Database:
-   - Tables created
-   - RLS enabled but permissive
-   - No test data yet
+## Quick Resume Notes
+
+### Current Priority & State
+CRITICAL RESUME CONTEXT - Auth Token Issue (March 19, 2024)
+
+Current Problem:
+- After Google OAuth login, tokens are exposed in URL
+- URL pattern showing: @http://0.0.0.0:3000/#access_token=[full-token-exposed]
+- This is a security issue that needs immediate fixing
+
+Last Actions Taken:
+1. Implemented auth callback route (src/app/auth/callback/route.ts)
+2. Added status 302 to redirect
+3. Modified login page redirect URL
+But: Still seeing token in URL
+
+Files Modified:
+1. src/app/auth/callback/route.ts:
+   - Added next param handling
+   - Added 302 status to redirect
+   - Exchanging code for session
+
+2. src/app/login/page.tsx:
+   - Added window.location.origin for redirect
+   - Set view="sign_in"
+   - Added pt-[300px] for header clearance
+
+3. .env.local:
+   - Verified NEXT_PUBLIC_SITE_URL=http://localhost:3000
+   - Supabase credentials are correct and working
+
+What's Working:
+- Google OAuth completes successfully
+- User gets logged in
+- Session persists
+- Login UI displays correctly
+
+What's Not Working:
+- Clean URL after auth
+- Token security (exposed in URL)
+- Proper redirect chain
+
+Next Session Tasks:
+1. Research Supabase auth flow options
+2. Test different redirect strategies
+3. Consider implementing custom callback handling
+
+Test Account Ready:
+- Email: rjpruitt@gmail.com
+- Auth: Working with Google
+- Can reproduce issue consistently
+
+To Resume Work:
+1. Start dev server
+2. Visit /login
+3. Try Google sign-in
+4. Watch URL for token exposure
+5. Check browser console for errors
 
 ## Current Session Context (Last Updated: [Current Date])
 
@@ -582,7 +662,7 @@ const [error, setError] = useState<string>()
 ```
 /test/
 ├── collections/     # Collection management testing
-├─�� products/        # Product selection (planned)
+├── products/        # Product selection (planned)
 └── sharing/         # Share functionality (planned)
 ```
 

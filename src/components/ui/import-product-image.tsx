@@ -6,9 +6,15 @@ interface ImportProductImageProps {
   thumbnails?: string[]
   alt: string
   className?: string
+  onError?: () => void
 }
 
-export function ImportProductImage({ thumbnails, alt, className }: ImportProductImageProps) {
+export function ImportProductImage({ 
+  thumbnails, 
+  alt, 
+  className, 
+  onError 
+}: ImportProductImageProps): JSX.Element {
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const [error, setError] = useState(false)
 
@@ -17,10 +23,11 @@ export function ImportProductImage({ thumbnails, alt, className }: ImportProduct
       setCurrentImageIndex(currentImageIndex + 1)
     } else {
       setError(true)
+      onError?.()
     }
   }
 
-  const imageUrl = error ? PLACEHOLDER_IMAGE : thumbnails?.[currentImageIndex]
+  const imageUrl = error ? PLACEHOLDER_IMAGE : (thumbnails?.[currentImageIndex] ?? PLACEHOLDER_IMAGE)
 
   return (
     <div className={`relative aspect-square bg-gray-50 ${className}`}>
@@ -32,4 +39,4 @@ export function ImportProductImage({ thumbnails, alt, className }: ImportProduct
       />
     </div>
   )
-} 
+}

@@ -4,7 +4,8 @@ import "./globals.css";
 import { Header } from '@/components/shared/header/header'
 import { Footer } from '@/components/shared/footer/footer'
 import { ClientWrapper } from '@/components/layouts/client-wrapper'
-import { AuthProvider } from '@/components/providers/auth-provider'
+import { AuthProvider } from '@/providers/auth-provider'
+import { AuthHandler } from '@/components/auth/auth-handler'
 
 const montserrat = Montserrat({ 
   subsets: ['latin'],
@@ -53,6 +54,7 @@ export default function RootLayout({
       `}
     >
       <body className={montserrat.className}>
+        <AuthHandler />
         <Header />
         <AuthProvider>
           {(children as any).type?.name === 'NotFound' ? (
