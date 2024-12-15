@@ -62,18 +62,11 @@ export interface Product {
   url?: string
   thumbnails?: string[]
   source: ProductSource
-  externalId: string
-  sourceUrl: string
-  description: string
-  category: BathroomCategory
-  specifications: ProductSpecification[]
-  images: ProductImage[]
-  price: ProductPrice | number | undefined
-  inventory: ProductInventory
-  status: ProductStatus
-  isActive: boolean
-  lastUpdated: Date
-  metadata?: Record<string, any>
+  price?: number | string
+  price_reduced?: number
+  rating?: number
+  total_reviews?: number
+  inventory_quantity?: number
 }
 
 export interface ProductImport {

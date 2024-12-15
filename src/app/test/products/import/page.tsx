@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { unwrangleService, productsService } from '@/lib/services/service-provider'
 import { Product } from '@/types/products'
 import { PLACEHOLDER_IMAGE } from './constants'
@@ -27,6 +27,69 @@ export default function TestProductImportPage() {
   const [loadingDetails, setLoadingDetails] = useState(false)
   const [selectedForImport, setSelectedForImport] = useState<any>(null)
   const [importing, setImporting] = useState(false)
+
+  const handlePageChange = useCallback((newPage: number) => {
+    setPage(newPage)
+    handleSearch(currentPlatform)
+  }, [currentPlatform, handleSearch])
+
+  const handleViewDetails = useCallback(async (product: Product) => {
+    if (!product.url) {
+      console.error('Product URL is missing')
+      setError('Cannot view details: Product URL is missing')
+      return
+    }
+
+    setLoadingDetails(true)
+    try {
+      console.log('Getting details for product:', product)
+
+      const details = product.source === 'lowes'
+        ? await unwrangleService.getLowesProductDetails({
+            url: product.url,
+            zipcode: '99504',
+            store_no: '2955',
+            zip_state: 'AK'
+          })
+        : await unwrangleService.getHomeDepotProductDetails({
+            url: product.url
+          })
+
+      console.log('Got product details:', details)
+
+      // Create a merged product with both search and detail data
+      const mergedProduct = {
+        ...product,
+        details,  // Keep the original details
+        // Add detail fields to top level for modal
+        description: details.description,
+        specifications: details.specifications,
+        highlights: details.highlights,
+        categories: details.categories,
+        dimensions: details.measurements,
+        features: details.highlights,  // Using highlights as features
+        upc: details.barcode,
+        retail_id: details.sku_id,
+        // Preserve search data
+        name: product.name || details.name,
+        brand: product.brand || details.brand,
+        model_no: product.model_no || details.model_no,
+        price: product.price || details.price,
+        rating: product.rating || details.rating,
+        total_reviews: product.total_reviews || details.total_reviews,
+        inventory_quantity: product.inventory_quantity || details.inventory_quantity
+      }
+
+      console.log('Setting merged product:', mergedProduct)
+
+      setSelectedProduct(mergedProduct)
+    } catch (error) {
+      console.error('Error fetching product details:', error)
+      setError(error instanceof Error ? error.message : 'Failed to load product details')
+    } finally {
+      setLoadingDetails(false)
+    }
+  }, [])
 
   useEffect(() => {
     setIsClient(true)
@@ -73,11 +136,6 @@ export default function TestProductImportPage() {
     }
   }
 
-  function handlePageChange(newPage: number) {
-    setPage(newPage)
-    handleSearch('homedepot')
-  }
-
   function renderLoadingState() {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -86,37 +144,6 @@ export default function TestProductImportPage() {
         ))}
       </div>
     )
-  }
-
-  async function handleViewDetails(product: any) {
-    try {
-      setLoadingDetails(true)
-      const details = await unwrangleService.getProductDetails({
-        url: product.url
-      })
-      
-      // Create merged product with search data preserved
-      const mergedProduct = {
-        ...details,                    // Product details from API
-        name: product.name,            // Preserve product name
-        brand: product.brand,          // Preserve brand
-        model_no: product.model_no,    // Preserve model
-        price: product.price,          // Preserve price
-        price_reduced: product.price_reduced,
-        rating: product.rating,        // Preserve rating
-        total_reviews: product.total_reviews,  // Preserve reviews
-        inventory_quantity: product.inventory_quantity,
-        favorite_count: product.favorite_count
-      }
-      
-      setSelectedProduct(mergedProduct)
-      console.log('Merged product data:', mergedProduct)
-    } catch (err) {
-      console.error('Failed to get product details:', err)
-      setError(err instanceof Error ? err.message : 'Failed to get product details')
-    } finally {
-      setLoadingDetails(false)
-    }
   }
 
   async function handleImport(data: ImportFormData) {
@@ -198,6 +225,14 @@ export default function TestProductImportPage() {
             {loading && <LoadingSpinner size="sm" className="mr-2" />}
             Search Home Depot
           </button>
+          <button
+            onClick={() => handleSearch('lowes')}
+            disabled={loading}
+            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50 flex items-center"
+          >
+            {loading && <LoadingSpinner size="sm" className="mr-2" />}
+            Search Lowes
+          </button>
         </div>
       </div>
 
@@ -213,7 +248,7 @@ export default function TestProductImportPage() {
         <div className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-fr">
             {results.results?.map((product: any) => (
-              <div key={product.id} className="border rounded-lg p-4 bg-white shadow-sm text-gray-900">
+              <div key={`${currentPlatform}-${product.id}`} className="border rounded-lg p-4 bg-white shadow-sm text-gray-900">
                 <div className="flex justify-end mb-2">
                   <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
                     {currentPlatform === 'homedepot' ? 'Home Depot' : 'Lowes'}
@@ -272,9 +307,10 @@ export default function TestProductImportPage() {
                   <button
                     onClick={() => handleViewDetails(product)}
                     disabled={loadingDetails}
-                    className="px-3 py-1 text-sm bg-blue-50 text-blue-600 rounded-full hover:bg-blue-100"
+                    className="px-3 py-1 text-sm bg-blue-50 text-blue-600 rounded-full hover:bg-blue-100 disabled:opacity-50 flex items-center gap-2"
                   >
-                    {loadingDetails ? 'Loading...' : 'View Details'}
+                    {loadingDetails && <LoadingSpinner size="sm" />}
+                    {loadingDetails ? 'Loading Details...' : 'View Details'}
                   </button>
                 </div>
               </div>
@@ -381,7 +417,7 @@ export default function TestProductImportPage() {
               <h3 className="font-medium text-gray-800 mb-2">Categories</h3>
               <div className="flex flex-wrap gap-2">
                 {selectedProduct.categories?.map((cat: any) => (
-                  <span key={cat.url} className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-sm">
+                  <span key={`category-${selectedProduct.id}-${cat.name}`} className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-sm">
                     {cat.name}
                   </span>
                 ))}
@@ -408,8 +444,10 @@ export default function TestProductImportPage() {
               <div className="mb-6">
                 <h3 className="font-medium text-gray-800 mb-2">Features</h3>
                 <ul className="list-disc pl-5 space-y-1">
-                  {selectedProduct.features.map((feature: string, index: number) => (
-                    <li key={index} className="text-sm text-gray-600">{feature}</li>
+                  {selectedProduct.features?.map((feature: string, index: number) => (
+                    <li key={`feature-${selectedProduct.id}-${index}`} className="text-sm text-gray-600">
+                      {feature}
+                    </li>
                   ))}
                 </ul>
               </div>
@@ -420,8 +458,10 @@ export default function TestProductImportPage() {
               <div className="mb-6">
                 <h3 className="font-medium text-gray-800 mb-2">Highlights</h3>
                 <ul className="list-disc pl-5 space-y-1">
-                  {selectedProduct.highlights.map((highlight: string, index: number) => (
-                    <li key={index} className="text-sm text-gray-600">{highlight}</li>
+                  {selectedProduct.highlights?.map((highlight: string, index: number) => (
+                    <li key={`highlight-${selectedProduct.id}-${index}`} className="text-sm text-gray-600">
+                      {highlight}
+                    </li>
                   ))}
                 </ul>
               </div>
@@ -432,8 +472,8 @@ export default function TestProductImportPage() {
               <div className="mb-6">
                 <h3 className="font-medium text-gray-800 mb-2">Specifications</h3>
                 <div className="grid grid-cols-2 gap-x-4 gap-y-2">
-                  {selectedProduct.specifications.map((spec: any) => (
-                    <div key={spec.name} className="text-sm">
+                  {selectedProduct.specifications?.map((spec: any) => (
+                    <div key={`spec-${selectedProduct.id}-${spec.name}`} className="text-sm">
                       <span className="font-medium text-gray-700">{spec.name}:</span>{' '}
                       <span className="text-gray-600">{String(spec.value || 'N/A')}</span>
                     </div>
