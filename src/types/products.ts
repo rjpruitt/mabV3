@@ -1,14 +1,18 @@
 export interface ProductImage {
-  id: string
-  sourceUrl: string           
+  id?: string
+  url: string
+  sourceUrl?: string           
   localUrl?: string          
   thumbnailUrl?: string      
-  alt: string
-  isPrimary: boolean
+  alt?: string
+  isPrimary?: boolean
+  primary?: boolean
+  order?: number
   width?: number
   height?: number
-  status: 'pending' | 'cached' | 'failed'
+  status?: 'pending' | 'cached' | 'failed'
   lastChecked?: Date
+  source?: 'supplier' | 'internal'
 }
 
 export interface ProductSpecification {
@@ -126,4 +130,46 @@ export interface Collection {
   theme?: string
   style?: string
   shares?: CollectionShare[]
+}
+
+export interface ProductVariant {
+  id: string
+  finish: string
+  price: number
+  images: ProductImage[]
+  sku: string
+  model_number: string
+  inventory_quantity?: number
+}
+
+export interface InternalProduct {
+  id: string
+  external_id: string
+  name: string
+  description: {
+    supplier: string
+    internal?: string
+  }
+  brand: string
+  supplier: 'homedepot' | 'lowes'
+  images: ProductImage[]
+  variants: ProductVariant[]
+  specifications: {
+    name: string
+    value: string
+  }[]
+  categories: {
+    style?: string[]
+    type?: string[]
+    campaign?: string[]
+  }
+  visibility: {
+    showToCustomer: boolean
+    showToSalesRep: boolean
+  }
+  metadata: {
+    imported_at: Date
+    last_updated: Date
+    imported_by: string
+  }
 } 

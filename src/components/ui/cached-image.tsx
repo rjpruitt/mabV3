@@ -40,13 +40,20 @@ export function CachedImage({ src, alt, className, onError }: Props): JSX.Elemen
     }
   }, [src, onError])
 
+  function getProxiedImageUrl(url: string | undefined) {
+    if (!url) return ''
+    if (url.startsWith('/')) return url // Local images
+    if (url.startsWith('data:')) return url // Data URLs
+    return `/api/proxy/image?url=${encodeURIComponent(url)}`
+  }
+
   return (
     <div className={`relative ${className}`}>
       {isLoading && (
         <div className="absolute inset-0 bg-gray-100 animate-pulse" />
       )}
       <img
-        src={imageSrc || ''}
+        src={getProxiedImageUrl(src)}
         alt={alt}
         className={`w-full h-full object-contain ${isLoading ? 'opacity-0' : 'opacity-100'}`}
         onError={onError}

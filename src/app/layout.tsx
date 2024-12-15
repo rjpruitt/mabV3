@@ -53,7 +53,10 @@ export default function RootLayout({
         ${playfairDisplaySC.variable}
       `}
     >
-      <body className={montserrat.className}>
+      <body 
+        className={montserrat.className}
+        suppressHydrationWarning
+      >
         <AuthHandler />
         <Header />
         <AuthProvider>
