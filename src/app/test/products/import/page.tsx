@@ -119,6 +119,10 @@ export default function TestProductImportPage() {
             zipcode
           })
       
+      if (!data) {
+        throw new Error(`No results found for ${platform} search`)
+      }
+      
       setResults(data)
       setTotalPages(data.no_of_pages || 1)
 
@@ -129,7 +133,7 @@ export default function TestProductImportPage() {
         resultCount: data.result_count
       })
     } catch (err) {
-      console.error('Search error:', err)
+      console.error(`${platform} search error:`, err)
       setError(err instanceof Error ? err.message : 'Search failed')
     } finally {
       setLoading(false)

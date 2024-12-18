@@ -8,7 +8,8 @@ import {
   CategoriesStep,
   ImagesStep,
   VisibilityStep,
-  ReviewStep
+  ReviewStep,
+  DesignToolStep
 } from './steps'
 import { LoadingSpinner } from '@/components/ui/loading-spinner'
 
@@ -47,12 +48,30 @@ export function ImportWizard({ productData, onClose, onImport, importing }: Impo
       supplier: 'homedepot',
       externalId: productData.id,
       importedAt: new Date()
+    },
+    designTool: {
+      category: undefined,
+      subcategory: undefined,
+      dimensions: {
+        width: 0,
+        height: 0
+      },
+      installation: {
+        type: '',
+        requirements: [],
+        difficulty: 'moderate' as const
+      },
+      compatibility: {
+        requiredProducts: [],
+        incompatibleWith: []
+      }
     }
   }))
 
   const steps = [
     { title: 'Basic Information', component: <BasicInfoStep data={formData} onChange={setFormData} /> },
     { title: 'Categories', component: <CategoriesStep data={formData} onChange={setFormData} /> },
+    { title: 'Design Tool', component: <DesignToolStep data={formData} onChange={setFormData} /> },
     { title: 'Images', component: <ImagesStep data={formData} onChange={setFormData} /> },
     { title: 'Visibility', component: <VisibilityStep data={formData} onChange={setFormData} /> },
     { title: 'Review', component: <ReviewStep data={formData} /> }

@@ -111,23 +111,26 @@ export class UnwrangleService {
       if (store_no) params.append('store_no', store_no)
       if (zipcode) params.append('zipcode', zipcode)
 
-      const response = await fetch(`${this.baseUrl}?${params.toString()}`)
+      const url = `${this.baseUrl}?${params.toString()}`
+      console.log('Lowes search URL:', url)
+      console.log('Search params:', {
+        search,
+        encodedSearch: search.replace(/\s+/g, '+'),
+        page,
+        store_no,
+        zipcode
+      })
+
+      const response = await fetch(url)
       const data = await response.json()
+
+      console.log('Lowes API full response:', data)
 
       if (!data.success) {
         throw new Error(data.error || 'Failed to search Lowes products')
       }
 
       console.log('Lowes raw product data:', data.results[0])
-
-      const sampleProduct = data.results[0]
-      const sampleThumbnails = [
-        `https://mobileimages.lowes.com/product/${sampleProduct.id}`,
-        `https://mobileimages.lowes.com/product/${sampleProduct.id}/sm`,
-        `https://mobileimages.lowes.com/product/${sampleProduct.id}/md`,
-        `https://mobileimages.lowes.com/product/${sampleProduct.id}/lg`
-      ].filter(Boolean)
-      console.log('Generated thumbnails:', sampleThumbnails)
 
       const results = data.results.map((product: LowesSearchResult) => ({
         ...product,

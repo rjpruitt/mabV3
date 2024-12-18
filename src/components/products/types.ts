@@ -1,4 +1,5 @@
-import { ProductImage } from '@/types/products'
+import { DESIGN_TOOL_CATEGORIES } from '@/lib/types/product-categories'
+import { DesignToolProductData } from '@/lib/types/product-types'
 
 export interface ImportFormData {
   name: string
@@ -11,7 +12,11 @@ export interface ImportFormData {
     style: string[]
     type: string[]
   }
-  images: ProductImage[]
+  images: {
+    url: string
+    source: 'supplier' | 'custom'
+    primary: boolean
+  }[]
   visibility: {
     showToCustomer: boolean
     showToSalesRep: boolean
@@ -20,15 +25,12 @@ export interface ImportFormData {
     name: string
     value: string
   }[]
-  variants: {
-    id: string
-    finish: string
-    price: number
-    images: ProductImage[]
-  }[]
+  variants: any[] // TODO: Type this properly
   metadata: {
-    supplier: 'homedepot' | 'lowes'
+    supplier: string
     externalId: string
     importedAt: Date
   }
+  // Add design tool data
+  designTool?: DesignToolProductData
 } 

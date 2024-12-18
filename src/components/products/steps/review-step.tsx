@@ -58,6 +58,47 @@ export function ReviewStep({ data }: ReviewStepProps) {
             </dd>
           </dl>
         </div>
+
+        {data.designTool && (
+          <div>
+            <h4 className="font-medium text-gray-700">Design Tool Settings</h4>
+            <dl className="mt-2">
+              <dt className="text-sm text-gray-500">Category</dt>
+              <dd className="text-sm text-gray-900">
+                {data.designTool.category || 'Not set'}
+              </dd>
+              
+              <dt className="text-sm text-gray-500 mt-2">Subcategory</dt>
+              <dd className="text-sm text-gray-900">
+                {data.designTool.subcategory || 'Not set'}
+              </dd>
+
+              <dt className="text-sm text-gray-500 mt-2">Dimensions</dt>
+              <dd className="text-sm text-gray-900">
+                {`${data.designTool.dimensions.width}" × ${data.designTool.dimensions.height}"`}
+                {data.designTool.dimensions.depth && ` × ${data.designTool.dimensions.depth}"`}
+              </dd>
+
+              <dt className="text-sm text-gray-500 mt-2">Installation Type</dt>
+              <dd className="text-sm text-gray-900">
+                {data.designTool.installation.type || 'Not set'}
+              </dd>
+
+              <dt className="text-sm text-gray-500 mt-2">Installation Requirements</dt>
+              <dd className="text-sm text-gray-900">
+                {data.designTool.installation.requirements.length > 0 
+                  ? data.designTool.installation.requirements.join(', ')
+                  : 'None specified'
+                }
+              </dd>
+
+              <dt className="text-sm text-gray-500 mt-2">Installation Difficulty</dt>
+              <dd className="text-sm text-gray-900 capitalize">
+                {data.designTool.installation.difficulty}
+              </dd>
+            </dl>
+          </div>
+        )}
       </div>
     </div>
   )
