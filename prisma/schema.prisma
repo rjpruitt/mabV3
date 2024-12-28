@@ -1,5 +1,6 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = []
 }
 
 datasource db {
@@ -8,22 +9,24 @@ datasource db {
 }
 
 model Product {
-  id          String   @id @default(cuid())
-  name        String
-  brand       String
-  description Json     // { supplier: string, internal: string }
-  categories  Category[]
-  images      Image[]
-  specifications Specification[]
-  visibility  Json     // { showToCustomer: boolean, showToSalesRep: boolean }
-  metadata    Json     // { supplier: string, externalId: string, importedAt: DateTime }
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id               String            @id @default(cuid())
+  name             String
+  brand            String
+  description      Json // { supplier: string, marketing: string, internal: string }
+  categories       Category[]
+  images           Image[]
+  specifications   Specification[]
+  visibility       Json // { customer: boolean, team: boolean }
+  metadata         Json // { supplier: string, externalId: string, importedAt: DateTime }
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  supplierId       String
+  sourceData       Json
 }
 
 model Category {
   id        String   @id @default(cuid())
-  type      String   // 'style' | 'product_type'
+  type      String // 'style' | 'product_type'
   name      String
   productId String
   product   Product  @relation(fields: [productId], references: [id])
@@ -36,7 +39,7 @@ model Category {
 model Image {
   id        String   @id @default(cuid())
   url       String
-  source    String   // 'supplier' | 'internal'
+  source    String // 'supplier' | 'internal'
   isPrimary Boolean  @default(false)
   productId String
   product   Product  @relation(fields: [productId], references: [id])
@@ -54,4 +57,14 @@ model Specification {
   updatedAt DateTime @updatedAt
 
   @@unique([productId, name])
-} 
+}
+
+model Supplier {
+  id        String   @id @default(uuid())
+  name      String
+  code      String   @unique
+  contact   Json?
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

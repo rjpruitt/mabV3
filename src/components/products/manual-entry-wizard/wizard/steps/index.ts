@@ -1,0 +1,6 @@
+export { BasicInfoStep } from './basic-info-step'
+export { CategoriesStep } from './categories-step'
+export { ImagesStep } from './images-step'
+export { VisibilityStep } from './visibility-step'
+export { ReviewStep } from './review-step'
+// Note: We might not need DesignToolStep in the manual entry wizard 

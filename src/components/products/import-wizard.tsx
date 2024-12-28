@@ -49,21 +49,32 @@ export function ImportWizard({ productData, onClose, onImport, importing }: Impo
       externalId: productData.id,
       importedAt: new Date()
     },
+    priceLevel: 'SMART_SOLUTIONS',
     designTool: {
-      category: undefined,
-      subcategory: undefined,
-      dimensions: {
-        width: 0,
-        height: 0
-      },
-      installation: {
-        type: '',
-        requirements: [],
-        difficulty: 'moderate' as const
+      classification: {
+        topCategory: 'SHOWERS',
+        format: 'INDIVIDUAL_COMPONENT',
+        componentType: undefined,
+        includedComponents: undefined,
+        showerType: [],
+        showerShape: undefined,
+        subType: undefined
       },
       compatibility: {
-        requiredProducts: [],
-        incompatibleWith: []
+        showerTypes: [],
+        showerShapes: [],
+        dimensions: {
+          minWidth: undefined,
+          maxWidth: undefined,
+          minDepth: undefined,
+          maxDepth: undefined,
+          height: undefined
+        }
+      },
+      installation: {
+        difficulty: 'moderate',
+        requirements: [],
+        notes: undefined
       }
     }
   }))
@@ -83,6 +94,38 @@ export function ImportWizard({ productData, onClose, onImport, importing }: Impo
         return formData.name && formData.brand
       case 2: // Categories
         return formData.categories.type.length > 0
+      case 3: // Design Tool
+        // Basic validation for all components
+        if (!formData.designTool.classification.componentType) {
+          console.log('Missing component type')
+          return false
+        }
+        
+        // Wall-specific validation
+        if (formData.designTool.classification.componentType === 'WALL_PANEL' || 
+            formData.designTool.classification.componentType === 'WALL_SET') {
+          const wallConfig = formData.designTool.classification.wallConfig
+          if (!wallConfig) {
+            console.log('Missing wall configuration')
+            return false
+          }
+          
+          // For complete sets, must have included panels
+          if (wallConfig.isCompleteSet && (!wallConfig.includedPanels || wallConfig.includedPanels.length === 0)) {
+            console.log('Complete set missing panels')
+            return false
+          }
+          
+          // For individual panels, must specify panel type
+          if (!wallConfig.isCompleteSet && !wallConfig.panelType) {
+            console.log('Individual panel missing panel type')
+            return false
+          }
+        }
+
+        // All components need shower type compatibility
+        console.log('Shower types:', formData.designTool.compatibility.showerTypes)
+        return formData.designTool.compatibility.showerTypes.length > 0
       default:
         return true
     }

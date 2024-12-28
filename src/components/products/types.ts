@@ -1,5 +1,18 @@
-import { DESIGN_TOOL_CATEGORIES } from '@/lib/types/product-categories'
-import { DesignToolProductData } from '@/lib/types/product-types'
+import { Prisma } from '@prisma/client'
+
+// Use Prisma's type utilities
+type ProductWithSuppliers = Prisma.Args<typeof prisma.product, 'findUnique'> & {
+  include: { productSuppliers: true }
+}
+
+export interface Product {
+  id: string
+  name: string
+  description?: string | null
+  // ... add other fields you need
+}
+
+import { DesignToolData } from '@/lib/types/product-types'
 
 export interface ImportFormData {
   name: string
@@ -25,12 +38,12 @@ export interface ImportFormData {
     name: string
     value: string
   }[]
-  variants: any[] // TODO: Type this properly
+  variants: any[] // TODO: Define variant type
   metadata: {
     supplier: string
     externalId: string
     importedAt: Date
   }
-  // Add design tool data
-  designTool?: DesignToolProductData
+  designTool: DesignToolData
+  priceLevel: 'SMART_SOLUTIONS' | 'PREMIUM_UPGRADES' | 'LUXURY'
 } 

@@ -39,8 +39,8 @@ export function BasicInfoStep({ data, onChange }: BasicInfoStepProps) {
         <input
           type="text"
           value={data.name}
-          onChange={(e) => handleChange('name', e.target.value)}
-          className="w-full px-3 py-2 border rounded-md"
+          onChange={(e) => onChange({ ...data, name: e.target.value })}
+          className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900"
         />
       </div>
 
@@ -52,7 +52,7 @@ export function BasicInfoStep({ data, onChange }: BasicInfoStepProps) {
           type="text"
           value={data.brand}
           onChange={(e) => handleChange('brand', e.target.value)}
-          className="w-full px-3 py-2 border rounded-md"
+          className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900"
         />
       </div>
 
@@ -64,7 +64,7 @@ export function BasicInfoStep({ data, onChange }: BasicInfoStepProps) {
           value={data.description.supplier}
           onChange={(e) => handleDescriptionChange('supplier', e.target.value)}
           rows={3}
-          className="w-full px-3 py-2 border rounded-md"
+          className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900"
         />
       </div>
 
@@ -77,7 +77,7 @@ export function BasicInfoStep({ data, onChange }: BasicInfoStepProps) {
           onChange={(e) => handleDescriptionChange('internal', e.target.value)}
           rows={3}
           placeholder="Add your own description for internal use"
-          className="w-full px-3 py-2 border rounded-md"
+          className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900"
         />
         <p className="mt-1 text-sm text-gray-500">
           This description will be used internally and won't be shown to customers
@@ -100,7 +100,7 @@ export function BasicInfoStep({ data, onChange }: BasicInfoStepProps) {
                   onChange({ ...data, specifications: newSpecs })
                 }}
                 placeholder="Name"
-                className="w-1/3 px-3 py-2 border rounded-md"
+                className="w-1/3 mt-1 block border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900"
               />
               <input
                 type="text"
@@ -111,7 +111,7 @@ export function BasicInfoStep({ data, onChange }: BasicInfoStepProps) {
                   onChange({ ...data, specifications: newSpecs })
                 }}
                 placeholder="Value"
-                className="flex-1 px-3 py-2 border rounded-md"
+                className="flex-1 mt-1 block border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900"
               />
               <button
                 onClick={() => {

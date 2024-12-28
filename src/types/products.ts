@@ -67,6 +67,11 @@ export interface Product {
   rating?: number
   total_reviews?: number
   inventory_quantity?: number
+  description?: string
+  status?: ProductStatus
+  inventory?: {
+    status?: string
+  }
 }
 
 export interface ProductImport {

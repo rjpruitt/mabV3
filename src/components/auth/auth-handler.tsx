@@ -2,10 +2,11 @@
 
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { supabase } from '@/lib/supabase'
+import { createPagesBrowserClient } from '@supabase/auth-helpers-nextjs'
 
 export function AuthHandler() {
   const router = useRouter()
+  const supabase = createPagesBrowserClient()
 
   useEffect(() => {
     // Handle auth state change
@@ -29,7 +30,7 @@ export function AuthHandler() {
     return () => {
       subscription.unsubscribe()
     }
-  }, [router])
+  }, [router, supabase])
 
   return null
 } 
