@@ -16,22 +16,14 @@ export const GET = protectedApi(async (request: Request) => {
   return NextResponse.json(products)
 })
 
-export const POST = protectedApi(async (request: Request) => {
-  const { supplierId, externalId } = await request.json()
-  
-  if (!supplierId || !externalId) {
+export async function POST(request: Request) {
+  try {
+    const body = await request.json()
+    return NextResponse.json({ success: true })
+  } catch (error) {
     return NextResponse.json(
-      { error: 'Missing required fields' },
-      { status: 400 }
+      { success: false, error: 'Failed to process request' },
+      { status: 500 }
     )
   }
-
-  const product = await productService.importProducts('homedepot', [{
-    supplierId,
-    externalId
-  }])
-  
-  return NextResponse.json(product)
-}, {
-  requiredRoles: ['admin', 'catalogue_manager']
-}) 
+} 

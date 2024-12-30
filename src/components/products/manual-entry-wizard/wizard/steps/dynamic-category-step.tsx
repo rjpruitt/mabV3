@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { CategoryStep } from '../types'
+import { CategoryStep } from '../../types'
 
 interface DynamicCategoryStepProps {
   steps: CategoryStep[]
@@ -20,7 +20,8 @@ export function DynamicCategoryStep({ steps, onChange, initialSelections = {} }:
       if (!step.dependsOn) return true
 
       const dependentStep = step.dependsOn.step
-      const dependentValue = selections[dependentStep]
+      const stepKey = dependentStep
+      const dependentValue = selections[stepKey]
       const allowedValues = step.dependsOn.values
 
       if (!dependentValue) return false

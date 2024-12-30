@@ -2,22 +2,35 @@
 
 import { useState } from 'react'
 import Image from 'next/image'
-import { DynamicImportFormData } from '../types'
+import { ImportFormData } from '../types'
 
 interface ImageStepProps {
-  data: DynamicImportFormData
-  onChange: (data: Partial<DynamicImportFormData>) => void
-  supplierImages: DynamicImportFormData['images']
+  data: ImportFormData
+  onChange: (data: Partial<ImportFormData>) => void
+  supplierImages: ImportFormData['images']
+}
+
+interface ImageData {
+  id: string
+  url: string
+  alt: string
+  isPrimary?: boolean
+  source: 'supplier' | 'custom'
+  visibility?: {
+    customer: boolean
+    team: boolean
+  }
+  selected?: boolean
 }
 
 export function ImageStep({ data, onChange, supplierImages }: ImageStepProps) {
   const [selectedImages, setSelectedImages] = useState<string[]>(
-    data.images?.map(img => img.id) || []
+    data.images?.map((img: ImageData) => img.id) || []
   )
   const [primaryImage, setPrimaryImage] = useState<string | null>(
-    data.images?.find(img => img.isPrimary)?.id || null
+    data.images?.find((img: ImageData) => img.isPrimary)?.id || null
   )
-  const [uploadedImages, setUploadedImages] = useState<DynamicImportFormData['images']>([])
+  const [uploadedImages, setUploadedImages] = useState<ImportFormData['images']>([])
 
   const handleImageToggle = (imageId: string) => {
     const newSelected = selectedImages.includes(imageId)

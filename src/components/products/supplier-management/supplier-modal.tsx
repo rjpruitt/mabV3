@@ -2,13 +2,15 @@
 
 import { useState } from 'react'
 import { CreateSupplierData } from '@/lib/products/types/supplier'
+import { formStyles } from '@/lib/styles/forms'
 
 interface SupplierModalProps {
   onClose: () => void
   onSave: (data: CreateSupplierData) => Promise<void>
+  isLoading?: boolean
 }
 
-export function SupplierModal({ onClose, onSave }: SupplierModalProps) {
+export function SupplierModal({ onClose, onSave, isLoading = false }: SupplierModalProps) {
   const [formData, setFormData] = useState<CreateSupplierData>({
     name: '',
     code: '',
@@ -41,7 +43,7 @@ export function SupplierModal({ onClose, onSave }: SupplierModalProps) {
               type="text"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              className="mt-1 block w-full rounded-md border-gray-300 text-gray-800"
+              className={formStyles.input}
             />
           </div>
 
@@ -53,7 +55,7 @@ export function SupplierModal({ onClose, onSave }: SupplierModalProps) {
               type="text"
               value={formData.code}
               onChange={(e) => setFormData({ ...formData, code: e.target.value })}
-              className="mt-1 block w-full rounded-md border-gray-300 text-gray-800"
+              className={formStyles.input}
             />
           </div>
 
@@ -71,7 +73,7 @@ export function SupplierModal({ onClose, onSave }: SupplierModalProps) {
                   ...formData,
                   contact: { ...formData.contact, name: e.target.value }
                 })}
-                className="mt-1 block w-full rounded-md border-gray-300 text-gray-800"
+                className={formStyles.input}
               />
             </div>
 
@@ -86,7 +88,7 @@ export function SupplierModal({ onClose, onSave }: SupplierModalProps) {
                   ...formData,
                   contact: { ...formData.contact, email: e.target.value }
                 })}
-                className="mt-1 block w-full rounded-md border-gray-300 text-gray-800"
+                className={formStyles.input}
               />
             </div>
 
@@ -101,7 +103,7 @@ export function SupplierModal({ onClose, onSave }: SupplierModalProps) {
                   ...formData,
                   contact: { ...formData.contact, phone: e.target.value }
                 })}
-                className="mt-1 block w-full rounded-md border-gray-300 text-gray-800"
+                className={formStyles.input}
               />
             </div>
           </div>
@@ -110,15 +112,17 @@ export function SupplierModal({ onClose, onSave }: SupplierModalProps) {
         <div className="mt-6 flex justify-end space-x-3">
           <button
             onClick={onClose}
-            className="px-4 py-2 border rounded text-gray-700 hover:bg-gray-50"
+            disabled={isLoading}
+            className="px-4 py-2 border rounded text-gray-700 hover:bg-gray-50 disabled:opacity-50"
           >
             Cancel
           </button>
           <button
             onClick={() => onSave(formData)}
-            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+            disabled={isLoading}
+            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50"
           >
-            Save Supplier
+            {isLoading ? 'Saving...' : 'Save Supplier'}
           </button>
         </div>
       </div>

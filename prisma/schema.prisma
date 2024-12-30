@@ -12,16 +12,16 @@ model Product {
   id               String            @id @default(cuid())
   name             String
   brand            String
-  description      Json // { supplier: string, marketing: string, internal: string }
+  description      Json
   categories       Category[]
   images           Image[]
   specifications   Specification[]
-  visibility       Json // { customer: boolean, team: boolean }
-  metadata         Json // { supplier: string, externalId: string, importedAt: DateTime }
+  visibility       Json
+  metadata         Json?
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @updatedAt
   supplierId       String
-  sourceData       Json
+  sourceData       Json?
 }
 
 model Category {

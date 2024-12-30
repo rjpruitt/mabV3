@@ -1,4 +1,5 @@
 import { ProductBase } from './index'
+import { ComponentType } from '@/lib/types/product-types'
 
 export interface SupplierData {
   supplierId: string
@@ -26,16 +27,23 @@ export interface CatalogueFormData {
     marketing: string
     internal: string
   }
-  categorization: Record<string, string | string[]>
-  specifications: Array<{
-    name: string
-    value: string
-    source: 'supplier' | 'custom'
-    visibility?: {
-      customer?: boolean
-      team?: boolean
+  categorization: {
+    style: string[]
+    type: string[]
+  }
+  classification: {
+    style: string[]
+    productType: string[]
+  }
+  designTool: {
+    classification: {
+      format: 'INDIVIDUAL_COMPONENT' | 'KIT'
+      topCategory: 'BATHTUBS' | 'SHOWERS' | 'ACCESSIBILITY_SAFETY' | 'WALLS_WAINSCOTTING' | 'ACCESSORIES'
+      componentType?: ComponentType
+      includedComponents?: ComponentType[]
     }
-  }>
+  }
+  priceLevel: 'SMART_SOLUTIONS' | 'PREMIUM_UPGRADES' | 'LUXURY'
   images: Array<{
     id: string
     url: string
@@ -51,4 +59,13 @@ export interface CatalogueFormData {
     showToCustomer: boolean
     showToSalesRep: boolean
   }
+  specifications: Array<{
+    name: string
+    value: string
+    source: 'supplier' | 'custom'
+    visibility?: {
+      customer?: boolean
+      team?: boolean
+    }
+  }>
 } 

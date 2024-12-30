@@ -3,13 +3,14 @@
 import { useState, useEffect } from 'react'
 import { CatalogueFormData, SupplierData } from '@/lib/products/types/catalogue'
 import { SupplierDataSet } from './components/supplier-data-set'
-import { getSuppliers } from '@/lib/services/supplier-service'
-import type { Supplier } from '@/lib/services/supplier-service'
+import { getSuppliers } from '@/lib/server/actions/supplier-actions'
+import type { Supplier } from '@prisma/client'
+import { formStyles } from '@/lib/styles/forms'
 
 interface BasicInfoStepProps {
   data: CatalogueFormData
   onChange: (data: CatalogueFormData) => void
-  initialData?: CatalogueFormData
+  initialData?: Partial<CatalogueFormData>
 }
 
 export function BasicInfoStep({ data, onChange, initialData }: BasicInfoStepProps) {
@@ -175,7 +176,7 @@ export function BasicInfoStep({ data, onChange, initialData }: BasicInfoStepProp
           type="text"
           value={data.name}
           onChange={(e) => onChange({ ...data, name: e.target.value })}
-          className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-800"
+          className={formStyles.input}
           placeholder="Enter the internal name used to identify this product"
         />
       </div>
@@ -188,7 +189,7 @@ export function BasicInfoStep({ data, onChange, initialData }: BasicInfoStepProp
           type="text"
           value={data.brand}
           onChange={(e) => onChange({ ...data, brand: e.target.value })}
-          className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-800"
+          className={formStyles.input}
         />
       </div>
 

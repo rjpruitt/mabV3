@@ -1,14 +1,14 @@
 'use client'
 
-import { ImportFormData } from '../types'
+import { CatalogueFormData } from '@/lib/products/types/catalogue'
 
 interface VisibilityStepProps {
-  data: ImportFormData
-  onChange: (data: ImportFormData) => void
+  data: CatalogueFormData
+  onChange: (data: CatalogueFormData) => void
 }
 
 export function VisibilityStep({ data, onChange }: VisibilityStepProps) {
-  const handleVisibilityChange = (key: keyof ImportFormData['visibility'], value: boolean) => {
+  const handleVisibilityChange = (key: keyof CatalogueFormData['visibility'], value: boolean) => {
     onChange({
       ...data,
       visibility: {

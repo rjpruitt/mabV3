@@ -1,14 +1,13 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  eslint: {
-    ignoreDuringBuilds: true,
+  experimental: {
+    serverActions: {
+      allowedOrigins: ['localhost:3000']
+    }
   },
   images: {
-    unoptimized: true,
-    domains: [
-      'images.thdstatic.com'
-    ],
-  }
+    domains: ['localhost', 'via.placeholder.com'],
+  },
 }
 
 module.exports = nextConfig 

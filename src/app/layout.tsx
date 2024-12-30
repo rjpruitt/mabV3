@@ -6,6 +6,7 @@ import { Footer } from '@/components/shared/footer/footer'
 import { ClientWrapper } from '@/components/layouts/client-wrapper'
 import { AuthProvider } from '@/providers/auth-provider'
 import { AuthHandler } from '@/components/auth/auth-handler'
+import { Toaster } from 'sonner'
 
 const montserrat = Montserrat({ 
   subsets: ['latin'],
@@ -75,6 +76,7 @@ export default function RootLayout({
           )}
         </AuthProvider>
         <Footer />
+        <Toaster />
       </body>
     </html>
   )

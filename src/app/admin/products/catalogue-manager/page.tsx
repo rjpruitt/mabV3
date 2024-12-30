@@ -3,21 +3,34 @@
 import { useState } from 'react'
 import { ManualEntryWizard } from '@/components/products/manual-entry-wizard/wizard/ManualEntryWizard'
 import { CatalogueFormData } from '@/lib/products/types/catalogue'
+import { toast } from 'sonner'
 
 export default function CatalogueManagerPage() {
   const [showWizard, setShowWizard] = useState(false)
   const [initialData, setInitialData] = useState<Partial<CatalogueFormData>>()
 
-  async function cloneProduct(product: CatalogueFormData) {
-    const clonedData = {
-      ...product,
-      name: `${product.name} - New Variant`,
-      // Clear unique identifiers but keep reference to original
-      id: undefined,
-      // Keep supplier data but might need to update item numbers
+  const handleComplete = async (data: CatalogueFormData) => {
+    try {
+      const response = await fetch('/api/products/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+      })
+
+      const result = await response.json()
+      
+      if (result.success && result.productId) {
+        toast.success('Product created successfully')
+        setShowWizard(false)
+      } else {
+        toast.error(result.error || 'Failed to create product')
+      }
+    } catch (error) {
+      console.error('Error creating product:', error)
+      toast.error('Failed to create product')
     }
-    setShowWizard(true)
-    setInitialData(clonedData)
   }
 
   return (
@@ -35,10 +48,7 @@ export default function CatalogueManagerPage() {
 
       {showWizard && (
         <ManualEntryWizard 
-          onComplete={(data) => {
-            console.log('Wizard completed:', data)
-            setShowWizard(false)
-          }}
+          onComplete={handleComplete}
           onCancel={() => setShowWizard(false)}
           initialData={initialData}
         />

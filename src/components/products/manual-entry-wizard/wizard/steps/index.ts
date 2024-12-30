@@ -1,6 +1,6 @@
-export { BasicInfoStep } from './basic-info-step'
-export { CategoriesStep } from './categories-step'
-export { ImagesStep } from './images-step'
-export { VisibilityStep } from './visibility-step'
-export { ReviewStep } from './review-step'
+export * from './basic-info-step'
+export * from './dynamic-category-step'
+export * from './images-step'
+export * from './visibility-step'
+export * from './review-step'
 // Note: We might not need DesignToolStep in the manual entry wizard 

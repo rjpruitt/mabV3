@@ -4,11 +4,13 @@ import { useState } from 'react'
 import { CatalogueFormData } from '@/lib/products/types/catalogue'
 import {
   BasicInfoStep,
-  CategoriesStep,
+  DynamicCategoryStep,
   ImagesStep,
   VisibilityStep,
   ReviewStep
 } from './steps'
+import { CATEGORY_STEPS } from '../config/category-steps'
+import { toast } from 'sonner'
 
 interface ManualEntryWizardProps {
   onComplete: (data: CatalogueFormData) => void
@@ -34,6 +36,19 @@ export function ManualEntryWizard({
       style: [],
       type: []
     },
+    classification: {
+      style: [],
+      productType: []
+    },
+    designTool: {
+      classification: {
+        format: 'INDIVIDUAL_COMPONENT',
+        topCategory: 'SHOWERS',
+        componentType: undefined,
+        includedComponents: []
+      }
+    },
+    priceLevel: 'SMART_SOLUTIONS',
     images: [],
     visibility: {
       showToCustomer: true,
@@ -43,15 +58,100 @@ export function ManualEntryWizard({
     supplierData: []
   }))
 
+  const handleCategoryChange = (selections: Record<string, string | string[]>) => {
+    console.log('Category selections:', selections)
+    
+    // Map the selections to our categorization format
+    const type: string[] = []
+    if (selections.topCategory) {
+      type.push(typeof selections.topCategory === 'string' ? selections.topCategory : selections.topCategory[0])
+    }
+    if (selections.showerType) {
+      type.push(typeof selections.showerType === 'string' ? selections.showerType : selections.showerType[0])
+    }
+    if (selections.componentType) {
+      type.push(typeof selections.componentType === 'string' ? selections.componentType : selections.componentType[0])
+    }
+    if (selections.showerLocation) {
+      type.push(typeof selections.showerLocation === 'string' ? selections.showerLocation : selections.showerLocation[0])
+    }
+    
+    console.log('Setting categorization:', {
+      style: Array.isArray(selections.style) ? selections.style : [],
+      type
+    })
+
+    setFormData(prev => ({
+      ...prev,
+      categorization: {
+        style: Array.isArray(selections.style) ? selections.style : [],
+        type
+      }
+    }))
+  }
+
+  type WizardStep = 'basic' | 'category' | 'images' | 'visibility'
+
+  const handleSave = async (data: CatalogueFormData) => {
+    if (!data || !data.name || !data.brand) {
+      toast.error('Name and brand are required')
+      return
+    }
+
+    try {
+      const response = await fetch('/api/products/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+      })
+
+      const result = await response.json()
+      
+      if (result.success) {
+        toast.success('Product added successfully', {
+          position: 'top-center',
+          duration: 3000,
+          dismissible: true
+        })
+        onComplete?.(data)
+      } else {
+        toast.error(result.error || 'Failed to create product')
+      }
+    } catch (error) {
+      console.error('Error in handleSave:', error)
+      toast.error('Failed to create product')
+    }
+  }
+
   const steps = [
-    { title: 'Basic Information', component: <BasicInfoStep data={formData} onChange={(data) => setFormData(data)} /> },
-    { title: 'Categories', component: <CategoriesStep data={formData} onChange={(data) => setFormData(data)} /> },
+    { title: 'Basic Information', component: <BasicInfoStep data={formData} onChange={(data) => setFormData(data)} initialData={initialData} /> },
+    { title: 'Categories', component: <DynamicCategoryStep
+      steps={CATEGORY_STEPS}
+      onChange={handleCategoryChange}
+      initialSelections={formData.categorization}
+    /> },
     { title: 'Images', component: <ImagesStep data={formData} onChange={(data) => setFormData(data)} /> },
     { title: 'Visibility', component: <VisibilityStep data={formData} onChange={(data) => setFormData(data)} /> },
-    { title: 'Review', component: <ReviewStep data={formData} /> }
+    { title: 'Review', component: <ReviewStep 
+      data={formData} 
+      onEdit={(step: WizardStep) => {
+        const stepMap: Record<WizardStep, number> = {
+          'basic': 1,
+          'category': 2,
+          'images': 3,
+          'visibility': 4
+        }
+        setStep(stepMap[step])
+      }}
+      onComplete={handleSave}
+    /> }
   ]
 
   const canProceed = () => {
+    console.log('Checking canProceed for step', step)
+    console.log('Current categorization:', formData.categorization)
     switch (step) {
       case 1: // Basic Info
         return formData.name && formData.brand
@@ -63,8 +163,8 @@ export function ManualEntryWizard({
   }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-lg p-6 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+      <div className="bg-white rounded-lg p-6 max-w-4xl w-full max-h-[90vh] overflow-y-auto relative mt-16">
         {/* Header */}
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-bold text-gray-900">Add New Product</h2>
@@ -121,20 +221,13 @@ export function ManualEntryWizard({
             Previous
           </button>
           
-          {step < steps.length ? (
+          {step < steps.length && (
             <button
               onClick={() => setStep(step + 1)}
               disabled={!canProceed()}
               className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50"
             >
               Next
-            </button>
-          ) : (
-            <button
-              onClick={() => onComplete(formData)}
-              className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
-            >
-              Save Product
             </button>
           )}
         </div>

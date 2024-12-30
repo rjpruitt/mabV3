@@ -1,9 +1,9 @@
 import { SupplierData } from '@/lib/products/types/catalogue'
 import { useState } from 'react'
 import { SupplierModal } from '@/components/products/supplier-management/supplier-modal'
-import { createSupplier } from '@/lib/services/supplier-service'
-import type { Supplier } from '@/lib/services/supplier-service'
-import type { CreateSupplierData } from '@/lib/services/supplier-service'
+import { createSupplier } from '@/lib/server/actions/supplier-actions'
+import type { Supplier, Prisma } from '@prisma/client'
+import { formStyles } from '@/lib/styles/forms'
 
 interface SupplierDataSetProps {
   data: SupplierData
@@ -21,15 +21,19 @@ export function SupplierDataSet({
   onAddSupplier 
 }: SupplierDataSetProps) {
   const [showSupplierModal, setShowSupplierModal] = useState(false)
+  const [isCreating, setIsCreating] = useState(false)
 
-  const handleAddSupplier = async (supplierData: CreateSupplierData) => {
+  const handleAddSupplier = async (supplierData: Prisma.SupplierCreateInput) => {
+    setIsCreating(true)
     try {
       const newSupplier = await createSupplier(supplierData)
       onAddSupplier(newSupplier)
       setShowSupplierModal(false)
     } catch (error) {
       console.error('Failed to create supplier:', error)
-      // TODO: Add error handling
+      alert('Failed to create supplier. Please try again.')
+    } finally {
+      setIsCreating(false)
     }
   }
 
@@ -40,7 +44,7 @@ export function SupplierDataSet({
           <select
             value={data.supplierId}
             onChange={(e) => onChange({ ...data, supplierId: e.target.value })}
-            className="block w-64 rounded-md border-gray-300 text-gray-800"
+            className={formStyles.selectWithWidth('w-64')}
           >
             <option value="">Select Supplier</option>
             {suppliers.map(supplier => (
@@ -74,7 +78,7 @@ export function SupplierDataSet({
             type="text"
             value={data.productName}
             onChange={(e) => onChange({ ...data, productName: e.target.value })}
-            className="mt-1 block w-full rounded-md border-gray-300 text-gray-800"
+            className={formStyles.input}
           />
         </div>
 
@@ -86,7 +90,7 @@ export function SupplierDataSet({
             value={data.productDescription}
             onChange={(e) => onChange({ ...data, productDescription: e.target.value })}
             rows={3}
-            className="mt-1 block w-full rounded-md border-gray-300 text-gray-800"
+            className={formStyles.textarea}
           />
         </div>
 
@@ -94,36 +98,39 @@ export function SupplierDataSet({
           <div>
             <label className="block text-sm font-medium text-gray-700">
               Internet Number
+              <span className="ml-1 text-gray-400 text-xs">(Supplier's online product ID)</span>
             </label>
             <input
               type="text"
               value={data.internetNumber}
               onChange={(e) => onChange({ ...data, internetNumber: e.target.value })}
-              className="mt-1 block w-full rounded-md border-gray-300 text-gray-800"
+              className={formStyles.input}
             />
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700">
               Item Number / SKU
+              <span className="ml-1 text-gray-400 text-xs">(Supplier's internal reference)</span>
             </label>
             <input
               type="text"
               value={data.itemNumber}
               onChange={(e) => onChange({ ...data, itemNumber: e.target.value })}
-              className="mt-1 block w-full rounded-md border-gray-300 text-gray-800"
+              className={formStyles.input}
             />
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700">
               Model Number
+              <span className="ml-1 text-gray-400 text-xs">(Manufacturer's reference)</span>
             </label>
             <input
               type="text"
               value={data.modelNumber}
               onChange={(e) => onChange({ ...data, modelNumber: e.target.value })}
-              className="mt-1 block w-full rounded-md border-gray-300 text-gray-800"
+              className={formStyles.input}
             />
           </div>
         </div>
@@ -139,8 +146,19 @@ export function SupplierDataSet({
             <input
               type="text"
               value={data.listPrice}
-              onChange={(e) => onChange({ ...data, listPrice: e.target.value })}
-              className="pl-7 block w-full rounded-md border-gray-300 text-gray-800"
+              onChange={(e) => {
+                const value = e.target.value.replace(/[^\d.]/g, '')
+                if (value === '' || /^\d*\.?\d{0,2}$/.test(value)) {
+                  onChange({ ...data, listPrice: value })
+                }
+              }}
+              onBlur={(e) => {
+                const value = parseFloat(e.target.value)
+                if (!isNaN(value)) {
+                  onChange({ ...data, listPrice: value.toFixed(2) })
+                }
+              }}
+              className={`pl-7 ${formStyles.input}`}
               placeholder="0.00"
             />
           </div>
@@ -151,6 +169,7 @@ export function SupplierDataSet({
         <SupplierModal
           onClose={() => setShowSupplierModal(false)}
           onSave={handleAddSupplier}
+          isLoading={isCreating}
         />
       )}
     </div>
