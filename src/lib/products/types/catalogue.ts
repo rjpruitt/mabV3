@@ -12,6 +12,19 @@ export interface SupplierData {
   listPrice: string
 }
 
+export interface ProductImage {
+  id: string
+  url: string
+  alt: string
+  isPrimary?: boolean
+  source: 'supplier' | 'custom'
+  visibility?: {
+    customer: boolean
+    team: boolean
+  }
+  file?: File
+}
+
 export interface CatalogueFormData {
   id?: string
   name: string
@@ -44,28 +57,14 @@ export interface CatalogueFormData {
     }
   }
   priceLevel: 'SMART_SOLUTIONS' | 'PREMIUM_UPGRADES' | 'LUXURY'
-  images: Array<{
-    id: string
-    url: string
-    alt: string
-    isPrimary?: boolean
-    source: 'supplier' | 'custom'
-    visibility?: {
-      customer: boolean
-      team: boolean
-    }
-  }>
+  images: ProductImage[]
   visibility: {
     showToCustomer: boolean
     showToSalesRep: boolean
   }
-  specifications: Array<{
-    name: string
-    value: string
-    source: 'supplier' | 'custom'
-    visibility?: {
-      customer?: boolean
-      team?: boolean
-    }
+  specifications: Record<string, string | number | boolean | string[]>
+  choices?: Array<{
+    category: string
+    productId: string
   }>
 } 

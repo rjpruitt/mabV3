@@ -1,13 +1,14 @@
 'use client'
 
 import { useState } from 'react'
-import { CatalogueFormData } from '@/lib/products/types/catalogue'
+import { CatalogueFormData, ProductImage } from '@/lib/products/types/catalogue'
 import {
   BasicInfoStep,
   DynamicCategoryStep,
   ImagesStep,
   VisibilityStep,
-  ReviewStep
+  ReviewStep,
+  SpecificationsStep
 } from './steps'
 import { CATEGORY_STEPS } from '../config/category-steps'
 import { toast } from 'sonner'
@@ -54,8 +55,9 @@ export function ManualEntryWizard({
       showToCustomer: true,
       showToSalesRep: true
     },
-    specifications: [],
-    supplierData: []
+    specifications: {},
+    supplierData: [],
+    choices: []
   }))
 
   const handleCategoryChange = (selections: Record<string, string | string[]>) => {
@@ -75,22 +77,58 @@ export function ManualEntryWizard({
     if (selections.showerLocation) {
       type.push(typeof selections.showerLocation === 'string' ? selections.showerLocation : selections.showerLocation[0])
     }
-    
-    console.log('Setting categorization:', {
-      style: Array.isArray(selections.style) ? selections.style : [],
-      type
-    })
+
+    // Build choices array
+    const choices: Array<{ category: string, productId: string }> = []
+
+    // Add product type - use productFormat if it exists, otherwise use topCategory
+    if (selections.productFormat) {
+      choices.push({
+        category: 'product_type',
+        productId: typeof selections.productFormat === 'string' ? selections.productFormat : selections.productFormat[0]
+      })
+    } else if (selections.topCategory) {
+      choices.push({
+        category: 'product_type',
+        productId: typeof selections.topCategory === 'string' ? selections.topCategory : selections.topCategory[0]
+      })
+    }
+
+    // Add component type if it exists
+    if (selections.componentType) {
+      choices.push({
+        category: 'componentType',
+        productId: typeof selections.componentType === 'string' ? selections.componentType : selections.componentType[0]
+      })
+    }
+
+    // Add kit includes
+    if (selections.kit_includes) {
+      const kitIncludes = Array.isArray(selections.kit_includes) 
+        ? selections.kit_includes 
+        : [selections.kit_includes]
+      
+      kitIncludes.forEach(item => {
+        choices.push({
+          category: 'kit_includes',
+          productId: item
+        })
+      })
+    }
+
+    console.log('Setting choices:', choices)
 
     setFormData(prev => ({
       ...prev,
       categorization: {
         style: Array.isArray(selections.style) ? selections.style : [],
         type
-      }
+      },
+      choices
     }))
   }
 
-  type WizardStep = 'basic' | 'category' | 'images' | 'visibility'
+  type WizardStep = 'basic' | 'category' | 'specifications' | 'images' | 'visibility'
 
   const handleSave = async (data: CatalogueFormData) => {
     if (!data || !data.name || !data.brand) {
@@ -99,22 +137,57 @@ export function ManualEntryWizard({
     }
 
     try {
+      // Upload any new images first
+      const uploadPromises = data.images
+        .filter((img): img is ProductImage & { file: File } => Boolean(img.file))
+        .map(async (img) => {
+          const formData = new FormData()
+          formData.append('file', img.file)
+          
+          const response = await fetch('/api/upload', {
+            method: 'POST',
+            body: formData
+          })
+          
+          if (!response.ok) throw new Error('Failed to upload image')
+          
+          const result = await response.json()
+          return {
+            originalId: img.id,
+            url: result.url
+          }
+        })
+
+      const uploadedImages = await Promise.all(uploadPromises)
+
+      // Replace temporary URLs with permanent ones
+      const finalImages = data.images.map(img => {
+        const uploaded = uploadedImages.find(u => u.originalId === img.id)
+        return {
+          url: uploaded?.url || img.url,
+          alt: img.alt,
+          source: img.source,
+          isPrimary: img.isPrimary,
+          visibility: img.visibility
+        }
+      })
+
+      // Create the product with permanent image URLs
       const response = await fetch('/api/products/create', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(data)
+        body: JSON.stringify({
+          ...data,
+          images: finalImages
+        })
       })
 
       const result = await response.json()
       
       if (result.success) {
-        toast.success('Product added successfully', {
-          position: 'top-center',
-          duration: 3000,
-          dismissible: true
-        })
+        toast.success('Product added successfully')
         onComplete?.(data)
       } else {
         toast.error(result.error || 'Failed to create product')
@@ -125,28 +198,84 @@ export function ManualEntryWizard({
     }
   }
 
+  const handleDataChange = (partialData: Partial<CatalogueFormData>) => {
+    setFormData(prev => ({
+      ...prev,
+      ...partialData
+    }))
+  }
+
+  const handleStepComplete = (category: string, productId: string) => {
+    console.log('Setting step choices:', {
+      category,
+      productId,
+      allChoices: formData.choices
+    })
+
+    // Update choices
+    setFormData(prev => ({
+      ...prev,
+      choices: prev.choices ? 
+        prev.choices.map(c => c.category === category ? { ...c, productId } : c)
+        : [{ category, productId }]
+    }))
+  }
+
   const steps = [
-    { title: 'Basic Information', component: <BasicInfoStep data={formData} onChange={(data) => setFormData(data)} initialData={initialData} /> },
-    { title: 'Categories', component: <DynamicCategoryStep
-      steps={CATEGORY_STEPS}
-      onChange={handleCategoryChange}
-      initialSelections={formData.categorization}
-    /> },
-    { title: 'Images', component: <ImagesStep data={formData} onChange={(data) => setFormData(data)} /> },
-    { title: 'Visibility', component: <VisibilityStep data={formData} onChange={(data) => setFormData(data)} /> },
-    { title: 'Review', component: <ReviewStep 
-      data={formData} 
-      onEdit={(step: WizardStep) => {
-        const stepMap: Record<WizardStep, number> = {
-          'basic': 1,
-          'category': 2,
-          'images': 3,
-          'visibility': 4
-        }
-        setStep(stepMap[step])
-      }}
-      onComplete={handleSave}
-    /> }
+    { 
+      title: 'Basic Information', 
+      component: <BasicInfoStep 
+        data={formData} 
+        onChange={handleDataChange} 
+        initialData={initialData} 
+      /> 
+    },
+    { 
+      title: 'Categories', 
+      component: <DynamicCategoryStep
+        steps={CATEGORY_STEPS}
+        onChange={handleCategoryChange}
+        initialSelections={formData.categorization}
+      /> 
+    },
+    { 
+      title: 'Specifications', 
+      component: <SpecificationsStep 
+        data={formData} 
+        onChange={handleDataChange} 
+      /> 
+    },
+    { 
+      title: 'Images', 
+      component: <ImagesStep 
+        data={formData} 
+        onChange={handleDataChange} 
+      /> 
+    },
+    { 
+      title: 'Visibility', 
+      component: <VisibilityStep 
+        data={formData} 
+        onChange={handleDataChange} 
+      /> 
+    },
+    { 
+      title: 'Review', 
+      component: <ReviewStep 
+        data={formData} 
+        onEdit={(step: WizardStep) => {
+          const stepMap: Record<WizardStep, number> = {
+            'basic': 1,
+            'category': 2,
+            'specifications': 3,
+            'images': 4,
+            'visibility': 5
+          }
+          setStep(stepMap[step])
+        }}
+        onComplete={handleSave}
+      /> 
+    }
   ]
 
   const canProceed = () => {

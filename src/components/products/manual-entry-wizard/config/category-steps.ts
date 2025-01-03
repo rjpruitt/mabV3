@@ -1,4 +1,4 @@
-import { CategoryStep, ShowerType, ComponentType } from '../types'
+import { CategoryStep, CategoryOption } from '../types'
 
 const KIT_COMPONENT_GROUPS = {
   SHOWER_BASE: {
@@ -55,7 +55,7 @@ export const CATEGORY_STEPS: CategoryStep[] = [
         return ['SQUARE', 'RECTANGULAR']
       }
       if (selections.showerLocation === 'CORNER') {
-        return ['SQUARE', 'NEO_ANGLE', 'ROUND']
+        return ['SQUARE', 'RECTANGULAR', 'NEO_ANGLE', 'ROUND']
       }
       return []
     },
@@ -74,14 +74,89 @@ export const CATEGORY_STEPS: CategoryStep[] = [
     }
   },
   {
-    id: 'kitComponents',
-    label: 'Kit Includes',
-    options: Object.values(KIT_COMPONENT_GROUPS).flatMap(group => group.options),
+    id: 'kit_includes',
+    title: 'Kit Includes',
+    description: 'Select the components included in this kit',
+    type: 'multiple',
     multiSelect: true,
-    groupedOptions: KIT_COMPONENT_GROUPS,
+    options: [
+      { id: 'BASE', label: 'Base' },
+      { id: 'DRAIN', label: 'Drain' },
+      { id: 'BACK_WALL', label: 'Back Wall' },
+      { id: 'LEFT_END_WALL', label: 'Left End Wall' },
+      { id: 'RIGHT_END_WALL', label: 'Right End Wall' },
+      { id: 'SHOWER_HEAD', label: 'Shower Head' },
+      { id: 'SHOWER_VALVE', label: 'Shower Valve' },
+      { id: 'DOOR', label: 'Door' },
+      { id: 'CURTAIN_ROD', label: 'Curtain Rod' },
+      { id: 'SHELF', label: 'Shelf' },
+      { id: 'NICHE', label: 'Niche' },
+      { id: 'SEAT', label: 'Seat' },
+      { id: 'GRAB_BAR', label: 'Grab Bar' }
+    ],
     dependsOn: {
       step: 'productFormat',
       values: ['KIT']
+    }
+  },
+  {
+    id: 'componentType',
+    label: 'Component Type',
+    options: ['BASE', 'WALL', 'DOOR', 'PLUMBING', 'ACCESSORIES'],
+    dependsOn: {
+      step: 'productFormat',
+      values: ['INDIVIDUAL_COMPONENT']
+    }
+  },
+  {
+    id: 'wallType',
+    label: 'Wall Type',
+    options: ['WALL_PANEL', 'WALL_SET'],
+    dependsOn: {
+      step: 'componentType',
+      values: ['WALL']
+    }
+  },
+  {
+    id: 'wallPanel',
+    label: 'Wall Panel',
+    options: ['BACK_WALL', 'LEFT_END_WALL', 'RIGHT_END_WALL'],
+    dependsOn: {
+      step: 'wallType',
+      values: ['WALL_PANEL']
+    }
+  },
+  {
+    id: 'wallSet',
+    label: 'Wall Set Configuration',
+    type: 'multiple',
+    multiSelect: true,
+    options: [
+      { id: 'BACK_WALL', label: 'Back Wall' },
+      { id: 'LEFT_END_WALL', label: 'Left End Wall' },
+      { id: 'RIGHT_END_WALL', label: 'Right End Wall' }
+    ],
+    dependsOn: {
+      step: 'wallType',
+      values: ['WALL_SET']
+    }
+  },
+  {
+    id: 'plumbingType',
+    label: 'Plumbing Component',
+    options: ['SHOWER_HEAD', 'SHOWER_VALVE'],
+    dependsOn: {
+      step: 'componentType',
+      values: ['PLUMBING']
+    }
+  },
+  {
+    id: 'accessoryType',
+    label: 'Accessory Type',
+    options: ['SHELF', 'NICHE', 'SEAT', 'GRAB_BAR', 'CURTAIN_ROD'],
+    dependsOn: {
+      step: 'componentType',
+      values: ['ACCESSORIES']
     }
   }
 ]

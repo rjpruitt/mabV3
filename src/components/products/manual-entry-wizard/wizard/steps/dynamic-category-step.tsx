@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { CategoryStep } from '../../types'
+import { CategoryStep, CategoryOption } from '../../types'
 
 interface DynamicCategoryStepProps {
   steps: CategoryStep[]
@@ -10,7 +10,7 @@ interface DynamicCategoryStepProps {
 }
 
 export function DynamicCategoryStep({ steps, onChange, initialSelections = {} }: DynamicCategoryStepProps) {
-  const [selections, setSelections] = useState<Record<string, string | string[]>>(initialSelections)
+  const [selections, setSelections] = useState<Record<string, string | string[]>>({})
   const [hoveredOption, setHoveredOption] = useState<string | null>(null)
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 })
 
@@ -34,23 +34,18 @@ export function DynamicCategoryStep({ steps, onChange, initialSelections = {} }:
 
   const handleOptionHover = (
     event: React.MouseEvent<HTMLButtonElement>,
-    option: string,
+    option: CategoryOption,
     description?: string
   ) => {
     if (description) {
       const rect = event.currentTarget.getBoundingClientRect()
       const containerRect = event.currentTarget.closest('.relative')?.getBoundingClientRect() || rect
       
-      // Calculate if tooltip would go below viewport
-      const tooltipHeight = 80 // Approximate height of tooltip
-      const relativeTop = rect.top - containerRect.top
-      const relativeLeft = rect.left - containerRect.left
-      
       setTooltipPosition({
-        x: relativeLeft + (rect.width / 2),
-        y: relativeTop + rect.height + 8
+        x: rect.left - containerRect.left + (rect.width / 2),
+        y: rect.top - containerRect.top + rect.height + 8
       })
-      setHoveredOption(option)
+      setHoveredOption(typeof option === 'string' ? option : option.id)
     }
   }
 
@@ -58,8 +53,9 @@ export function DynamicCategoryStep({ steps, onChange, initialSelections = {} }:
     setHoveredOption(null)
   }
 
-  const handleOptionClick = (step: CategoryStep, option: string) => {
+  const handleOptionClick = (step: CategoryStep, option: CategoryOption) => {
     const newSelections = { ...selections }
+    const optionValue = typeof option === 'string' ? option : option.id
 
     // Clear child selections when parent changes
     const clearChildSelections = (parentStep: string, parentValue: string) => {
@@ -74,68 +70,96 @@ export function DynamicCategoryStep({ steps, onChange, initialSelections = {} }:
       })
     }
 
-    if (step.multiSelect) {
+    if (step.multiSelect || step.type === 'multiple') {
       const currentValues = (newSelections[step.id] as string[]) || []
-      if (currentValues.includes(option)) {
-        newSelections[step.id] = currentValues.filter(v => v !== option)
+      if (currentValues.includes(optionValue)) {
+        newSelections[step.id] = currentValues.filter(v => v !== optionValue)
       } else {
-        newSelections[step.id] = [...currentValues, option]
+        newSelections[step.id] = [...currentValues, optionValue]
       }
     } else {
-      newSelections[step.id] = option
-      clearChildSelections(step.id, option)
+      newSelections[step.id] = optionValue
+      clearChildSelections(step.id, optionValue)
     }
 
     setSelections(newSelections)
     onChange(newSelections)
   }
 
+  const handleSelect = (stepId: string, value: string | string[]) => {
+    console.log('Step selection:', { stepId, value })
+    
+    const newSelections = {
+      ...selections,
+      [stepId]: value
+    }
+    
+    // Special handling for kit includes
+    if (stepId === 'kit_includes') {
+      console.log('Kit includes selected:', value)
+    }
+    
+    setSelections(newSelections)
+    onChange(newSelections)
+  }
+
+  const renderOption = (step: CategoryStep, option: CategoryOption) => {
+    const optionId = typeof option === 'string' ? option : option.id
+    const optionLabel = typeof option === 'string' ? option : option.label
+    const isSelected = step.multiSelect || step.type === 'multiple'
+      ? (selections[step.id] as string[] || []).includes(optionId)
+      : selections[step.id] === optionId
+
+    return (
+      <button
+        key={optionId}
+        type="button"
+        className={`px-4 py-2 rounded-md ${
+          isSelected 
+            ? 'bg-blue-600 text-white' 
+            : 'bg-white text-gray-900 hover:bg-gray-50'
+        }`}
+        onClick={() => handleOptionClick(step, option)}
+        onMouseEnter={(e) => handleOptionHover(e, option, step.description)}
+        onMouseLeave={handleOptionLeave}
+      >
+        {optionLabel.replace(/_/g, ' ')}
+      </button>
+    )
+  }
+
   return (
     <div className="space-y-8 relative">
-      {getAvailableSteps().map((step) => (
+      {getAvailableSteps().map(step => (
         <div key={step.id} className="space-y-4">
-          <label className="block text-sm font-medium text-gray-700">
-            {step.label}
-          </label>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-            {(typeof step.options === 'function' ? step.options(selections) : step.options).map((option) => (
-              <button
-                key={option}
-                type="button"
-                onClick={() => handleOptionClick(step, option)}
-                onMouseEnter={(e) => handleOptionHover(e, option, step.descriptions?.[option])}
-                onMouseLeave={handleOptionLeave}
-                className={`px-4 py-3 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${
-                  step.multiSelect
-                    ? (selections[step.id] as string[])?.includes(option)
-                      ? 'border-blue-500 bg-blue-50 text-blue-700'
-                      : 'border-gray-300 hover:border-gray-400'
-                    : selections[step.id] === option
-                    ? 'border-blue-500 bg-blue-50 text-blue-700'
-                    : 'border-gray-300 hover:border-gray-400'
-                }`}
-              >
-                {option.replace(/_/g, ' ')}
-              </button>
-            ))}
+          <div className="flex justify-between items-center">
+            <h3 className="text-lg font-medium text-gray-900">
+              {step.title || step.label}
+            </h3>
+            {step.description && (
+              <p className="text-sm text-gray-500">{step.description}</p>
+            )}
+          </div>
+
+          <div className="flex flex-wrap gap-2">
+            {(typeof step.options === 'function' 
+              ? step.options(selections) 
+              : step.options
+            ).map(option => renderOption(step, option))}
           </div>
         </div>
       ))}
 
-      {/* Tooltip */}
       {hoveredOption && (
         <div
-          className="absolute z-10 px-4 py-2 text-sm text-white bg-gray-900 rounded-md shadow-lg"
+          className="absolute z-10 bg-white p-2 rounded shadow-lg text-sm"
           style={{
             left: `${tooltipPosition.x}px`,
             top: `${tooltipPosition.y}px`,
-            transform: 'translateX(-50%)',
-            maxWidth: '300px',
-            wordWrap: 'break-word',
-            pointerEvents: 'none'
+            transform: 'translateX(-50%)'
           }}
         >
-          {steps.find(step => step.descriptions?.[hoveredOption])?.descriptions?.[hoveredOption]}
+          {hoveredOption}
         </div>
       )}
     </div>

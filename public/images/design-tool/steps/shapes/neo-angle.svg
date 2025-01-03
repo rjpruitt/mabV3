@@ -1,0 +1,6 @@
+<svg width="400" height="300" viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+  <rect width="100%" height="100%" fill="#f0f0f0"/>
+  <path d="M150,50 L250,50 L300,100 L300,250 L100,250 L100,100 Z" fill="#e0e0e0" stroke="#666" stroke-width="2"/>
+  <text x="200" y="160" font-family="Arial" font-size="16" text-anchor="middle">Neo-Angle</text>
+  <text x="200" y="180" font-family="Arial" font-size="12" text-anchor="middle">42" × 42"</text>
+</svg> 

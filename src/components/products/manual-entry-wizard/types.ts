@@ -1,21 +1,24 @@
 // UI Types for the Category Steps
-export interface OptionGroup {
+export type CategoryOption = string | {
+  id: string
   label: string
-  options: readonly string[] | string[]
 }
 
 export interface CategoryStep {
   id: string
-  label: string
-  options: string[] | ((selections: Record<string, string | string[]>) => string[])
-  descriptions?: Record<string, string>
+  label?: string
+  title?: string
+  description?: string
+  type?: 'single' | 'multiple'
+  options: CategoryOption[] | ((selections: Record<string, string | string[]>) => CategoryOption[])
+  multiSelect?: boolean
+  groupedOptions?: Record<string, { label: string; options: string[] }>
   dependsOn?: {
     step: string
     values: string[]
     conditions?: (selections: Record<string, string | string[]>) => boolean
   }
-  multiSelect?: boolean
-  groupedOptions?: Record<string, OptionGroup>
+  showWhen?: (selections: Record<string, string | string[]>) => boolean
 }
 
 // Categorization Types

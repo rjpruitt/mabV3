@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Image from 'next/image'
 import { CatalogueFormData } from '@/lib/products/types/catalogue'
+import { toast } from 'sonner'
 
 interface ImagesStepProps {
   data: CatalogueFormData
@@ -70,20 +71,48 @@ export function ImagesStep({ data, onChange }: ImagesStepProps) {
   }
 
   const handleImageUpload = async (file: File) => {
-    const newImage = {
-      id: `new-${Date.now()}`,
-      url: URL.createObjectURL(file),
-      alt: file.name,
-      source: 'custom' as const,
-      visibility: { customer: true, team: true }
+    try {
+      // Client-side validation
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error('File too large. Maximum size is 5MB.')
+        return
+      }
+
+      if (!['image/jpeg', 'image/png', 'image/webp', 'image/gif'].includes(file.type)) {
+        toast.error('Invalid file type. Only JPEG, PNG, WebP, and GIF files are allowed.')
+        return
+      }
+
+      if ((data.images || []).length >= 10) {
+        toast.error('Maximum number of images reached (10)')
+        return
+      }
+
+      // Create temporary URL for preview
+      const tempUrl = URL.createObjectURL(file)
+      const tempId = `new-${Date.now()}`
+      
+      // Add image with temporary URL for preview
+      const newImage = {
+        id: tempId,
+        url: tempUrl,
+        alt: file.name,
+        source: 'custom' as const,
+        visibility: { customer: true, team: true },
+        file
+      }
+      
+      const newImages = [...(data.images || []), newImage]
+      onChange({
+        ...data,
+        images: newImages
+      })
+      setSelectedImages(prev => [...prev, newImage.id])
+
+    } catch (error) {
+      console.error('Error uploading image:', error)
+      toast.error('Failed to upload image')
     }
-    
-    const newImages = [...(data.images || []), newImage]
-    onChange({
-      ...data,
-      images: newImages
-    })
-    setSelectedImages(prev => [...prev, newImage.id])
   }
 
   return (

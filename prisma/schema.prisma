@@ -60,9 +60,9 @@ model Specification {
 }
 
 model Supplier {
-  id        String   @id @default(uuid())
+  id        String    @id @default(cuid())
+  code      String    @unique
   name      String
-  code      String   @unique
   contact   Json?
   active    Boolean  @default(true)
   createdAt DateTime @default(now())
