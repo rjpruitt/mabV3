@@ -1,3 +1,8 @@
+'use client'
+
+import { useSearchParams } from 'next/navigation'
+import { useEffect } from 'react'
+import { useAuth } from '@/hooks/useAuth'
 import { HomeHero } from '@/components/sections/home/home-hero'
 import { FeaturesBanner } from '@/components/sections/home/features-banner'
 import { WhyChooseUs } from '@/components/sections/home/why-choose-us'
@@ -9,6 +14,17 @@ import { DesignToolsShowcase } from '@/components/shared/design-tools-showcase'
 import { Testimonials } from '@/components/sections/home/testimonials'
 
 export default function HomePage() {
+  const searchParams = useSearchParams()
+  const redirectTo = searchParams?.get('redirectTo') ?? null
+  const { signIn } = useAuth()
+
+  useEffect(() => {
+    // Store the redirect URL if present
+    if (redirectTo) {
+      localStorage.setItem('redirectAfterLogin', redirectTo)
+    }
+  }, [redirectTo])
+
   return (
     <div className="page-standard">
       <HomeHero />

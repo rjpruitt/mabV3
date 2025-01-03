@@ -4,8 +4,6 @@ import "./globals.css";
 import { Header } from '@/components/shared/header/header'
 import { Footer } from '@/components/shared/footer/footer'
 import { ClientWrapper } from '@/components/layouts/client-wrapper'
-import { AuthProvider } from '@/providers/auth-provider'
-import { AuthHandler } from '@/components/auth/auth-handler'
 import { Toaster } from 'sonner'
 
 const montserrat = Montserrat({ 
@@ -36,6 +34,9 @@ const playfairDisplaySC = Playfair_Display_SC({
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://midamericabathworks.com'),
+  icons: {
+    icon: '/images/favicon.ico',
+  },
   // ... keep existing metadata
 }
 
@@ -58,23 +59,20 @@ export default function RootLayout({
         className={montserrat.className}
         suppressHydrationWarning
       >
-        <AuthHandler />
         <Header />
-        <AuthProvider>
-          {(children as any).type?.name === 'NotFound' ? (
-            children
-          ) : (
-            <main 
-              id="main"
-              tabIndex={-1}
-              className="focus:outline-none"
-            >
-              <ClientWrapper>
-                {children}
-              </ClientWrapper>
-            </main>
-          )}
-        </AuthProvider>
+        {(children as any).type?.name === 'NotFound' ? (
+          children
+        ) : (
+          <main 
+            id="main"
+            tabIndex={-1}
+            className="focus:outline-none"
+          >
+            <ClientWrapper>
+              {children}
+            </ClientWrapper>
+          </main>
+        )}
         <Footer />
         <Toaster />
       </body>

@@ -1,7 +1,11 @@
-export default function Layout({
+export default function DesignYourShowerLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  return children
+  return (
+    <div className="page-standard pt-[280px] text-gray-800">
+      {children}
+    </div>
+  )
 } 
