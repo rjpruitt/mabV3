@@ -166,12 +166,43 @@ export class CasticoScraper extends ScraperService {
       const name = document.querySelector('h1.product_title')?.textContent?.trim() || ''
       const price = document.querySelector('.price .amount')?.textContent?.trim() || ''
       
-      // Get description
-      const description = document.querySelector('.woocommerce-product-details__short-description')?.textContent?.trim() || ''
-      
-      // Get includes
+      // Get description - look for paragraph starting with "Elevate your shower"
+      let description = ''
+      const paragraphs = document.querySelectorAll('p')
+      for (const p of paragraphs) {
+        const text = p.textContent?.trim() || ''
+        if (text.toLowerCase().startsWith('elevate your shower')) {
+          description = text
+          break
+        }
+      }
+
+      // Get includes - look for "Includes:" and parse items separated by <br> tags
       const includesList: string[] = []
+      const includesSection = Array.from(paragraphs).find(p => 
+        p.textContent?.includes('Includes:')
+      )
       
+      if (includesSection) {
+        // Get the text content after "Includes:"
+        const text = includesSection.innerHTML
+        const items = text
+          .split(/<br\s*\/?>/i) // Split on <br> tags
+          .map(item => item.trim())
+          .filter(item => 
+            item && 
+            item !== 'Includes:' && 
+            !item.includes('strong') // Filter out any remaining HTML tags
+          )
+          .map(item => 
+            item.replace(/^[•\s]+/, '') // Remove bullet points and leading spaces
+            .trim()
+          )
+          .filter(item => item) // Remove any empty strings
+
+        includesList.push(...items)
+      }
+
       // Extract dimensions from title
       const dimensionsMatch = name.match(/(\d+)"\s*x\s*(\d+)"\s*x\s*(\d+)"/)
       const dimensions = dimensionsMatch ? {
