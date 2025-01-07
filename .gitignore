@@ -42,3 +42,10 @@ next-env.d.ts
 # Uploaded files
 public/uploads/*
 !public/uploads/.gitkeep
+
+# Scraper debug files
+debug/screenshots/
+debug/results/
+scraped-images/
+*.png
+test-product.json

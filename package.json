@@ -2,12 +2,16 @@
   "name": "mabv3",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev -H 0.0.0.0",
     "build": "rm -rf .next && next build",
     "start": "next start",
     "lint": "next lint",
-    "setup-sheets": "ts-node --esm -r tsconfig-paths/register scripts/setup-sheets.ts"
+    "setup-sheets": "ts-node --esm -r tsconfig-paths/register scripts/setup-sheets.ts",
+    "test-scraper": "NODE_OPTIONS=--experimental-loader=ts-node/esm node scripts/test-castico-scraper.ts",
+    "scrape-castico": "NODE_PATH=./src node --loader ts-node/esm -r tsconfig-paths/register scripts/scrape-castico-products.ts",
+    "import-castico": "NODE_OPTIONS='--loader ts-node/esm' node scripts/import-castico-data.ts"
   },
   "dependencies": {
     "@headlessui/react": "^2.2.0",
@@ -22,12 +26,14 @@
     "@supabase/auth-ui-shared": "^0.1.8",
     "@supabase/ssr": "^0.5.2",
     "@supabase/supabase-js": "^2.47.10",
+    "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "embla-carousel-react": "^8.5.1",
     "framer-motion": "^11.11.17",
     "googleapis": "^144.0.0",
     "lucide-react": "^0.460.0",
     "next": "15.0.3",
+    "playwright": "^1.49.1",
     "prisma": "^6.0.1",
     "react": "19.0.0-rc-66855b96-20241106",
     "react-compare-slider": "^3.1.0",

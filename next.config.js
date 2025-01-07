@@ -1,13 +1,15 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  experimental: {
-    serverActions: {
-      allowedOrigins: ['localhost:3000']
-    }
+  webpack: (config) => {
+    config.externals = [
+      ...(config.externals || []),
+      { canvas: 'canvas' }
+    ]
+    return config
   },
   images: {
-    domains: ['localhost', 'via.placeholder.com'],
+    domains: ['localhost', 'via.placeholder.com', 'placehold.co'],
   },
 }
 
-module.exports = nextConfig 
+export default nextConfig 
