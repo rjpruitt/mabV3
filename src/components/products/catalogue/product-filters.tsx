@@ -1,9 +1,90 @@
 'use client'
 
 import { useProductContext } from '@/contexts/product-context'
+import { useState } from 'react'
+
+interface FilterOption {
+  id: string
+  label: string
+}
+
+interface FilterGroup {
+  id: string
+  label: string
+  options: FilterOption[]
+  dependsOn?: {
+    group: string
+    values: string[]
+  }
+}
+
+const PRODUCT_FILTERS: FilterGroup[] = [
+  {
+    id: 'topCategory',
+    label: 'Product Category',
+    options: [
+      { id: 'SHOWERS', label: 'Showers' },
+      { id: 'BATHTUBS', label: 'Bathtubs' },
+      { id: 'ACCESSIBILITY_SAFETY', label: 'Accessibility & Safety' },
+      { id: 'WALLS_WAINSCOTTING', label: 'Walls & Wainscotting' },
+      { id: 'ACCESSORIES', label: 'Accessories' }
+    ]
+  },
+  {
+    id: 'showerType',
+    label: 'Shower Type',
+    options: [
+      { id: 'WALK_IN', label: 'Walk-In Shower' },
+      { id: 'TUB_SHOWER_COMBO', label: 'Tub-Shower Combo' }
+    ],
+    dependsOn: {
+      group: 'topCategory',
+      values: ['SHOWERS']
+    }
+  },
+  {
+    id: 'productFormat',
+    label: 'Format',
+    options: [
+      { id: 'KIT', label: 'Complete Kit' },
+      { id: 'INDIVIDUAL_COMPONENT', label: 'Individual Component' }
+    ]
+  }
+]
+
+interface FilterState {
+  category?: string[]
+  supplier?: string[]
+  search?: string
+}
 
 export function ProductFilters() {
   const { filters, setFilters } = useProductContext()
+  const [activeFilters, setActiveFilters] = useState<Record<string, string[]>>({})
+
+  const handleFilterChange = (groupId: string, value: string, checked: boolean) => {
+    setActiveFilters(prev => {
+      const current = prev[groupId] || []
+      const updated = checked 
+        ? [...current, value]
+        : current.filter(v => v !== value)
+      
+      return {
+        ...prev,
+        [groupId]: updated
+      }
+    })
+  }
+
+  // Get visible filters based on dependencies
+  const getVisibleFilters = () => {
+    return PRODUCT_FILTERS.filter(group => {
+      if (!group.dependsOn) return true
+      
+      const parentValues = activeFilters[group.dependsOn.group] || []
+      return group.dependsOn.values.some(v => parentValues.includes(v))
+    })
+  }
 
   return (
     <div className="space-y-6">
@@ -18,51 +99,27 @@ export function ProductFilters() {
         />
       </div>
 
-      {/* Category Filter */}
-      <div>
-        <h4 className="font-medium text-gray-900 mb-2">Category</h4>
-        <div className="space-y-2">
-          {['faucets', 'showers', 'bathtubs'].map((category) => (
-            <label key={category} className="flex items-center text-gray-700">
-              <input
-                type="checkbox"
-                checked={filters.category?.includes(category) || false}
-                onChange={(e) => {
-                  const newCategories = e.target.checked
-                    ? [...(filters.category || []), category]
-                    : (filters.category || []).filter(c => c !== category)
-                  setFilters({ ...filters, category: newCategories })
-                }}
-                className="mr-2"
-              />
-              {category.charAt(0).toUpperCase() + category.slice(1)}
-            </label>
-          ))}
+      {getVisibleFilters().map(group => (
+        <div key={group.id}>
+          <h4 className="font-medium text-gray-900 mb-2">{group.label}</h4>
+          <div className="space-y-2">
+            {group.options.map(option => (
+              <label key={option.id} className="flex items-center text-gray-700">
+                <input
+                  type="checkbox"
+                  checked={activeFilters[group.id]?.includes(option.id) || false}
+                  onChange={(e) => {
+                    handleFilterChange(group.id, option.id, e.target.checked)
+                    setFilters({ ...filters, [group.id]: activeFilters[group.id] || [] })
+                  }}
+                  className="mr-2"
+                />
+                {option.label}
+              </label>
+            ))}
+          </div>
         </div>
-      </div>
-
-      {/* Supplier Filter */}
-      <div>
-        <h4 className="font-medium mb-2">Supplier</h4>
-        <div className="space-y-2">
-          {['supplier1', 'supplier2', 'supplier3'].map((supplier) => (
-            <label key={supplier} className="flex items-center">
-              <input
-                type="checkbox"
-                checked={filters.supplier?.includes(supplier) || false}
-                onChange={(e) => {
-                  const newSuppliers = e.target.checked
-                    ? [...(filters.supplier || []), supplier]
-                    : (filters.supplier || []).filter(s => s !== supplier)
-                  setFilters({ ...filters, supplier: newSuppliers })
-                }}
-                className="mr-2"
-              />
-              {supplier}
-            </label>
-          ))}
-        </div>
-      </div>
+      ))}
     </div>
   )
 } 

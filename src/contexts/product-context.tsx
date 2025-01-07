@@ -1,39 +1,42 @@
 'use client'
 
-import { createContext, useContext, ReactNode } from 'react'
-import { useProducts, ProductFilters } from '@/hooks/use-products'
-import { Product } from '@/types/product'
+import { createContext, useContext, ReactNode, useState } from 'react'
+
+interface FilterState {
+  category?: string[]
+  supplier?: string[]
+  search?: string
+}
 
 interface ProductContextType {
-  products: Product[]
-  isLoading: boolean
-  error: string | null
-  filters: ProductFilters
-  setFilters: (filters: ProductFilters) => void
-  metadata?: {
-    total: number
-    page: number
-    totalPages: number
-    hasMore: boolean
-  }
+  filters: FilterState
+  setFilters: (filters: FilterState) => void
 }
 
 const ProductContext = createContext<ProductContextType | undefined>(undefined)
 
-export function ProductProvider({ children }: { children: ReactNode }) {
-  const productData = useProducts()
-
-  return (
-    <ProductContext.Provider value={productData}>
-      {children}
-    </ProductContext.Provider>
-  )
-}
-
 export function useProductContext() {
   const context = useContext(ProductContext)
-  if (context === undefined) {
+  if (!context) {
     throw new Error('useProductContext must be used within a ProductProvider')
   }
   return context
+}
+
+interface ProductProviderProps {
+  children: ReactNode
+}
+
+export function ProductProvider({ children }: ProductProviderProps) {
+  const [filters, setFilters] = useState<FilterState>({
+    category: [],
+    supplier: [],
+    search: ''
+  })
+
+  return (
+    <ProductContext.Provider value={{ filters, setFilters }}>
+      {children}
+    </ProductContext.Provider>
+  )
 } 

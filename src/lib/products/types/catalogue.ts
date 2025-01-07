@@ -13,28 +13,61 @@ export interface SupplierData {
 }
 
 export interface ProductImage {
-  id: string
+  id?: string
   url: string
-  alt: string
+  alt?: string
+  source?: string
   isPrimary?: boolean
-  source: 'supplier' | 'custom'
   visibility?: {
-    customer: boolean
-    team: boolean
+    showToCustomer: boolean
+    showToSalesRep: boolean
   }
   file?: File
+}
+
+export interface CatalogueProduct {
+  id: string
+  name: string
+  description?: {
+    supplier: string
+    marketing: string
+    internal: string
+  }
+  brand: string
+  categorization: {
+    style: string[]
+    type: string[]
+  }
+  classification: {
+    style: string[]
+    productType: string[]
+  }
+  designTool: {
+    classification: {
+      format: 'KIT' | 'INDIVIDUAL_COMPONENT'
+      topCategory: string
+      componentType?: string
+      includedComponents: string[]
+    }
+  }
+  priceLevel: string
+  images: ProductImage[]
+  visibility: {
+    showToCustomer: boolean
+    showToSalesRep: boolean
+  }
+  specifications?: Record<string, any>
+  supplierData?: any[]
+  choices?: Array<{
+    category: string
+    productId: string
+  }>
 }
 
 export interface CatalogueFormData {
   id?: string
   name: string
   brand: string
-  supplierData: SupplierData[]
-  variant?: {
-    parentId?: string
-    type: 'color' | 'finish' | 'size' | null
-    value: string
-  }
   description: {
     supplier: string
     marketing: string
@@ -50,20 +83,21 @@ export interface CatalogueFormData {
   }
   designTool: {
     classification: {
-      format: 'INDIVIDUAL_COMPONENT' | 'KIT'
-      topCategory: 'BATHTUBS' | 'SHOWERS' | 'ACCESSIBILITY_SAFETY' | 'WALLS_WAINSCOTTING' | 'ACCESSORIES'
-      componentType?: ComponentType
-      includedComponents?: ComponentType[]
+      format: 'KIT' | 'INDIVIDUAL_COMPONENT'
+      topCategory: string
+      componentType?: string
+      includedComponents: string[]
     }
   }
-  priceLevel: 'SMART_SOLUTIONS' | 'PREMIUM_UPGRADES' | 'LUXURY'
+  priceLevel: string
   images: ProductImage[]
   visibility: {
     showToCustomer: boolean
     showToSalesRep: boolean
   }
-  specifications: Record<string, string | number | boolean | string[]>
-  choices?: Array<{
+  specifications: Record<string, any>
+  supplierData: any[]
+  choices: Array<{
     category: string
     productId: string
   }>
