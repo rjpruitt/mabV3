@@ -75,7 +75,7 @@ export abstract class ScraperService {
       }
     }
   }>
-  abstract extractImages(page: Page, pattern: string): Promise<ScrapedImage[]>
+  abstract extractImages(page: Page, pattern?: string): Promise<ScrapedImage[]>
   abstract extractPatternVariations(page: Page): Promise<PatternVariation[]>
   abstract downloadImage(url: string): Promise<Buffer>
   abstract scrapeProduct(url: string): Promise<ScrapedProduct>
@@ -153,10 +153,12 @@ export abstract class ScraperService {
     const resultsDir = path.join(process.cwd(), 'debug', 'results')
     await fs.mkdir(resultsDir, { recursive: true })
     
-    // Stringify with normalized line endings
-    const jsonString = this.normalizeLineEndings(
-      JSON.stringify(data, null, 2)
-    )
+    // Normalize line endings and convert to standard JSON string
+    const jsonString = JSON.stringify(data, null, 2)
+      .replace(/\r\n/g, '\n')  // Convert Windows line endings
+      .replace(/\r/g, '\n')    // Convert old Mac line endings
+      .replace(/\u2028/g, '\n') // Replace LS (Line Separator)
+      .replace(/\u2029/g, '\n') // Replace PS (Paragraph Separator)
     
     const filepath = path.join(resultsDir, filename)
     await fs.writeFile(filepath, jsonString, 'utf8')

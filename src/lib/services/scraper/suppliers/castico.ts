@@ -45,10 +45,10 @@ export class CasticoScraper extends ScraperService {
   private enableScreenshots = process.env.SAVE_SCRAPER_SCREENSHOTS === 'true'
   private debug = process.env.DEBUG_SCRAPER === 'true'
   
-  private readonly categories: CategoryInfo[] = [
+  public readonly categories: CategoryInfo[] = [
     {
       name: 'BASE & WALL KITS',
-      url: 'https://castico-tx.com/product-category/castico-online/?filter_product-category=base-wall-kits/',
+      url: 'https://castico-tx.com/product-category/castico-online/shower-kits-base-wall/',
     },
     {
       name: 'SHOWER WALLS',
@@ -69,7 +69,7 @@ export class CasticoScraper extends ScraperService {
 
   private cleanText(text: string): string {
     return text
-      .replace(/[\t\r\n\u2028\u2029\v\f\u000b\u001c\u001d\u001e\u001f]+/g, ' ')
+      .replace(/[\t\r\n\u2028\u000b\u001c\u001d\u001e\u001f]+/g, ' ')
       .replace(/\s+/g, ' ')
       .trim()
   }
@@ -79,7 +79,6 @@ export class CasticoScraper extends ScraperService {
     
     // Create required directories
     await fs.mkdir(this.screenshotsDir, { recursive: true })
-    await fs.mkdir(path.join(process.cwd(), 'scraped-images'), { recursive: true })
 
     // Only launch if not already launched
     if (!this.browser) {
@@ -90,7 +89,13 @@ export class CasticoScraper extends ScraperService {
           '--disable-web-security',
           '--disable-features=IsolateOrigins,site-per-process'
         ],
-        timeout: 120000 // Increase timeout to 2 minutes
+        timeout: 120000, // Increase timeout to 2 minutes
+        // Add console filtering
+        ignoreDefaultArgs: ['--enable-automation'],
+        // Filter out Kirki deprecation warnings
+        env: {
+          PLAYWRIGHT_SKIP_CONSOLE_WARNINGS: '1'
+        }
       })
     }
 
@@ -435,7 +440,7 @@ export class CasticoScraper extends ScraperService {
     }
   }
 
-  async extractImages(page: Page, pattern: string): Promise<ScrapedImage[]> {
+  async extractImages(page: Page, pattern?: string): Promise<ScrapedImage[]> {
     console.log('Starting image extraction...')
     const images = await page.evaluate(() => {
       // Target the main product gallery column on the left
@@ -491,13 +496,15 @@ export class CasticoScraper extends ScraperService {
     const results = await Promise.all(
       productImages.map(async (img, index) => {
         const buffer = await this.downloadImage(img.url)
-        const localPath = await this.saveImage(buffer, `${pattern}-${productName}`, index)
+        const view = this.getViewFromUrl(img.url, index)
+        const sanitizedPattern = pattern?.replace(/[^a-z0-9]/gi, '-').toLowerCase() || ''
+        const filename = `${sanitizedPattern}-${view}-${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}.jpg`
+        const localPath = await this.saveImage(buffer, filename, index)
         return {
-          url: img.url,
-          alt: img.alt,
+          ...img,
           localPath,
-          view: img.view,
-          isPrimary: index === 0
+          view,
+          isPrimary: view === 'full'
         }
       })
     )
@@ -608,152 +615,155 @@ export class CasticoScraper extends ScraperService {
     }
   }
 
-  private async scrapeCategory(category: CategoryInfo): Promise<string[]> {
+  public async scrapeCategory(category: CategoryInfo): Promise<string[]> {
     if (!this.browser) {
       throw new Error('Browser not initialized')
     }
 
     const page = await this.browser.newPage()
-    console.log(`Processing category: ${category.name}`)
-    
+    console.log(`Scraping category: ${category.name}`)
+
     try {
       await page.goto(category.url)
-      const allProductUrls: string[] = []
+      console.log('Category page loaded')
+
+      await page.waitForSelector('.products', { timeout: 10000 })
+      console.log('Product grid found')
       
-      // Initial product load - wait for any product to be visible
-      await page.waitForSelector('.product-grid-item, .product, li.type-product', { 
-        timeout: 10000,
-        state: 'visible'
-      })
+      const allProductUrls: string[] = []
+      let previousCount = 0
+      let loadMoreAttempts = 0
+      const maxAttempts = 10
 
-      while (true) {
-        // Get current page's products using multiple possible selectors
+      while (loadMoreAttempts < maxAttempts) {
+        // Get current product URLs
         const newUrls = await page.evaluate(() => {
-          const selectors = [
-            '.product-grid-item a.product-image-link',
-            '.products li.product a.woocommerce-LoopProduct-link',
-            'li.type-product a.woocommerce-loop-product__link',
-            '.product a[href*="/product/"]'
-          ]
-
-          for (const selector of selectors) {
-            const links = Array.from(document.querySelectorAll(selector))
-            if (links.length > 0) {
-              return links.map(link => (link as HTMLAnchorElement).href)
-            }
-          }
-          return []
+          const products = document.querySelectorAll('a.product-link[title]')
+          return Array.from(products, a => (a as HTMLAnchorElement).href)
+            .filter(url => url.includes('/product/'))
         })
         
-        if (newUrls.length > 0) {
+        if (newUrls.length > previousCount) {
+          allProductUrls.length = 0
           allProductUrls.push(...newUrls)
-          console.log(`Found ${newUrls.length} products on current page`)
-        } else {
-          console.log('No products found with current selectors')
+          console.log(`Found ${newUrls.length} products, total: ${allProductUrls.length}`)
+          previousCount = newUrls.length
+          loadMoreAttempts = 0 // Reset attempts when we find new products
         }
 
-        // Check for Load More button with multiple possible selectors
-        const loadMoreButton = await page.$(
-          [
-            '.load-more-button',
-            'button.load-more',
-            '[data-action="load-more"]',
-            '.woodmart-load-more',
-            'a.load-more-products',
-            '.products-footer .load-more'
-          ].join(', ')
-        )
-
-        if (!loadMoreButton) {
-          console.log('No more Load More button found')
+        // If we have all expected products, we can stop
+        if (allProductUrls.length >= 60) {
+          console.log('Found all expected products')
           break
         }
 
-        // Click Load More and wait for new products
-        console.log('Clicking Load More button...')
-        await loadMoreButton.click()
-        
-        // Wait for new products to load
-        await page.waitForTimeout(2000)
-
-        // Wait for any loading indicators to disappear
-        await page.waitForSelector(
-          [
-            '.loading',
-            '.loading-mask',
-            '.products-loading',
-            '.woodmart-loading-hidden'
-          ].join(', '),
-          { 
-            state: 'hidden',
-            timeout: 5000 
+        // Look for Load More button
+        const loadMoreButton = await page.$('.et-infload-btn')
+        if (!loadMoreButton || !(await loadMoreButton.isVisible())) {
+          // Only check for "All products loaded" if we have a significant number of products
+          if (allProductUrls.length > 50) {
+            const allLoaded = await page.$('.et-infload-to-top')
+            if (allLoaded) {
+              const loadedText = await allLoaded.textContent()
+              console.log('Found message:', loadedText)
+              if (loadedText?.includes('All products loaded')) {
+                console.log('All products loaded confirmation found')
+                break
+              }
+            }
           }
-        ).catch(() => {
-          console.log('No loading indicator found or it disappeared quickly')
-        })
+          loadMoreAttempts++
+          console.log(`Load More button not found, attempt ${loadMoreAttempts}`)
+          await page.waitForTimeout(2000)
+          continue
+        }
 
-        // Verify new products were loaded
-        const currentCount = allProductUrls.length
-        await page.waitForFunction(
-          function(count: number) {
-            return document.querySelectorAll('.product, .product-grid-item, li.type-product').length > count
-          },
-          currentCount,
-          { timeout: 5000 }
-        ).catch(() => {
-          console.log('No new products loaded, might be at the end')
-        })
+        // Click and wait for new products
+        console.log('Clicking load more button...')
+        await loadMoreButton.click()
+        await page.waitForTimeout(2000)
       }
 
       const uniqueUrls = [...new Set(allProductUrls)]
-      console.log(`Total products found in ${category.name}: ${uniqueUrls.length}`)
-      
-      if (uniqueUrls.length === 0) {
-        // Take a screenshot and log the page content for debugging
-        await page.screenshot({
-          path: path.join(this.screenshotsDir, `no-products-${category.name.toLowerCase()}.png`),
-          fullPage: true
-        })
-        const content = await page.content()
-        console.log('Page content sample:', content.substring(0, 500))
-        console.log(`No products found in category ${category.name}. Screenshot saved.`)
-      } else {
-        console.log(`Found ${uniqueUrls.length} products in ${category.name}:`)
-        uniqueUrls.forEach(url => console.log(`- ${url}`))
-      }
-
+      console.log(`Found ${uniqueUrls.length} unique products in ${category.name}`)
       return uniqueUrls
 
     } catch (error) {
       console.error(`Error scraping category ${category.name}:`, error)
-      await page.screenshot({
-        path: path.join(this.screenshotsDir, `error-${category.name.toLowerCase()}.png`),
-        fullPage: true
-      })
+      await this.saveErrorScreenshot(page, category.url)
       return []
     } finally {
       await page.close()
     }
   }
 
-  public async scrapeAllProducts(): Promise<ScrapedProduct[]> {
-    const allProductUrls: string[] = []
+  public async scrapeAllProducts(category: CategoryInfo): Promise<ScrapedProduct[]> {
+    console.log(`Starting full scrape of category: ${category.name}`)
     
-    for (const category of this.categories) {
-      const urls = await this.scrapeCategory(category)
-      allProductUrls.push(...urls)
-      
-      // Add random delay between categories
-      const delay = Math.floor(Math.random() * 10000) + 10000 // 10-20 seconds
-      console.log(`Waiting ${delay}ms before next category...`)
-      await new Promise(resolve => setTimeout(resolve, delay))
+    // Get all product URLs
+    const productUrls = await this.scrapeCategory(category)
+    console.log(`Found ${productUrls.length} products to scrape`)
+    
+    const results: ScrapedProduct[] = []
+    const errors: { url: string; error: string }[] = []
+    
+    // Setup progress tracking
+    let completed = 0
+    const total = productUrls.length
+    
+    for (const url of productUrls) {
+      try {
+        console.log(`\nScraping product ${++completed}/${total}: ${url}`)
+        
+        // Add delay between requests
+        if (completed > 1) {
+          await new Promise(resolve => setTimeout(resolve, 2000))
+        }
+        
+        const product = await this.scrapeProduct(url)
+        
+        // Only save if we have a valid product with a name
+        if (product.name) {
+          // Setup directories for this product
+          const { baseDir, productDir, imagesDir } = await this.setupResultsDirectory(
+            'base-and-wall-kits',
+            product.name
+          )
+
+          // Save product data once
+          await this.saveScrapedProduct(product, productDir)
+
+          // Save pattern images once
+          for (const pattern of product.patterns) {
+            await this.savePatternImages(pattern, imagesDir)
+          }
+          
+          results.push(product)
+        }
+        
+        // Log progress
+        console.log(`✓ Completed ${completed}/${total} (${Math.round(completed/total*100)}%)`)
+        
+      } catch (error) {
+        console.error(`Error scraping ${url}:`, error)
+        errors.push({ url, error: error instanceof Error ? error.message : String(error) })
+      }
     }
 
-    // Remove duplicates across categories
-    const uniqueUrls = [...new Set(allProductUrls)]
-    console.log(`Total unique products found: ${uniqueUrls.length}`)
+    // Save summary including errors
+    const summary = {
+      category: category.name,
+      scrapedAt: new Date().toISOString(),
+      total: productUrls.length,
+      successful: results.length,
+      failed: errors.length,
+      errors
+    }
 
-    return this.scrapeWithRateLimit(uniqueUrls)
+    const summaryPath = path.join(process.cwd(), 'debug', 'results', 'base-and-wall-kits', 'summary.json')
+    await fs.writeFile(summaryPath, JSON.stringify(summary, null, 2))
+
+    return results
   }
 
   private async scrapeWithRateLimit(urls: string[]): Promise<ScrapedProduct[]> {
@@ -945,18 +955,21 @@ export class CasticoScraper extends ScraperService {
             }
           })
           
-          const getViewFromUrl = (url: string): string => {
-            const lower = url.toLowerCase()
-            if (lower.includes('center')) return 'front'
-            if (lower.includes('lr') || lower.includes('leftright')) return 'side'
-            if (lower.includes('texture')) return 'detail'
-            return 'view'
+          const getViewFromUrl = (url: string, index: number): string => {
+            switch(index) {
+              case 0: return 'base-detail'
+              case 1: return 'full'
+              case 2: return 'includes'
+              case 3: return 'detail'
+              case 4: return 'base'
+              default: return `view-${index + 1}`
+            }
           }
 
           return Array.from(urls).map((url, index) => ({
             url,
             alt: '',
-            view: getViewFromUrl(url)
+            view: getViewFromUrl(url, index)
           }))
         }, pattern.name)
 
@@ -967,11 +980,15 @@ export class CasticoScraper extends ScraperService {
           pattern.images = await Promise.all(
             images.map(async (img, index) => {
               const buffer = await this.downloadImage(img.url)
-              const localPath = await this.saveImage(buffer, `${pattern.name}-${index}`, index)
+              const view = this.getViewFromUrl(img.url, index)
+              const sanitizedPattern = pattern.name.replace(/[^a-z0-9]/gi, '-').toLowerCase()
+              const filename = `${sanitizedPattern}-${view}-${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}.jpg`
+              const localPath = await this.saveImage(buffer, filename, index)
               return {
                 ...img,
                 localPath,
-                isPrimary: index === 0
+                view,
+                isPrimary: view === 'full'
               }
             })
           )
@@ -1091,10 +1108,26 @@ export class CasticoScraper extends ScraperService {
       const patterns = await this.extractPatternVariations(page)
       console.log(`Pattern extraction complete. Found ${patterns.length} patterns`)
 
-      return {
+      const product = {
         ...details,
         patterns
       }
+
+      // Setup directories and save results
+      const { baseDir, productDir, imagesDir } = await this.setupResultsDirectory(
+        'base-and-wall-kits',
+        product.name
+      )
+
+      // Save product data
+      await this.saveScrapedProduct(product, productDir)
+
+      // Save pattern images
+      for (const pattern of patterns) {
+        await this.savePatternImages(pattern, imagesDir)
+      }
+
+      return product
 
     } catch (error) {
       console.error(`Error scraping product ${url}:`, error)
@@ -1118,4 +1151,98 @@ export class CasticoScraper extends ScraperService {
       }
     }
   }
-} 
+
+  private async setupResultsDirectory(category: string, productName: string): Promise<{
+    baseDir: string,
+    productDir: string,
+    imagesDir: string
+  }> {
+    const date = new Date().toISOString().split('T')[0]
+    const sanitizedName = productName.replace(/[^a-z0-9]/gi, '-').toLowerCase()
+    
+    const baseDir = path.join(process.cwd(), 'debug', 'results', category, date)
+    const productDir = path.join(baseDir, sanitizedName)
+    const imagesDir = path.join(productDir, 'images')
+
+    await fs.mkdir(productDir, { recursive: true })
+    await fs.mkdir(imagesDir, { recursive: true })
+
+    return { baseDir, productDir, imagesDir }
+  }
+
+  private async saveScrapedProduct(product: ScrapedProduct, directory: string) {
+    await fs.writeFile(
+      path.join(directory, 'product.json'),
+      JSON.stringify(product, null, 2)
+    )
+    console.log(`Saved product data: ${product.name}`)
+  }
+
+  private async savePatternImages(pattern: PatternVariation, imagesDir: string) {
+    // Skip if no images
+    if (pattern.images.length === 0) {
+      console.warn(`No images to save for pattern ${pattern.name}`)
+      return
+    }
+
+    // Create pattern directory
+    const patternDir = path.join(imagesDir, pattern.name.replace(/[^a-z0-9]/gi, '-').toLowerCase())
+    await fs.mkdir(patternDir, { recursive: true })
+    
+    console.log(`Saving ${pattern.images.length} images for pattern ${pattern.name}...`)
+    
+    // Track which images we've already saved
+    const savedImages = new Set<string>()
+    
+    for (const image of pattern.images) {
+      try {
+        // Skip if we've already saved this image
+        if (savedImages.has(image.localPath)) {
+          continue
+        }
+        
+        // Verify source image exists
+        await fs.access(image.localPath)
+        
+        const filename = path.basename(image.localPath)
+        const targetPath = path.join(patternDir, filename)
+        
+        await fs.copyFile(image.localPath, targetPath)
+        savedImages.add(image.localPath)
+        
+        console.log(`Saved ${filename} for pattern ${pattern.name}`)
+        
+      } catch (error) {
+        console.error(`Error saving image ${image.localPath} for pattern ${pattern.name}:`, error)
+      }
+    }
+  }
+
+  private async saveSummary(results: ScrapedProduct[], directory: string) {
+    const summary = {
+      scrapedAt: new Date().toISOString(),
+      totalProducts: results.length,
+      products: results.map(p => ({
+        name: p.name,
+        url: p.url,
+        patterns: p.patterns.length
+      }))
+    }
+
+    await fs.writeFile(
+      path.join(directory, 'summary.json'),
+      JSON.stringify(summary, null, 2)
+    )
+  }
+
+  private getViewFromUrl(url: string, index: number): string {
+    switch(index) {
+      case 0: return 'base-detail'
+      case 1: return 'full'
+      case 2: return 'includes'
+      case 3: return 'detail'
+      case 4: return 'base'
+      default: return `view-${index + 1}`
+    }
+  }
+}

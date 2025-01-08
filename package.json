@@ -10,6 +10,7 @@
     "lint": "next lint",
     "setup-sheets": "ts-node --esm -r tsconfig-paths/register scripts/setup-sheets.ts",
     "test-scraper": "NODE_OPTIONS=--experimental-loader=ts-node/esm node scripts/test-castico-scraper.ts",
+    "analyze-scrape": "NODE_OPTIONS=--experimental-loader=ts-node/esm node scripts/analyze-scrape-results.ts",
     "scrape-castico": "NODE_PATH=./src node --loader ts-node/esm -r tsconfig-paths/register scripts/scrape-castico-products.ts",
     "import-castico": "NODE_OPTIONS='--loader ts-node/esm' node scripts/import-castico-data.ts"
   },

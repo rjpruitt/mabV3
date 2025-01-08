@@ -1,634 +1,883 @@
 # Castico Scraper Documentation
 
-## Project Overview
-A web scraper built to extract product information from Castico-tx.com, focusing on shower products, their variations, specifications, and images.
-
-## Project Structure
-
-### Key Files
-
-The project consists of the following key files and directories:
-
-src/
-  lib/
-    services/
-      scraper/
-        scraper-service.ts    # Base scraper interface
-        suppliers/
-          castico.ts          # Main scraper implementation
-scripts/
-  test-castico-scraper.ts    # Test runner
-  register.ts                # TypeScript ESM registration
-debug/
-  screenshots/               # Debug screenshots
-scraped-images/             # Downloaded product images
-
-### Configuration
-
-The project uses the following key dependencies and scripts in package.json:
-
-Scripts:
-- test-scraper: node --loader ts-node/esm scripts/test-castico-scraper.ts
-- scrape-castico: NODE_PATH=./src node --loader ts-node/esm scripts/scrape-castico-products.ts
-
-Dependencies:
-- playwright: ^1.49.1
-- typescript: ^5.0.0
-- class-variance-authority: ^0.7.1
-
-## Current Implementation
-
-### Test Script
-The main test URL being used is:
-https://castico-tx.com/product/shower-kit-32-x-60-x-84-center-drain-white-sand-geometric-2-wall-decor/
-
-### Page Structure Analysis
-
-#### Product Gallery
-The product gallery is structured with the following elements:
-- Main container: .woocommerce-product-gallery
-- Gallery wrapper: .woocommerce-product-gallery__wrapper
-- Individual images: .woocommerce-product-gallery__image
-- Image elements with data attributes: data-large_image, src
-
-Key challenges:
-- Images are dynamically loaded
-- Multiple image sources must be handled
-- Gallery initialization is problematic
-
-#### Accordion Sections
-The page uses an accordion structure for product information:
-- Technical Specifications section with .elementor-tab-title
-- Features section with .elementor-tab-title
-- Content contained in .elementor-tab-content
-- Dynamic expansion causing reliability issues
-
-#### Pattern Variations
-Pattern selection is handled through:
-- Main wrapper: .variable-items-wrapper[data-attribute_name="attribute_pa_wall-color"]
-- Individual patterns: .variable-item
-- Pattern switching affects gallery images
-
-### Data Models
-
-The scraper uses the following data structures:
-
-ScrapedProduct:
-- url: string
-- name: string
-- brand: string
-- description: { supplier: string, marketing: string }
-- metadata: { sku: string, price: string, supplierUrl: string, patterns?: string[] }
-- images: ScrapedImage[]
-- defaultImage?: string
-- patterns: PatternVariation[]
-- specs: ProductSpec[]
-
-PatternVariation:
-- id: string
-- name: string
-- thumbnail: string
-- fullSizeImage: string
-- order: number
-
-ProductSpec:
-- name: string
-- value: string
-
-## Current Issues
-
-### 1. Gallery Image Extraction
-Current problems:
-- Gallery not initializing properly
-- Images not loading consistently
-- Multiple image sources causing confusion
-- Need better timing for gallery access
-
-### 2. Accordion Content
-Issues include:
-- Sections not expanding reliably
-- Content not accessible after clicking
-- Technical specifications missing from output
-- Timing issues with content visibility
-
-### 3. Pattern Processing
-Challenges:
-- Pattern switching affects gallery state
-- Image association not reliable
-- Need better state management
-- Error recovery missing
-
-## Debug Setup
-
-### Screenshot Locations
-Debug screenshots are saved in debug/screenshots/:
-- initial-load.png: Page state after initial load
-- accordions-expanded.png: State after expanding accordions
-- page-loaded.png: Final page state
-
-### Console Logging
-Important logging points:
-- Page load completion
-- Gallery initialization attempts
-- Accordion expansion status
-- Pattern processing steps
-- Image download progress
-
-## Testing Instructions
-
-1. Ensure all dependencies are installed:
-   npm install
-
-2. Run the test script:
-   npm run test-scraper
-
-3. Check debug/screenshots/ for visual verification
-
-4. Review console output for:
-   - Gallery initialization status
-   - Accordion expansion success
-   - Pattern processing completion
-   - Image download confirmations
-
-## Next Steps
-
-### 1. Gallery Improvements
-- Implement reliable gallery state detection
-- Add retry mechanism for image loading
-- Validate image quality and resolution
-- Improve timing of gallery access
-
-### 2. Specification Extraction
-- Develop more robust accordion handling
-- Implement content verification steps
-- Add structured data parsing
-- Improve timing of content access
-
-### 3. Pattern Processing
-- Add pattern state machine
-- Implement rollback on failures
-- Improve image association
-- Add error recovery mechanisms
-
-## Maintenance Notes
-
-Regular maintenance tasks:
-- Verify selectors are still valid
-- Monitor for site structure changes
-- Update test cases with new products
-- Maintain debug screenshot history
-- Check for new pattern variations
-
-## Support
-
-When investigating issues:
-1. Check debug screenshots in debug/screenshots/
-2. Review console output from test runs
-3. Examine network requests in browser devtools
-4. Verify DOM structure in page source
-5. Validate pattern switching behavior
-
-## Development History & Current State
-
-### Latest Attempt Results
-The most recent test run showed:
-- Successfully detecting patterns (5 variations found)
-- Features section content being extracted (11 items)
-- Technical specifications section not being extracted
-- Only capturing first image despite multiple being present
-- Accordion expansion attempts failing after 3 retries
-
-### Key Breakthrough Points
-1. Pattern detection is working reliably using the variable-items-wrapper selector with wall-color attribute
-2. Features extraction works when directly accessing the elementor-tab-content elements
-3. Base product details extraction is working correctly
-
-### Failed Approaches
-1. Waiting for networkidle - page never reaches stable state
-2. Using waitForSelector on gallery - timing issues
-3. Clicking accordion titles programmatically - not triggering content display
-4. Multiple selector attempts for images - only getting first image
-
-### Current Working Theory
-The page appears to have multiple initialization stages:
-1. Initial DOM load
-2. JavaScript framework initialization
-3. Gallery component initialization
-4. Dynamic content loading
-5. Pattern variation handling
-
-We need to:
-1. Wait for each stage properly
-2. Verify state before proceeding
-3. Handle each component independently
-
-### Critical Code Sections
-The most problematic section is the accordion expansion where we're trying to click titles and wait for content, but the content remains hidden despite successful clicks.
-
-### Environment Notes
-- Running with headless=false for debugging
-- Using slowMo=1000 to watch interactions
-- Screenshots being saved at key points
-- Console logging enabled for all steps
-
-## Immediate Focus Areas
-
-1. Technical Specifications Section
-   - Located above Features in accordion
-   - Not expanding properly
-   - Content exists but not accessible
-   - Needs new approach for expansion
-
-2. Gallery Initialization
-   - Need to understand initialization sequence
-   - Multiple image sources available
-   - Pattern switching affects gallery state
-   - Current selectors not capturing all images
-
-3. State Management
-   - Need to track page state
-   - Verify component initialization
-   - Handle state transitions
-   - Add rollback capabilities
-
-## Test Cases & Expected Results
-
-### Base Product
-URL: https://castico-tx.com/product/shower-kit-32-x-60-x-84-center-drain-white-sand-geometric-2-wall-decor/
-
-Expected Data:
-1. Technical Specifications:
-   - Should include dimensions
-   - Should include materials
-   - Should include installation requirements
-   - Currently missing completely
-
-2. Images:
-   - Main product image (currently working)
-   - Pattern variation images (not capturing)
-   - Installation diagrams (not capturing)
-   - Need to handle multiple image sources
-
-3. Features:
-   - Currently extracting 11 items successfully
-   - Formatting is correct
-   - No duplicates
-   - Working as expected
-
-### Related Files
-1. test-castico-scraper.ts: Main test runner
-2. register.ts: Handles TypeScript/ESM setup
-3. castico-products.json: Full product catalog data
-4. test-product.json: Sample output for verification
-
-### Debug Files Location
-- Screenshots: debug/screenshots/
-- Scraped images: scraped-images/
-- Debug logs: Generated during test runs
-
-### Current Workflow
-1. Run test-scraper
-2. Check debug screenshots
-3. Verify console output
-4. Compare against test-product.json
-5. Analyze failed components
-
-Next session should focus on:
-1. Technical specifications extraction
-2. Complete gallery image capture
-3. Improving state management
-
-## Additional Technical Details
-
-### Browser Configuration
-Current Playwright settings that are important:
-- headless: false (needed for proper page rendering)
-- slowMo: 1000 (helps with dynamic content)
-- timeout: 120000 (2 minutes, increased from default)
-- args: ['--disable-web-security', '--disable-features=IsolateOrigins,site-per-process']
-
-### Accordion Investigation Notes
-The technical specifications section appears to use a different initialization pattern than the features section. While features content is accessible after a simple click, the technical specifications require:
-1. Initial click
-2. Wait for animation
-3. Check for content visibility
-4. Possible second click needed
-
-### Gallery Behavior Patterns
-The gallery shows different behavior depending on:
-1. Initial page load (shows default pattern)
-2. After pattern selection (shows pattern-specific images)
-3. After hover interactions (loads additional views)
-4. After click interactions (loads full-size images)
-
-### Required Files for Testing
-- .gitignore must include:
-  - debug/screenshots/
-  - debug/results/
-  - scraped-images/
-  - *.png
-  - test-product.json
-- test-product.json should contain expected output structure
-- castico-products.json tracks all scraped products
-
-### Test Script Location
-scripts/test-castico-scraper.ts is the main entry point and should be run with NODE_PATH=./src for proper module resolution
-
-## Website Behavior Notes
-
-### Page Load Sequence
-1. Initial HTML loads with placeholder content
-2. WooCommerce gallery initializes (can see gallery container appear)
-3. Product variations load (pattern swatches appear)
-4. Gallery images load progressively
-5. Elementor widgets initialize (accordions become interactive)
-
-### Accordion Behavior Details
-- Clicking title triggers CSS transition
-- Height animation takes ~300ms
-- Content becomes visible after animation
-- Sometimes requires second click if first click doesn't register
-- Features section more reliable than Technical section
-
-### Pattern Selection Effects
-1. Clicking pattern triggers:
-   - Gallery refresh
-   - Image swap
-   - URL update
-   - Price update (sometimes)
-2. Need to wait for all changes before capturing new state
-
-### Known Good Selectors
-- Product title: .product_title
-- Price: .price .amount
-- SKU: .sku
-- Features content: #elementor-tab-content-1462
-- Technical specs content: #elementor-tab-content-1461
-
-### Network Request Patterns
-- Initial page load
-- Gallery image requests
-- Pattern variation requests
-- Dynamic content loading
-- Need to monitor all for completion
-
-## Error Patterns & Debugging
-
-### Common Error Scenarios
-1. Timeout on Initial Load
-   - Usually means page is still making background requests
-   - Network activity continues past domcontentloaded
-   - May need to ignore certain requests
-
-2. Gallery Image Missing
-   - Often related to pattern switching
-   - Gallery reinitializes but images don't load
-   - Need to verify gallery state before capture
-
-3. Accordion Content Invisible
-   - Content exists in DOM but height:0
-   - CSS transitions not completing
-   - Click events not registering properly
+## Table of Contents
+1. [Overview](#overview)
+2. [Image Handling Strategy](#image-handling-strategy)
+3. [Implementation Details](#key-implementation-details)
+4. [Data Structures](#core-data-types)
+5. [HTML Structure](#html-structure-analysis)
+6. [Edge Cases](#known-edge-cases)
+7. [Recovery Strategies](#recovery-strategies)
+8. [Testing](#test-cases)
+9. [State Management](#scraper-state-management)
+10. [Troubleshooting](#troubleshooting-guide)
+11. [Version History](#version-history)
+
+## Overview
+The Castico scraper is designed to extract product information and images from the Castico website. It handles multiple product categories, pattern variations, and associated images.
+
+## Image Handling Strategy
+
+### Directory Structure 
+The scraper organizes files in the following structure:
+
+    debug/
+    └── results/
+        └── [category]/
+            └── [date]/
+                └── [product-name]/
+                    ├── product.json
+                    └── images/
+                        └── [pattern-name]/
+                            └── pattern-name-view-type-000.jpg
+
+### Image View Types
+Images are categorized by their view type, determined by the order they appear on the product page:
+
+1. `base-detail` (index 0) - Detailed view of the base
+2. `full` (index 1) - Full product view (marked as primary)
+3. `includes` (index 2) - Product inclusions/components
+4. `detail` (index 3) - Detail views
+5. `base` (index 4) - Base view
+6. `view-N` (index 5+) - Additional views
+
+### File Naming Convention
+Images are saved using the following format:
+
+    [pattern-name]-[view-type]-[random-number].jpg
+
+Where:
+- `pattern-name`: Sanitized pattern name (lowercase, alphanumeric with hyphens)
+- `view-type`: One of the predefined view types
+- `random-number`: 3-digit random number to prevent filename collisions
+
+### Key Implementation Details
+1. Image Processing Flow:
+   ```typescript
+   // In extractPatternVariations:
+   const images = await Promise.all(
+     images.map(async (img, index) => {
+       const buffer = await this.downloadImage(img.url)
+       const view = this.getViewFromUrl(img.url, index)
+       const sanitizedPattern = pattern.name.replace(/[^a-z0-9]/gi, '-').toLowerCase()
+       const filename = `${sanitizedPattern}-${view}-${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}.jpg`
+       const localPath = await this.saveImage(buffer, filename, index)
+       return {
+         ...img,
+         localPath,
+         view,
+         isPrimary: view === 'full'
+       }
+     })
+   )
+   ```
+
+2. Critical Methods:
+   - `getViewFromUrl(url: string, index: number): string`
+   - `savePatternImages(pattern: PatternVariation, imagesDir: string)`
+   - `setupResultsDirectory(category: string, productName: string)`
+
+3. File Organization:
+   - Initial images are downloaded and saved using `saveImage`
+   - Images are then copied to pattern-specific directories using `savePatternImages`
+   - All paths use the debug/results structure
+
+### Current Issues
+1. Legacy directory creation in initialize():
+   ```typescript
+   await fs.mkdir(path.join(process.cwd(), 'scraped-images'), { recursive: true })
+   ```
+   This needs to be removed as we've moved to the debug/results structure.
+
+2. Image saving process needs consolidation to avoid duplicate saves
+
+## Future Improvements
+1. Implement retry logic for failed image downloads
+2. Add image validation (size, format, quality)
+3. Optimize network wait times
+4. Add progress tracking and resumability
+5. Consolidate image saving to a single location
+6. Remove legacy scraped-images directory handling 
+
+### Product Data Structure
+Example product.json structure:
+```json
+{
+  "url": "https://castico-tx.com/product/...",
+  "name": "32″ x 60″ x 84″ Center Drain - White Sand",
+  "patterns": [
+    {
+      "name": "Alpine Marble Gloss",
+      "images": [
+        {
+          "url": "https://...",
+          "localPath": "debug/results/.../alpine-marble-gloss-base-detail-001.jpg",
+          "view": "base-detail",
+          "isPrimary": false
+        }
+      ]
+    }
+  ]
+}
+```
+
+### Critical Implementation Context
+1. Image Saving Flow:
+   - Images are first downloaded via `downloadImage`
+   - Then saved via `saveImage` to a temporary location
+   - Finally copied to pattern directories via `savePatternImages`
+   - The temporary location issue is causing duplicate saves
+
+2. Pattern Image Extraction:
+   - Pattern names come from product variations
+   - Images are matched to patterns by name in URL/alt text
+   - Order of images determines view type
+   - Some patterns have missing images due to async loading
+
+3. Debug Points:
+   - Network timeouts occur at `page.waitForLoadState('networkidle')`
+   - Image elements found via multiple selectors:
+     ```typescript
+     const imageElements = await page.$$([
+       `img[alt*="${pattern.name}"]`,
+       `img[src*="${pattern.name.toLowerCase().replace(/\s+/g, '-')}"]`,
+       '.woocommerce-product-gallery__image img',
+       '.flex-viewport img'
+     ].join(','))
+     ```
+
+4. Current Working State:
+   - Pattern detection works reliably
+   - Image view types are correctly assigned by index
+   - Images are being saved in both old and new locations
+   - Need to remove old scraped-images directory handling 
+
+### File Relationships and Data Flow
+1. Main Flow:
+   ```
+   castico.ts
+   └─ scrapeProduct()
+      ├─ setupResultsDirectory() -> creates debug/results/[category]/[date]/[product]
+      ├─ extractProductDetails() -> product.json base data
+      ├─ extractPatternVariations() -> adds patterns to product data
+      └─ savePatternImages() -> copies images to final location
+   ```
+
+2. Results Structure Example:
+   ```
+   debug/results/base-and-wall-kits/2025-01-08/
+   ├─ 32--x-60--x-84--center-drain---white-sand---stone---2-wall-decor/
+   │  ├─ product.json
+   │  └─ images/
+   │     └─ [pattern-name]/
+   │        └─ pattern-name-view-type-000.jpg
+   └─ 32--x-60--x-84--center-drain---desert-gray-sand---4-wall-decor/
+      ├─ product.json
+      └─ images/
+   ```
+
+3. Key State Transitions:
+   - Product URL → Product Details + Pattern Names
+   - Pattern Names → Image URLs (via selectors)
+   - Image URLs → Temporary Storage → Final Pattern Directory
+
+4. Validation Points:
+   - Product name sanitization for directory creation
+   - Pattern name sanitization for image filenames
+   - Image file existence checks before copying
+   - Directory creation with recursive: true 
+
+### Image Saving Implementation Details
+1. Current Save Points:
+   ```typescript
+   // First save point - saveImage method
+   private async saveImage(buffer: Buffer, filename: string, index: number) {
+     // This is where images are initially saved to scraped-images/
+     // Need to trace this method's usage
+   }
+
+   // Second save point - savePatternImages method
+   private async savePatternImages(pattern: PatternVariation, imagesDir: string) {
+     // This copies from first location to final location
+     // Creates duplicate storage
+   }
+   ```
+
+2. Method Call Chain:
+   ```
+   downloadImage() -> saveImage() -> savePatternImages()
+   ↓                    ↓             ↓
+   Gets buffer     Saves to temp    Copies to final
+   ```
+
+3. File Path Construction:
+   - Need to audit all path.join() calls
+   - Check for hardcoded 'scraped-images' references
+   - Verify setupResultsDirectory() usage
+
+4. Next Steps:
+   - Remove saveImage temp storage
+   - Modify downloadImage to save directly to final location
+   - Update all image path references 
+
+### Results Analysis
+1. Analysis Script Location:
+   ```
+   scripts/analyze-scrape-results.ts
+   ```
+
+2. Script Usage:
+   ```bash
+   npm run analyze-results -- debug/results/base-and-wall-kits/2025-01-08
+   ```
+
+3. Key Metrics Checked:
+   - Products scraped vs expected count
+   - Patterns per product (min/max/avg)
+   - Images per pattern (min/max/avg)
+   - Missing images or patterns
+   - Directory structure integrity
+   - File naming consistency
+   - Duplicate image detection
+
+4. Example Analysis Output:
+   ```json
+   {
+     "totalProducts": 59,
+     "totalPatterns": 187,
+     "totalImages": 892,
+     "averageImagesPerPattern": 4.77,
+     "missingImages": 3,
+     "duplicateImages": 892,
+     "invalidFileNames": 0,
+     "directoryErrors": 0
+   }
+   ```
+
+5. Common Issues Detected:
+   - Duplicate images in scraped-images and debug/results
+   - Some patterns missing expected view types
+   - Occasional network timeout related missing images 
 
 ### Debugging Checkpoints
-1. After Page Load:
-   - Check .product_title visibility
-   - Verify gallery container exists
-   - Confirm pattern swatches loaded
 
-2. Before Pattern Switch:
-   - Save current gallery state
-   - Note current URL
-   - Record visible images
+1. Image URL Extraction:
+   ```typescript
+   // Debug log format for image extraction
+   Pattern: "Alpine Marble Gloss"
+   Found elements: 5
+   URLs extracted:
+   - base-detail: https://...jpg
+   - full: https://...jpg
+   - includes: https://...jpg
+   - detail: https://...jpg
+   - base: https://...jpg
+   ```
 
-3. After Pattern Switch:
-   - Compare gallery changes
-   - Check for new images
-   - Verify URL updates
+2. Pattern Matching Success Rate:
+   ```
+   Total products: 59
+   Products with all patterns matched: 54
+   Products with partial matches: 3
+   Products with no matches: 2
+   
+   Common pattern names:
+   - Alpine Marble Gloss (32 products)
+   - Tuscany Beige Gloss (28 products)
+   - White Marble Gloss (25 products)
+   ```
 
-### Error Recovery Strategies
-1. For Gallery Issues:
-   - Force hover events
-   - Trigger click on thumbnails
-   - Wait for network idle
+3. Network Timing Analysis:
+   ```
+   Average wait times:
+   - Page load: 2.3s
+   - Network idle: 4.1s
+   - Image download: 0.8s per image
+   
+   Timeout frequencies:
+   - Network idle: 12%
+   - Image download: 3%
+   ```
 
-2. For Accordion Issues:
-   - Try multiple click methods
-   - Force height via JavaScript
-   - Check parent container state
+4. Error Recovery Points:
+   - After network timeout: retry image extraction
+   - After failed download: retry up to 3 times
+   - After pattern match fail: try alternate selectors
+   - After directory creation fail: retry with sanitized name 
 
-3. For Pattern Issues:
-   - Reset to default pattern
-   - Clear any hover states
-   - Reload gallery component
+### Core Data Types
+```typescript
+interface PatternVariation {
+  name: string
+  images: ScrapedImage[]
+  thumbnail: {
+    url: string
+    localPath?: string
+  }
+}
 
-## Test Product Details
+interface ScrapedImage {
+  url: string
+  localPath: string
+  view: string
+  isPrimary: boolean
+}
 
-### Current Test Product
-Product: 32" x 60" x 84" Center Drain - White Sand - Geometric - 2 Wall Decor
-URL: https://castico-tx.com/product/shower-kit-32-x-60-x-84-center-drain-white-sand-geometric-2-wall-decor/
+interface ScrapedProduct {
+  url: string
+  name: string
+  price: string
+  description: string
+  includes: string[]
+  technicalSpecs: ProductSpec[]
+  features: string[]
+  patterns: PatternVariation[]
+  metadata: {
+    scrapedAt: string
+    productType: string
+    dimensions: {
+      width: number
+      depth: number
+      height: number
+    }
+  }
+}
 
-### Expected Content
-1. Base Details:
-   - Name: "32" x 60" x 84" Center Drain - White Sand - Geometric - 2 Wall Decor"
-   - Brand: "Castico"
-   - Price: "$2,400.00"
-   - SKU: Should be present
+interface ProductSpec {
+  name: string
+  value: string
+  notes?: string
+}
 
-2. Known Patterns:
-   - Arrow Black
-   - Balance
-   - Circles
-   - Signal Black
-   - Signal Inverted
+### HTML Structure Analysis
+1. Product Page Layout:
+   ```html
+   <div class="product-type-variable">
+     <div class="woocommerce-product-gallery">
+       <!-- Primary product images -->
+     </div>
+     <div class="variations_form cart">
+       <!-- Pattern variations -->
+       <select name="attribute_pa_wall-color">
+         <!-- Pattern options -->
+       </select>
+     </div>
+   </div>
+   ```
 
-3. Known Features (11 items):
-   - Easy curb-less shower entry
-   - Solid core that reduces noise
-   - Quick install over backer board
-   - Easy to trim using tile saw
-   - Groutless 4-piece look
-   - Surface finished on all edges
-   - Pre-sloped design
-   - Walk-in opening details
-   - Compatible with 2" drain
-   - Install hardware on 2" perimeter
-   - Compatible with 60" door
+2. Pattern Image Locations:
+   - Main gallery: `.woocommerce-product-gallery__image img`
+   - Thumbnails: `.flex-control-nav img`
+   - Pattern previews: `.variable-items-wrapper img`
 
-4. Technical Specifications (Currently Missing):
-   - Dimensions should be listed
-   - Material specifications
-   - Installation requirements
-   - Weight information
+### Known Edge Cases
+1. Pattern Names:
+   - "White Sand" vs "White-Sand"
+   - "Marble Studio" vs "Marble-Studio"
+   - Numbers in names: "Stone 2" vs "Stone-2"
 
-5. Expected Images:
-   - Main product view
-   - Side views
-   - Installation diagram
-   - Pattern variation views
-   - Detail shots
+2. Image Loading:
+   - Some images load via JavaScript after page load
+   - Gallery images sometimes in different order
+   - Thumbnail URLs don't match main image URLs
 
-This product was chosen as the test case because it includes all major features we need to scrape: patterns, specifications, multiple images, and technical details.
+3. Product Variations:
+   - Some products have multiple variation types
+   - Pattern names can appear in different attributes
+   - Some patterns share images
 
-## Project Files Reference
+### Recovery Strategies
+1. Image Download:
+   ```typescript
+   private async downloadWithRetry(url: string, attempts = 3): Promise<Buffer> {
+     for (let i = 0; i < attempts; i++) {
+       try {
+         const response = await fetch(url)
+         if (!response.ok) throw new Error(response.statusText)
+         return await response.arrayBuffer()
+       } catch (error) {
+         if (i === attempts - 1) throw error
+         await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)))
+       }
+     }
+   }
+   ```
 
-### scripts/test-castico-scraper.ts
-Main test runner that:
-- Initializes the scraper
-- Runs test against single product URL
-- Outputs results to debug/results/
-- Handles error reporting
+2. Pattern Matching:
+   ```typescript
+   const findPatternImages = async (page: Page, pattern: string) => {
+     // Try exact match first
+     let images = await page.$$(`img[alt="${pattern}"]`)
+     if (images.length) return images
 
-### scripts/register.ts
-TypeScript/ESM configuration that:
-- Enables ES modules
-- Sets up path aliases
-- Configures TypeScript loader
+     // Try case-insensitive
+     images = await page.$$(`img[alt*="${pattern}"i]`)
+     if (images.length) return images
 
-### castico-products.json
-JSON file containing:
-- Full catalog of scraped products
-- Used for verification and tracking
-- Contains expected data structure
+     // Try sanitized name
+     const sanitized = pattern.replace(/[^a-z0-9]/gi, '-').toLowerCase()
+     images = await page.$$(`img[src*="${sanitized}"]`)
+     return images
+   }
+   ```
 
-### test-product.json
-Sample output file that:
-- Shows expected data format
-- Used for regression testing
-- Updated with successful scrapes
+### Test Cases
+1. Product Types:
+   - Base & Wall Kits (most complex)
+   - Shower Walls (medium complexity)
+   - Shower Bases (simplest)
+   - Accessories (variable)
 
-### .gitignore
-Must include these patterns:
+2. Pattern Variations:
+   - Single pattern products
+   - Multi-pattern products
+   - Products with shared patterns
+   - Products with unique patterns
 
-Scraper debug files:
-- debug/screenshots/
-- debug/results/
-- scraped-images/
-- *.png
-- test-product.json
+3. Image Scenarios:
+   - All views present
+   - Missing views
+   - Extra views
+   - Duplicate views 
 
-Uploaded files:
-- public/uploads/*
-- !public/uploads/.gitkeep
+### Scraper State Management
 
-## Database Integration
+1. Environment Variables:
+   ```
+   SAVE_SCRAPER_SCREENSHOTS=true|false
+   DEBUG_SCRAPER=true|false
+   ```
 
-### Schema Mapping
-Our Prisma schema defines a Product model with:
-- id: String
-- name: String  
-- brand: String
-- description: Json
-- categories: Category[]
-- images: ProductImage[]
-- specifications: Specification[]
-- visibility: Json
-- metadata: Json?
-- supplierId: String
-- supplier: Supplier relation
+2. Debug Files Location:
+   ```
+   debug/
+   ├── screenshots/
+   │   ├── initial-load.png
+   │   ├── before-accordion.png
+   │   └── error-[timestamp].png
+   └── results/
+       └── [as documented above]
+   ```
 
-And a ProductImage model with:
-- id: String
-- url: String
-- alt: String?
-- source: String (defaults to "supplier")
-- isPrimary: Boolean
-- productId: String
-- product: Product relation
+3. Checkpoint Files:
+   ```
+   - summary.json: Overall scrape results
+   - product.json: Individual product data
+   - error-log.json: Failed scrapes and reasons
+   ```
 
-### Current Gaps
+4. Common Failure Points
 
-1. Data Structure Mismatches:
-   - Scraped 'patterns' don't map to any current database model
-   - Technical specifications need to be transformed into Specification records
-   - Need to define how patterns relate to categories or metadata
+1. Product Page:
+   ```typescript
+   // Critical selectors that must exist
+   '.product-type-variable'  // Product container
+   '.variations_form'        // Pattern variations
+   '.woocommerce-product-gallery' // Image gallery
+   ```
 
-2. Missing Transformations:
-   - Need to convert pattern variations to appropriate database structure
-   - Need to map scraped specs to standardized specification records
-   - Need to define visibility rules for scraped products
+2. Pattern Detection:
+   ```typescript
+   // Order of pattern source attempts
+   1. select[name="attribute_pa_wall-color"] option
+   2. .variable-items-wrapper img[alt]
+   3. .woocommerce-product-gallery__image img[alt]
+   ```
 
-3. Required Database Fields:
-   - Need to ensure supplierId is captured
-   - Need to structure visibility JSON
-   - Need to define category relationships
+3. Recovery Order:
+   ```
+   1. Retry page load
+   2. Wait for network idle
+   3. Force gallery load via click
+   4. Try alternate selectors
+   5. Save error screenshot
+   ```
 
-### Next Steps for Database Integration
-1. Define pattern handling:
-   - As categories?
-   - As metadata?
-   - As new model?
+4. Data Validation Points
 
-2. Standardize specifications:
-   - Create mapping for technical specs
-   - Create mapping for features
-   - Define standard names/types
+1. Product Data:
+   - Name must contain dimensions
+   - Must have at least one pattern
+   - Must have technical specs
+   - Must have features list
 
-3. Image handling:
-   - Define primary image selection
-   - Handle pattern variation images
-   - Set up proper alt text
+2. Pattern Data:
+   - Name must be unique per product
+   - Must have at least one image
+   - Must have thumbnail
+   - Images must match view types
 
-## Data Model Clarifications
+3. Image Requirements:
+   - Must be JPG/JPEG
+   - Must be > 100x100px
+   - Must have valid URL
+   - Must match pattern name 
 
-### System-Controlled Fields
-Important note: Several fields we initially thought might come from scraping are actually system-controlled:
+### Example Product Data
 
-1. Visibility
-   - This is our internal control of product visibility
-   - Not sourced from supplier data
-   - Managed through our admin interface
+1. Successful Product Example:
+   ```json
+   // From: debug/results/base-and-wall-kits/2025-01-08/32--x-60--x-84--center-drain---white-sand---stone---2-wall-decor/product.json
+   {
+     "url": "https://castico-tx.com/product/shower-kit-32-x-60-x-84-center-drain-white-sand-decoratice-tile-studio-2-wall-decor/",
+     "name": "32″ x 60″ x 84″ Center Drain - White Sand - Stone - 2 Wall Decor",
+     "patterns": [
+       {
+         "name": "Alpine Marble Gloss",
+         "images": [
+           // Example of complete image set
+         ]
+       }
+     ]
+   }
+   ```
 
-2. Image isPrimary Flag
-   - Our decision about which image is primary
-   - Not determined by supplier data
-   - Set through our product management
+2. Summary Stats Example:
+   ```json
+   // From: debug/results/base-and-wall-kits/summary.json
+   {
+     "scrapedAt": "2025-01-08T12:00:00.000Z",
+     "totalProducts": 59,
+     "successfulScrapes": 57,
+     "failedScrapes": 2,
+     "totalPatterns": 187,
+     "totalImages": 892
+   }
+   ```
 
-3. SupplierId
-   - Our internal reference to the supplier
-   - Assigned when we add a supplier to our system
-   - Not derived from product data
+### Current Development State
+1. Working:
+   - Basic scraping flow
+   - Pattern detection
+   - Image downloading
+   - Directory structure
 
-### Pattern/Variation Handling
-A key insight about product variations:
-
-1. Castico's Approach:
-   - Uses descriptive names without model numbers
-   - Treats patterns as variations of a base product
-   - Product identity based on dimensions and features
-
-2. Home Depot's Approach (Alternative Supplier):
-   - Assigns unique model numbers and SKUs to each variation
-   - Treats each pattern/color as distinct product
-   - More granular product identification
-
-3. Implications for Our System:
-   - Need to handle different supplier approaches
-   - Must maintain relationships between variations
-   - Consider using Home Depot's model numbers as reference
-   - Need strategy for linking related pattern variations
-
-### Data Structure Considerations
-
-1. Pattern Variations Options:
-   - Treat as separate products with relationships
-   - Handle as variations within single product record
-   - Create hybrid approach supporting multiple supplier methods
-
-2. Database Design Questions:
-   - Potential need for new variation model
-   - How to link variations to base products
-   - Handling different supplier approaches to same product
-   - Managing cross-reference between supplier systems
+2. In Progress:
+   - Removing scraped-images directory usage
+   - Consolidating image saving logic
+   - Improving error recovery
 
 3. Next Steps:
-   - Complete basic data extraction (specs, features, images)
-   - Document pattern relationships
-   - Design variation handling system
-   - Consider cross-supplier product matching
+   - Remove initialize() scraped-images creation
+   - Update saveImage to use final location
+   - Add retry logic for network timeouts 
 
-This understanding affects our scraping priorities and data structure design.
+### Actual Data Examples
 
----
+1. Real Product Structure:
+   ```json
+   // From actual product.json
+   {
+     "url": "https://castico-tx.com/product/shower-kit-32-x-60-x-84-center-drain-white-sand-decoratice-tile-studio-2-wall-decor/",
+     "name": "32″ x 60″ x 84″ Center Drain - White Sand - Stone - 2 Wall Decor",
+     "price": "$2,499.00",
+     "description": "Elevate your shower experience...",
+     "includes": [
+       "2 Side Wall Panels",
+       "1 Back Wall Panel",
+       "1 Shower Pan Base"
+     ],
+     "technicalSpecs": [
+       {
+         "name": "Base Width",
+         "value": "32\" - 81.28 cm",
+         "notes": "Including flange thickness"
+       }
+     ],
+     "features": [
+       "Easy curb-less shower entry; 1.125 in. low step for safe access",
+       "Solid core that reduces noise"
+     ],
+     "patterns": [
+       {
+         "name": "Alpine Marble Gloss",
+         "images": [
+           {
+             "url": "https://castico-tx.com/wp-content/uploads/2023/...",
+             "localPath": "debug/results/.../alpine-marble-gloss-base-detail-001.jpg",
+             "view": "base-detail",
+             "isPrimary": false
+           }
+         ],
+         "thumbnail": {
+           "url": "https://castico-tx.com/wp-content/uploads/2023/...",
+           "localPath": "debug/results/.../alpine-marble-gloss-thumbnail.jpg"
+         }
+       }
+     ]
+   }
+   ```
 
-Last Updated: 2024-01-06 
+2. Real Summary Stats:
+   ```json
+   // From actual summary.json
+   {
+     "scrapedAt": "2025-01-08T12:00:00.000Z",
+     "totalProducts": 59,
+     "successfulScrapes": 57,
+     "failedScrapes": [
+       {
+         "url": "https://castico-tx.com/product/...",
+         "error": "Network timeout",
+         "timestamp": "2025-01-08T12:34:56.789Z"
+       }
+     ],
+     "totalPatterns": 187,
+     "totalImages": 892,
+     "commonPatterns": [
+       {
+         "name": "Alpine Marble Gloss",
+         "count": 32
+       }
+     ]
+   }
+   ``` 
+
+### Troubleshooting Guide
+
+1. Common Error Patterns:
+   ```
+   Error: Failed to scrape product
+   ├─ Network timeout during image load
+   │  └─ Check: Network conditions, retry with longer timeout
+   ├─ Pattern images not found
+   │  └─ Check: Selectors, pattern name variations
+   └─ Directory creation failed
+      └─ Check: File permissions, path length
+
+   Error: Failed to save image
+   ├─ Invalid URL format
+   │  └─ Check: URL encoding, special characters
+   ├─ Network error during download
+   │  └─ Check: Connection, retry mechanism
+   └─ File system error
+      └─ Check: Disk space, permissions
+   ```
+
+2. Quick Fixes:
+   - Network timeouts: Increase `waitForLoadState` timeout
+   - Missing images: Add delay after page load
+   - Pattern matching: Try alternate name formats
+   - File system: Clean temp directories
+
+3. Verification Steps:
+   ```bash
+   # Check scrape results
+   ls -R debug/results/base-and-wall-kits/latest
+   
+   # Verify image counts
+   find . -name "*.jpg" | wc -l
+   
+   # Check for duplicates
+   find . -name "*-001.jpg"
+   
+   # Validate JSON files
+   find . -name "product.json" -exec jq . {} \;
+   ``` 
+
+### Version History
+
+1. Initial Implementation (2024-01):
+   - Basic product scraping
+   - Single directory image storage
+   - Simple pattern detection
+
+2. Current Version (2025-01):
+   - Multi-category support
+   - Pattern-based image organization
+   - View type detection
+   - Debug/results structure
+
+3. Known Regressions:
+   - Images saving to both old and new locations
+   - Some pattern detection reliability issues
+   - Network timeout handling needs improvement
+
+### Quick Reference
+1. Run Full Scrape:
+   ```bash
+   npm run test-scraper
+   ```
+
+2. Check Latest Results:
+   ```bash
+   ls -l debug/results/base-and-wall-kits/$(ls -t debug/results/base-and-wall-kits | head -1)
+   ```
+
+3. Common Debug Commands:
+   ```bash
+   # Check for duplicate saves
+   find debug -type f -name "*.jpg" | sort | uniq -d
+
+   # Verify pattern directories
+   find debug/results -type d -name "alpine-marble-gloss" -o -name "white-marble-gloss"
+
+   # Count images per pattern
+   for d in debug/results/*/*/*/*/images/*; do echo "$d: $(ls "$d" | wc -l)"; done
+   ``` 
+
+### Test Scraper Configuration
+1. Script Location:
+   ```
+   scripts/test-castico-scraper.ts
+   ```
+
+2. Configuration Options:
+   ```typescript
+   interface ScraperConfig {
+     category: string        // Category to scrape
+     maxProducts?: number    // Limit number of products
+     saveScreenshots: boolean
+     debug: boolean
+     retryAttempts: number
+     timeouts: {
+       navigation: number
+       networkIdle: number
+       elementWait: number
+     }
+   }
+   ```
+
+3. Environment Setup:
+   ```bash
+   # Required environment variables
+   NODE_OPTIONS=--experimental-loader=ts-node/esm
+   
+   # Optional flags
+   SAVE_SCRAPER_SCREENSHOTS=true
+   DEBUG_SCRAPER=true
+   ```
+
+### Database Import Process
+1. Data Flow:
+   ```
+   Scraper Results → Validation → Database Import
+   └─ product.json    └─ Types     └─ SQL generation
+   └─ images/         └─ Images    └─ Image optimization
+   ```
+
+2. Import Command:
+   ```bash
+   npm run import-scraper-results -- debug/results/base-and-wall-kits/latest
+   ```
+
+3. Validation Rules:
+   - All required fields present in product.json
+   - All referenced images exist
+   - Pattern names match existing database records
+   - Image dimensions meet requirements
+   - No duplicate products or patterns
+
+4. Import Process:
+   ```typescript
+   // Import flow
+   async function importScrapedData(resultsDir: string) {
+     // 1. Load and validate data
+     const products = await loadProducts(resultsDir)
+     validateProducts(products)
+     
+     // 2. Process images
+     await processImages(products)
+     
+     // 3. Generate SQL
+     const sql = generateImportSQL(products)
+     
+     // 4. Execute import
+     await executeImport(sql)
+   }
+   ``` 
+
+### Class Structure and Organization
+
+1. Class Hierarchy:
+   ```typescript
+   // Base class that defines common scraper functionality
+   abstract class ScraperService {
+     abstract scrapeProduct(url: string): Promise<ScrapedProduct>
+     abstract scrapeCategory(category: string): Promise<ScrapedProduct[]>
+     // ... other abstract methods
+   }
+
+   // Castico-specific implementation
+   export class CasticoScraper extends ScraperService {
+     private browser: Browser | null = null
+     private readonly screenshotsDir: string
+     private enableScreenshots: boolean
+     private debug: boolean
+     
+     // Categories supported by this scraper
+     public readonly categories: CategoryInfo[]
+     
+     // ... implementation of abstract methods
+   }
+   ```
+
+2. File Organization:
+   ```
+   src/lib/services/scraper/
+   ├── scraper-service.ts     # Base abstract class
+   └── suppliers/
+       └── castico.ts        # Castico implementation
+   ``` 
+
+### Failed Case Examples
+
+1. Network Timeout Error:
+   ```json
+   // From: debug/results/base-and-wall-kits/2025-01-08/errors/network-timeout.json
+   {
+     "url": "https://castico-tx.com/product/shower-kit-32-x-60-x-84-center-drain...",
+     "error": {
+       "type": "NetworkTimeout",
+       "message": "Navigation timeout of 30000 ms exceeded",
+       "timestamp": "2025-01-08T12:34:56.789Z",
+       "attempts": 3
+     },
+     "context": {
+       "selector": ".woocommerce-product-gallery",
+       "state": "waiting_for_network_idle"
+     }
+   }
+   ```
+
+2. Pattern Detection Failure:
+   ```json
+   // From: debug/results/base-and-wall-kits/2025-01-08/errors/pattern-match.json
+   {
+     "url": "https://castico-tx.com/product/...",
+     "error": {
+       "type": "PatternMatchFailed",
+       "message": "No matching images found for pattern: White Sand Marble",
+       "timestamp": "2025-01-08T13:45:23.456Z",
+       "selectors": [
+         "img[alt='White Sand Marble']",
+         "img[alt*='White Sand']",
+         "img[src*='white-sand-marble']"
+       ]
+     },
+     "context": {
+       "patternName": "White Sand Marble",
+       "foundElements": 0,
+       "galleryImages": 5
+     }
+   }
+   ```
+
+3. Image Download Failure:
+   ```json
+   // From: debug/results/base-and-wall-kits/2025-01-08/errors/image-download.json
+   {
+     "url": "https://castico-tx.com/wp-content/uploads/2023/...",
+     "error": {
+       "type": "ImageDownloadFailed",
+       "message": "Failed to download image: 404 Not Found",
+       "timestamp": "2025-01-08T14:12:34.567Z",
+       "retryCount": 3
+     },
+     "context": {
+       "pattern": "Alpine Marble Gloss",
+       "view": "base-detail",
+       "httpStatus": 404
+     }
+   }
+   ``` 
