@@ -1,27 +1,32 @@
-import { CasticoScraper } from '../src/lib/services/scraper/suppliers/castico.js'
-import { ScrapedProduct } from '../src/lib/services/scraper/scraper-service.js'
-import fs from 'fs/promises'
-import path from 'path'
-import { fileURLToPath } from 'url'
+/**
+ * Test script for the Castico product scraper
+ * Scrapes product data and saves it to the debug/results directory
+ */
 
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
+import { ServiceProvider } from '../src/lib/services/service-provider'
 
-async function main() {
-  const scraper = new CasticoScraper()
-  await scraper.initialize()
-
+async function testScraper() {
+  console.log('Starting scraper test...')
+  
   try {
-    const category = scraper.categories[0] // BASE & WALL KITS
-    const products = await scraper.scrapeAllProducts(category)
+    const services = ServiceProvider.getInstance()
+    const scraper = services.getCasticoScraper()
     
-    console.log('\nScraping Complete!')
-    console.log('------------------------')
-    console.log(`Total products scraped: ${products.length}`)
+    console.log('Initialized scraper, starting product scrape...')
+    const products = await scraper.scrapeProducts()
     
-  } finally {
-    await scraper.cleanup()
+    console.log('Scraped products:', products.length)
+    console.log('First product:', JSON.stringify(products[0], null, 2))
+    
+  } catch (error) {
+    console.error('Scraper test failed:', error)
+    throw error
   }
 }
 
-main().catch(console.error) 
+testScraper()
+  .then(() => process.exit(0))
+  .catch((error) => {
+    console.error('Test failed:', error)
+    process.exit(1)
+  }) 

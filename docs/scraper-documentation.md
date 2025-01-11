@@ -4,14 +4,15 @@
 1. [Overview](#overview)
 2. [Image Handling Strategy](#image-handling-strategy)
 3. [Implementation Details](#key-implementation-details)
-4. [Data Structures](#core-data-types)
-5. [HTML Structure](#html-structure-analysis)
-6. [Edge Cases](#known-edge-cases)
-7. [Recovery Strategies](#recovery-strategies)
-8. [Testing](#test-cases)
-9. [State Management](#scraper-state-management)
-10. [Troubleshooting](#troubleshooting-guide)
-11. [Version History](#version-history)
+4. [Core Files](#core-files)
+5. [Data Flow](#data-flow)
+6. [Database Integration](#database-integration)
+7. [Edge Cases](#known-edge-cases)
+8. [Recovery Strategies](#recovery-strategies)
+9. [Testing](#test-cases)
+10. [State Management](#scraper-state-management)
+11. [Troubleshooting](#troubleshooting-guide)
+12. [Version History](#version-history)
 
 ## Overview
 The Castico scraper is designed to extract product information and images from the Castico website. It handles multiple product categories, pattern variations, and associated images.
@@ -881,3 +882,241 @@ interface ProductSpec {
      }
    }
    ``` 
+
+## Core Files
+
+### Service Architecture
+1. `service-provider.ts`:
+```typescript
+export class ServiceProvider {
+  private static instance: ServiceProvider
+  private prisma: PrismaClient
+  private productRepo: ProductRepository
+  private casticoScraper: CasticoScraper | null = null
+  private productImportService: ProductImportService | null = null
+
+  // Singleton implementation
+  public static getInstance(): ServiceProvider
+  
+  // Service access methods
+  getCasticoScraper(): CasticoScraper
+  getProductRepository(): ProductRepository
+  getProductImportService(): ProductImportService
+}
+```
+
+2. `scraper-service.ts`:
+```typescript
+export interface ScraperService {
+  scrapeProducts(): Promise<ScrapedProduct[]>
+  cleanup(): Promise<void>
+}
+
+export interface ScrapedProduct {
+  url: string
+  name: string
+  brand: string
+  description: {
+    marketing: string
+    internal: string
+    supplier: string
+  }
+  // ... other fields
+}
+```
+
+### Database Layer
+1. `product.repository.ts`:
+```typescript
+export class ProductRepository {
+  constructor(private prisma: PrismaClient) {}
+
+  async create(data: Prisma.ProductCreateInput): Promise<Product>
+  async findById(id: string): Promise<ProductWithRelations | null>
+  async findBySupplier(supplierId: string): Promise<ProductWithRelations[]>
+  async update(id: string, data: Prisma.ProductUpdateInput): Promise<ProductWithRelations>
+  async delete(id: string): Promise<ProductWithRelations>
+}
+```
+
+2. `product-import.service.ts`:
+```typescript
+export class ProductImportService {
+  constructor(private productRepo: ProductRepository) {}
+
+  async importProduct(product: ScrapedProduct, supplier: string) {
+    // Transforms scraped data to database schema
+    const dbProduct: Prisma.ProductCreateInput = {
+      name: product.name,
+      brand: supplier,
+      // ... transform other fields
+    }
+  }
+}
+```
+
+### Testing and Analysis
+1. `test-castico-scraper.ts`:
+```typescript
+async function testScraper() {
+  const services = ServiceProvider.getInstance()
+  const scraper = services.getCasticoScraper()
+  const products = await scraper.scrapeProducts()
+}
+```
+
+2. `analyze-scrape-results.ts`:
+```typescript
+async function analyzeScrapeResults() {
+  // Analysis of scraped products
+  const results = {
+    totalProducts: 0,
+    productsWithoutPatterns: 0,
+    productsWithoutImages: 0
+  }
+}
+```
+
+## Data Flow
+
+### Scraping Process
+1. Service Initialization:
+```
+ServiceProvider
+└── getCasticoScraper()
+    └── new CasticoScraper(this)
+```
+
+2. Scraping Flow:
+```
+test-castico-scraper.ts
+└── CasticoScraper.scrapeProducts()
+    ├── scrapeCategory() -> URLs
+    └── scrapeAllProducts()
+        ├── extractProductDetails()
+        └── extractPatternVariations()
+```
+
+3. Data Import Flow:
+```
+ProductImportService
+└── importProduct()
+    ├── Transform data
+    └── ProductRepository
+        └── create()
+```
+
+### Database Schema
+Key models from `schema.prisma`:
+
+```prisma
+model Product {
+  id             String   @id @default(cuid())
+  name           String
+  brand          String
+  description    Json
+  categorization Json
+  specifications Json
+  variations     Json?
+  
+  // Relationships
+  supplier        Supplier
+  images          ProductImage[]
+  visibility      ProductVisibility?
+}
+
+model ProductImage {
+  id         String
+  url        String
+  alt        String?
+  isPrimary  Boolean
+  visibility ProductImageVisibility?
+}
+```
+
+### Data Transformation
+The `ProductImportService` handles transformation of scraped data to database schema:
+
+1. Basic Product Data:
+```typescript
+{
+  name: product.name,
+  brand: supplier,
+  description: {
+    marketing: product.description.marketing || '',
+    internal: product.description.internal || '',
+    supplier: product.description.supplier || ''
+  }
+}
+```
+
+2. Image Relationships:
+```typescript
+images: {
+  create: product.patterns.flatMap(pattern => 
+    pattern.images.map(image => ({
+      url: image.url,
+      alt: image.alt || '',
+      isPrimary: image.isPrimary,
+      visibility: {
+        create: {
+          team: true,
+          customer: false
+        }
+      }
+    }))
+  )
+}
+```
+
+## Database Integration
+
+### Repository Pattern
+The `ProductRepository` implements type-safe database operations:
+
+1. Create Operation:
+```typescript
+async create(data: Prisma.ProductCreateInput): Promise<Product> {
+  return await this.prisma.product.create({
+    data,
+    include: {
+      images: true,
+      supplier: true,
+      visibility: true
+    }
+  })
+}
+```
+
+2. Query Building:
+```typescript
+async findWithFilters(filters: {
+  supplier?: string
+  category?: string
+  status?: string
+  visibility?: string
+}): Promise<ProductWithRelations[]>
+```
+
+### Error Handling
+1. Import Errors:
+```typescript
+try {
+  const dbProduct = await this.productRepo.create(data)
+} catch (error) {
+  console.error('Import failed:', error)
+  throw error
+}
+```
+
+2. Batch Import Results:
+```typescript
+{
+  success: number
+  failed: number
+  errors: Array<{ 
+    product: Prisma.ProductCreateInput
+    error: Error 
+  }>
+}
+``` 
