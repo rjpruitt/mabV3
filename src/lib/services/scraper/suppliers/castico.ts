@@ -264,12 +264,12 @@ export class CasticoScraper implements ScraperService {
         }
       }
 
-      // Extract dimensions from title
-      const dimensionsMatch = name.match(/(\d+)"\s*x\s*(\d+)"\s*x\s*(\d+)"/)
+      // Updated regex to handle both Unicode (″) and ASCII (") quotes
+      const dimensionsMatch = name.match(/(\d+)[″"]\s*x\s*(\d+)[″"]\s*x\s*(\d+)[″"]/)
       const dimensions = dimensionsMatch ? {
-        width: parseInt(dimensionsMatch[1]),
-        depth: parseInt(dimensionsMatch[2]),
-        height: parseInt(dimensionsMatch[3])
+        width: parseInt(dimensionsMatch[2]),  // Second number (60)
+        depth: parseInt(dimensionsMatch[1]),  // First number (32)
+        height: parseInt(dimensionsMatch[3])  // Third number (84)
       } : {
         width: 0,
         depth: 0,
@@ -449,65 +449,38 @@ export class CasticoScraper implements ScraperService {
     }
   }
 
-  private async extractPatternVariations(page: Page, productDir: string): Promise<Array<{
-    id: string
-    name: string
-    thumbnail: {
-      url: string
-      localPath: string
-    }
-    images: Array<{
-      url: string
-      alt: string
-      view: string
-      localPath: string
-      isPrimary: boolean
-    }>
-    order: number
-  }>> {
+  private async extractPatternVariations(page: Page, productDir: string) {
     const patterns = await page.evaluate(() => {
-      type PatternImage = {
-        url: string
-        alt: string
-        view: string
-        localPath: string
-        isPrimary: boolean
-      }
-
-      type Pattern = {
-        id: string
-        name: string
-        thumbnail: {
-          url: string
-          localPath: string
-        }
-        images: PatternImage[]
-        order: number
-      }
-
       const items = Array.from(document.querySelectorAll(
         '.single-product-variable-items.variable-items-wrapper[data-attribute_name="attribute_pa_wall-color"] li'
       ))
       
-      return items.map((item, index): Pattern | null => {
+      // Use a Map to deduplicate patterns by ID
+      const patternMap = new Map()
+      
+      items.forEach((item, index) => {
         const img = item.querySelector('img')
-        if (!(img instanceof HTMLImageElement)) {
-          return null
-        }
+        if (!(img instanceof HTMLImageElement)) return
         
-        return {
-          id: item.getAttribute('data-value') || '',
-          name: img.alt?.replace(' Pattern', '').trim() || '',
-          thumbnail: {
-            url: img.src || '',
-            localPath: ''
-          },
-          images: [],
-          order: index
+        const id = item.getAttribute('data-value') || ''
+        const name = img.alt?.replace(' Pattern', '').trim() || ''
+        
+        // Only add if we haven't seen this pattern ID before
+        if (!patternMap.has(id) && name && name !== 'View More') {
+          patternMap.set(id, {
+            id,
+            name,
+            thumbnail: {
+              url: img.src || '',
+              localPath: ''
+            },
+            images: [],
+            order: patternMap.size  // Use map size for order to maintain sequence
+          })
         }
-      }).filter((p): p is Pattern => 
-        p !== null && p.name !== '' && p.name !== 'View More'
-      )
+      })
+      
+      return Array.from(patternMap.values())
     })
 
     // Process each pattern's images
