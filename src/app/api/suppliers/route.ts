@@ -1,5 +1,13 @@
+/**
+ * Suppliers API Route
+ * Handles supplier-related API requests
+ * GET: Returns list of suppliers ordered by name
+ * POST: Creates a new supplier with contacts and roles
+ */
+
 import { prisma } from '@/lib/prisma'
 import { NextResponse } from 'next/server'
+import type { CreateSupplierData } from '@/lib/products/types/supplier'
 
 export async function GET() {
   try {
@@ -18,18 +26,31 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json()
+    const data: CreateSupplierData = await request.json()
+
+    // Check for existing code one more time
+    const existing = await prisma.supplier.findUnique({
+      where: { code: data.code }
+    })
+
+    if (existing) {
+      return NextResponse.json(
+        { error: 'A supplier with this code already exists' },
+        { status: 409 }
+      )
+    }
+
     const supplier = await prisma.supplier.create({
       data: {
-        code: body.code,
-        name: body.name,
-        contact: {},
+        name: data.name,
+        code: data.code,
         active: true
       }
     })
+
     return NextResponse.json(supplier)
   } catch (error) {
-    console.error('Error creating supplier:', error)
+    console.error('Failed to create supplier:', error)
     return NextResponse.json(
       { error: 'Failed to create supplier' },
       { status: 500 }

@@ -1,175 +1,185 @@
-import { SupplierData } from '@/lib/products/types/catalogue'
 import { useState } from 'react'
-import { SupplierModal } from '@/components/products/supplier-management/supplier-modal'
-import { createSupplier } from '@/lib/server/actions/supplier-actions'
-import type { Supplier, Prisma } from '@prisma/client'
+import { SupplierData } from '@/lib/products/types/catalogue'
+import type { Supplier } from '@prisma/client'
 import { formStyles } from '@/lib/styles/forms'
+import { SupplierModal } from '@/components/products/supplier-management/supplier-modal'
+
+export interface CreateSupplierData {
+  name: string
+  code: string
+  website?: string
+  notes?: string
+}
 
 interface SupplierDataSetProps {
   data: SupplierData
   onChange: (data: SupplierData) => void
   onRemove: () => void
-  suppliers: Array<{ id: string, name: string }>
+  suppliers: Supplier[]
   onAddSupplier: (supplier: Supplier) => void
+  onCreateSupplier: (data: CreateSupplierData) => Promise<Supplier>
 }
 
-export function SupplierDataSet({ 
-  data, 
-  onChange, 
+export function SupplierDataSet({
+  data,
+  onChange,
   onRemove,
   suppliers,
-  onAddSupplier 
+  onAddSupplier,
+  onCreateSupplier
 }: SupplierDataSetProps) {
   const [showSupplierModal, setShowSupplierModal] = useState(false)
-  const [isCreating, setIsCreating] = useState(false)
 
-  const handleAddSupplier = async (supplierData: Prisma.SupplierCreateInput) => {
-    setIsCreating(true)
+  const handleSupplierCreate = async (supplierData: CreateSupplierData) => {
     try {
-      const newSupplier = await createSupplier(supplierData)
+      const newSupplier = await onCreateSupplier(supplierData)
       onAddSupplier(newSupplier)
       setShowSupplierModal(false)
+      // Update the current supplier data with the new supplier
+      onChange({
+        ...data,
+        supplierId: newSupplier.id,
+        supplierName: newSupplier.name
+      })
     } catch (error) {
       console.error('Failed to create supplier:', error)
-      alert('Failed to create supplier. Please try again.')
-    } finally {
-      setIsCreating(false)
+      throw error
     }
   }
 
   return (
     <div className="border rounded-lg p-4 space-y-4">
-      <div className="flex justify-between items-center">
-        <div className="flex-1 flex gap-2">
-          <select
-            value={data.supplierId}
-            onChange={(e) => onChange({ ...data, supplierId: e.target.value })}
-            className={formStyles.selectWithWidth('w-64')}
-          >
-            <option value="">Select Supplier</option>
-            {suppliers.map(supplier => (
-              <option key={supplier.id} value={supplier.id}>
-                {supplier.name}
-              </option>
-            ))}
-          </select>
-          <button
-            type="button"
-            onClick={() => setShowSupplierModal(true)}
-            className="text-blue-600 hover:text-blue-700"
-          >
-            + Add New Supplier
-          </button>
-        </div>
-        <button
-          onClick={onRemove}
-          className="text-red-600 hover:text-red-700"
-        >
-          Remove
-        </button>
-      </div>
-
-      <div className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700">
-            Supplier Product Name
-          </label>
-          <input
-            type="text"
-            value={data.productName}
-            onChange={(e) => onChange({ ...data, productName: e.target.value })}
-            className={formStyles.input}
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700">
-            Supplier Product Description
-          </label>
-          <textarea
-            value={data.productDescription}
-            onChange={(e) => onChange({ ...data, productDescription: e.target.value })}
-            rows={3}
-            className={formStyles.textarea}
-          />
-        </div>
-
-        <div className="grid grid-cols-3 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Internet Number
-              <span className="ml-1 text-gray-400 text-xs">(Supplier's online product ID)</span>
-            </label>
-            <input
-              type="text"
-              value={data.internetNumber}
-              onChange={(e) => onChange({ ...data, internetNumber: e.target.value })}
-              className={formStyles.input}
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Item Number / SKU
-              <span className="ml-1 text-gray-400 text-xs">(Supplier's internal reference)</span>
-            </label>
-            <input
-              type="text"
-              value={data.itemNumber}
-              onChange={(e) => onChange({ ...data, itemNumber: e.target.value })}
-              className={formStyles.input}
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Model Number
-              <span className="ml-1 text-gray-400 text-xs">(Manufacturer's reference)</span>
-            </label>
-            <input
-              type="text"
-              value={data.modelNumber}
-              onChange={(e) => onChange({ ...data, modelNumber: e.target.value })}
-              className={formStyles.input}
-            />
-          </div>
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700">
-            List Price
-          </label>
-          <div className="mt-1 relative rounded-md shadow-sm">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <span className="text-gray-500 sm:text-sm">$</span>
+      <div className="flex justify-between items-start">
+        <div className="flex-1 space-y-4">
+          <div className="flex space-x-4">
+            <div className="flex-1">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Supplier
+              </label>
+              <div className="flex space-x-2">
+                <select
+                  value={data.supplierId}
+                  onChange={(e) => {
+                    const supplier = suppliers.find(s => s.id === e.target.value)
+                    onChange({
+                      ...data,
+                      supplierId: e.target.value,
+                      supplierName: supplier?.name || ''
+                    })
+                  }}
+                  className={formStyles.select}
+                >
+                  <option value="" key="empty">Select Supplier</option>
+                  {suppliers.map((supplier) => (
+                    <option key={supplier.id} value={supplier.id}>
+                      {supplier.name}
+                    </option>
+                  ))}
+                </select>
+                <button
+                  type="button"
+                  onClick={() => setShowSupplierModal(true)}
+                  className="px-3 py-2 text-sm font-medium text-blue-600 hover:text-blue-700"
+                >
+                  + Add Supplier
+                </button>
+              </div>
             </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Product Name (from supplier)
+            </label>
+            <input
+              type="text"
+              value={data.productName}
+              onChange={(e) => onChange({ ...data, productName: e.target.value })}
+              className={formStyles.input}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Product Description
+            </label>
+            <textarea
+              value={data.productDescription}
+              onChange={(e) => onChange({ ...data, productDescription: e.target.value })}
+              className={formStyles.textarea}
+              rows={3}
+            />
+          </div>
+
+          <div className="grid grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Internet Number
+              </label>
+              <input
+                type="text"
+                value={data.internetNumber}
+                onChange={(e) => onChange({ ...data, internetNumber: e.target.value })}
+                className={formStyles.input}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Item Number
+              </label>
+              <input
+                type="text"
+                value={data.itemNumber}
+                onChange={(e) => onChange({ ...data, itemNumber: e.target.value })}
+                className={formStyles.input}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Model Number
+              </label>
+              <input
+                type="text"
+                value={data.modelNumber}
+                onChange={(e) => onChange({ ...data, modelNumber: e.target.value })}
+                className={formStyles.input}
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              List Price
+            </label>
             <input
               type="text"
               value={data.listPrice}
-              onChange={(e) => {
-                const value = e.target.value.replace(/[^\d.]/g, '')
-                if (value === '' || /^\d*\.?\d{0,2}$/.test(value)) {
-                  onChange({ ...data, listPrice: value })
-                }
-              }}
-              onBlur={(e) => {
-                const value = parseFloat(e.target.value)
-                if (!isNaN(value)) {
-                  onChange({ ...data, listPrice: value.toFixed(2) })
-                }
-              }}
-              className={`pl-7 ${formStyles.input}`}
-              placeholder="0.00"
+              onChange={(e) => onChange({ ...data, listPrice: e.target.value })}
+              className={formStyles.input}
             />
           </div>
         </div>
+
+        <button
+          type="button"
+          onClick={onRemove}
+          className="text-red-600 hover:text-red-700 ml-4"
+        >
+          <span className="sr-only">Remove supplier data</span>
+          <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <path
+              fillRule="evenodd"
+              d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+              clipRule="evenodd"
+            />
+          </svg>
+        </button>
       </div>
 
       {showSupplierModal && (
         <SupplierModal
           onClose={() => setShowSupplierModal(false)}
-          onSave={handleAddSupplier}
-          isLoading={isCreating}
+          onSave={handleSupplierCreate}
         />
       )}
     </div>

@@ -6,16 +6,18 @@ import { SupplierDataSet } from './components/supplier-data-set'
 import { getSuppliers } from '@/lib/server/actions/supplier-actions'
 import type { Supplier } from '@prisma/client'
 import { formStyles } from '@/lib/styles/forms'
+import type { CreateSupplierData } from './components/supplier-data-set'
 
 interface BasicInfoStepProps {
   data: CatalogueFormData
   onChange: (data: CatalogueFormData) => void
   initialData?: Partial<CatalogueFormData>
+  supplierList: Supplier[]
 }
 
-export function BasicInfoStep({ data, onChange, initialData }: BasicInfoStepProps) {
-  const [suppliers, setSuppliers] = useState<Supplier[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+export function BasicInfoStep({ data, onChange, initialData, supplierList }: BasicInfoStepProps) {
+  const [suppliers, setSuppliers] = useState<Supplier[]>(supplierList)
+  const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -66,6 +68,50 @@ export function BasicInfoStep({ data, onChange, initialData }: BasicInfoStepProp
   const removeSupplierData = (index: number) => {
     const newSupplierData = data.supplierData.filter((_, i) => i !== index)
     onChange({ ...data, supplierData: newSupplierData })
+  }
+
+  const handleCreateSupplier = async (supplierData: CreateSupplierData) => {
+    try {
+      const response = await fetch('/api/suppliers', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(supplierData)
+      })
+      
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Failed to create supplier')
+      }
+      
+      const newSupplier = await response.json()
+      return newSupplier
+    } catch (error) {
+      console.error('Failed to create supplier:', error)
+      throw error
+    }
+  }
+
+  const handleVariantChange = (variant: CatalogueFormData['variant']) => {
+    onChange({
+      ...data,
+      variant: variant ? {
+        type: variant.type,
+        value: variant.value,
+        parentId: variant.parentId
+      } : undefined
+    })
+  }
+
+  const handleParentIdChange = (parentId: string | undefined) => {
+    onChange({
+      ...data,
+      variant: {
+        ...data.variant,
+        parentId,
+        type: data.variant?.type || null,
+        value: data.variant?.value || ''
+      }
+    })
   }
 
   return (
@@ -193,6 +239,15 @@ export function BasicInfoStep({ data, onChange, initialData }: BasicInfoStepProp
         />
       </div>
 
+      <div>
+        <label>Parent Product ID</label>
+        <input
+          type="text"
+          value={data.variant?.parentId || ''}
+          onChange={e => handleParentIdChange(e.target.value || undefined)}
+        />
+      </div>
+
       <div className="space-y-4">
         <div className="flex justify-between items-center">
           <h3 className="text-lg font-medium text-gray-900">Supplier Data</h3>
@@ -206,6 +261,7 @@ export function BasicInfoStep({ data, onChange, initialData }: BasicInfoStepProp
             onRemove={() => removeSupplierData(index)}
             suppliers={suppliers}
             onAddSupplier={handleAddSupplier}
+            onCreateSupplier={handleCreateSupplier}
           />
         ))}
 

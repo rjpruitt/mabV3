@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { CatalogueFormData, ProductImage } from '@/lib/products/types/catalogue'
 import {
   BasicInfoStep,
@@ -10,8 +10,10 @@ import {
   ReviewStep,
   SpecificationsStep
 } from './steps'
-import { CATEGORY_STEPS } from '../config/category-steps'
+import { categorySteps } from '../config/category-steps'
 import { toast } from 'sonner'
+import type { ProductImageWithFile, WizardStep } from './types'
+import type { Supplier } from '@prisma/client'
 
 interface ManualEntryWizardProps {
   onComplete: (data: CatalogueFormData) => void
@@ -34,14 +36,16 @@ export function ManualEntryWizard({
     },
     brand: initialData?.brand || '',
     categorization: {
-      style: [],
-      type: []
+      categories: [],
+      type: '',
+      style: []
     },
     classification: {
-      style: [],
-      productType: []
+      categories: [],
+      type: ''
     },
     designTool: {
+      enabled: false,
       classification: {
         format: 'INDIVIDUAL_COMPONENT',
         topCategory: 'SHOWERS',
@@ -49,16 +53,33 @@ export function ManualEntryWizard({
         includedComponents: []
       }
     },
-    priceLevel: 'SMART_SOLUTIONS',
+    priceLevel: 'Smart Solutions',
     images: [],
     visibility: {
       showToCustomer: true,
       showToSalesRep: true
     },
-    specifications: {},
+    specifications: [],
     supplierData: [],
+    patterns: [],
     choices: []
   }))
+
+  const [suppliers, setSuppliers] = useState<Supplier[]>([])
+
+  useEffect(() => {
+    const fetchSuppliers = async () => {
+      try {
+        const response = await fetch('/api/suppliers')
+        const data = await response.json()
+        setSuppliers(data)
+      } catch (error) {
+        console.error('Failed to fetch suppliers:', error)
+        toast.error('Failed to load suppliers')
+      }
+    }
+    fetchSuppliers()
+  }, [])
 
   const handleCategoryChange = (selections: Record<string, string | string[]>) => {
     console.log('Category selections:', selections)
@@ -121,14 +142,13 @@ export function ManualEntryWizard({
     setFormData(prev => ({
       ...prev,
       categorization: {
-        style: Array.isArray(selections.style) ? selections.style : [],
-        type
+        categories: type,
+        type: type[0] || '',
+        style: Array.isArray(selections.style) ? selections.style : []
       },
       choices
     }))
   }
-
-  type WizardStep = 'basic' | 'category' | 'specifications' | 'images' | 'visibility'
 
   const handleSave = async (data: CatalogueFormData) => {
     if (!data || !data.name || !data.brand) {
@@ -139,10 +159,10 @@ export function ManualEntryWizard({
     try {
       // Upload any new images first
       const uploadPromises = data.images
-        .filter((img): img is ProductImage & { file: File } => Boolean(img.file))
+        .filter((img): img is ProductImageWithFile => 'file' in img && img.file instanceof File)
         .map(async (img) => {
           const formData = new FormData()
-          formData.append('file', img.file)
+          formData.append('file', img.file!)
           
           const response = await fetch('/api/upload', {
             method: 'POST',
@@ -227,13 +247,14 @@ export function ManualEntryWizard({
       component: <BasicInfoStep 
         data={formData} 
         onChange={handleDataChange} 
-        initialData={initialData} 
+        initialData={initialData}
+        supplierList={suppliers}
       /> 
     },
     { 
       title: 'Categories', 
       component: <DynamicCategoryStep
-        steps={CATEGORY_STEPS}
+        steps={categorySteps}
         onChange={handleCategoryChange}
         initialSelections={formData.categorization}
       /> 
@@ -249,7 +270,18 @@ export function ManualEntryWizard({
       title: 'Images', 
       component: <ImagesStep 
         data={formData} 
-        onChange={handleDataChange} 
+        onChange={(data) => {
+          const validatedImages = data.images.map(img => ({
+            ...img,
+            isPrimary: img.isPrimary || false,
+            visibility: {
+              ...img.visibility,
+              showToCustomer: true,
+              showToSalesRep: true
+            }
+          }))
+          handleDataChange({ images: validatedImages })
+        }} 
       /> 
     },
     { 
@@ -263,7 +295,8 @@ export function ManualEntryWizard({
       title: 'Review', 
       component: <ReviewStep 
         data={formData} 
-        onEdit={(step: WizardStep) => {
+        onChange={handleDataChange}
+        onStepChange={(step: WizardStep) => {
           const stepMap: Record<WizardStep, number> = {
             'basic': 1,
             'category': 2,
@@ -273,7 +306,6 @@ export function ManualEntryWizard({
           }
           setStep(stepMap[step])
         }}
-        onComplete={handleSave}
       /> 
     }
   ]
@@ -285,7 +317,7 @@ export function ManualEntryWizard({
       case 1: // Basic Info
         return formData.name && formData.brand
       case 2: // Categories
-        return formData.categorization.type.length > 0
+        return formData.categorization.type !== ''
       default:
         return true
     }
