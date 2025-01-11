@@ -16,67 +16,145 @@
  * - Supplier auto-creation if needed
  */
 
-import type { ProductRepository } from '@/lib/products/repositories/product.repository'
-import type { ScrapedProduct } from './scraper/scraper-service'
-import type { Prisma } from '@prisma/client'
+import { PrismaClient, Prisma, ProductImage } from '@prisma/client'
+import { promises as fs } from 'fs'
+import path from 'path'
+
+interface PatternVariation {
+  id: string
+  name: string
+  order: number
+  images: Array<{
+    url: string
+    localPath: string
+    view: string
+    isPrimary: boolean
+    alt?: string
+  }>
+}
 
 export class ProductImportService {
-  constructor(private productRepo: ProductRepository) {}
+  constructor(private prisma: PrismaClient) {}
 
-  async importProduct(product: ScrapedProduct, supplier: string) {
-    try {
-      const dbProduct: Prisma.ProductCreateInput = {
-        name: product.name,
-        brand: supplier,
+  async importScrapedProduct(
+    sourcePath: string,
+    category: string
+  ) {
+    // Get supplier first
+    const supplier = await this.prisma.supplier.findUnique({
+      where: { code: 'CASTICO' }
+    })
+    
+    if (!supplier) {
+      throw new Error('Supplier CASTICO not found')
+    }
+
+    // Read product JSON
+    const productData = JSON.parse(
+      await fs.readFile(path.join(sourcePath, 'product.json'), 'utf-8')
+    )
+
+    // Create product record first to get CUID
+    const product = await this.prisma.product.create({
+      data: {
+        name: productData.name,
+        brand: productData.brand,
         description: {
-          marketing: product.description.marketing || '',
-          internal: product.description.internal || '',
-          supplier: product.description.supplier || ''
+          supplier: productData.description.supplier,
+          marketing: productData.description.marketing,
+          internal: productData.description.internal || ''
         },
         categorization: {
-          style: Array.isArray(product.categorization.style) ? product.categorization.style : [],
-          type: Array.isArray(product.categorization.type) ? product.categorization.type : []
+          categories: productData.categorization.type,
+          style: productData.categorization.style
         },
         specifications: {
-          dimensions: product.specifications.dimensions,
-          features: product.specifications.features,
-          technicalSpecs: product.specifications.technicalSpecs
+          dimensions: productData.specifications.dimensions,
+          features: productData.specifications.features,
+          technicalSpecs: productData.specifications.technicalSpecs
         },
-        images: {
-          create: product.patterns.flatMap(pattern => 
-            pattern.images.map(image => ({
-              url: image.url,
-              alt: image.alt || '',
-              isPrimary: image.isPrimary,
-              visibility: {
-                create: {
-                  team: true,
-                  customer: false
-                }
-              }
-            }))
-          )
-        },
-        supplier: {
-          connectOrCreate: {
-            where: { code: supplier.toLowerCase() },
-            create: { 
-              code: supplier.toLowerCase(),
-              name: supplier
-            }
-          }
-        },
+        supplierId: supplier.id,
         visibility: {
           create: {
-            roles: ['TEAM']
+            roles: ['CUSTOMER', 'TEAM'],
+            promotions: Prisma.JsonNull,
+            designTools: Prisma.JsonNull
+          }
+        },
+        variations: {
+          patterns: (productData.patterns as PatternVariation[]).map(pattern => ({
+            id: pattern.id,
+            name: pattern.name,
+            order: pattern.order
+          }))
+        },
+        supplierPricing: {
+          create: {
+            listPrice: productData.price,
+            effectiveDate: new Date(),
+            discount: 0,
+            supplierName: 'Castico',
+            supplierSku: '',
+            updatedAt: new Date()
           }
         }
       }
+    })
 
-      return await this.productRepo.create(dbProduct)
-    } catch (error) {
-      console.error('Import failed:', error)
-      throw error
+    // Now handle images with the product's CUID
+    await this.importProductImages(
+      product.id,
+      category,
+      productData.patterns,
+      sourcePath
+    )
+
+    return product
+  }
+
+  private async importProductImages(
+    productId: string,
+    category: string,
+    patterns: any[],
+    sourcePath: string
+  ) {
+    const uploadDir = path.join(
+      process.cwd(),
+      'public/images/uploads',
+      category,
+      productId,
+      'patterns'
+    )
+
+    // Ensure upload directory exists
+    await fs.mkdir(uploadDir, { recursive: true })
+
+    // Process each pattern's images
+    for (const pattern of patterns) {
+      const patternDir = path.join(uploadDir, pattern.name.toLowerCase().replace(/[^a-z0-9]/g, '-'))
+      await fs.mkdir(patternDir, { recursive: true })
+
+      // Copy and register each image
+      for (const image of pattern.images) {
+        // Copy file to new location
+        const destPath = path.join(patternDir, path.basename(image.localPath))
+        await fs.copyFile(image.localPath, destPath)
+
+        // Create image with explicit type
+        const imageData: Prisma.ProductImageCreateInput = {
+          product: {
+            connect: { id: productId }
+          },
+          url: `/images/uploads/${category}/${productId}/patterns/${pattern.name}/${path.basename(image.localPath)}`,
+          alt: image.alt || pattern.name,
+          isPrimary: image.isPrimary,
+          view: image.view
+        }
+
+        await this.prisma.productImage.create({
+          data: imageData
+        })
+      }
     }
   }
 } 

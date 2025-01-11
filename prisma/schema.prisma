@@ -92,9 +92,14 @@ model ProductImage {
   url        String
   alt        String?
   isPrimary  Boolean  @default(false)
-  visibility ProductImageVisibility?
+  view       String?
+  
+  // Add timestamps
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
+
+  // Keep the visibility relation
+  visibility ProductImageVisibility?
 
   @@index([productId])
 }

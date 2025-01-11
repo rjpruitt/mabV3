@@ -216,6 +216,7 @@ export class CasticoScraper implements ScraperService {
     url: string
     name: string
     brand: string
+    price: number
     description: {
       marketing: string
       internal: string
@@ -250,9 +251,13 @@ export class CasticoScraper implements ScraperService {
     const url = page.url()
     
     const details = await page.evaluate(() => {
-      // Get basic product info
       const name = document.querySelector('h1.product_title')?.textContent?.trim() || ''
       
+      // Extract price using exact HTML structure
+      const priceText = document.querySelector('p.price .woocommerce-Price-amount.amount bdi')?.textContent?.trim() || ''
+      console.log('Raw price text:', priceText)  // Debug log
+      const price = parseFloat(priceText.replace(/[^0-9.]/g, '')) || 0
+
       // Get description - look for paragraph starting with "Elevate your shower"
       let description = ''
       const paragraphs = document.querySelectorAll('p')
@@ -278,6 +283,7 @@ export class CasticoScraper implements ScraperService {
 
       return {
         name,
+        price,
         dimensions,
         description
       }
@@ -291,6 +297,7 @@ export class CasticoScraper implements ScraperService {
       url,
       name: details.name,
       brand: 'Castico',
+      price: details.price,
       description: {
         marketing: details.description,
         internal: '',
