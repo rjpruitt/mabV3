@@ -41,7 +41,7 @@ export class ServiceProvider {
 
   getProductImportService(): ProductImportService {
     if (!this.productImportService) {
-      this.productImportService = new ProductImportService(this.getProductRepository())
+      this.productImportService = new ProductImportService(this.prisma)
     }
     return this.productImportService
   }

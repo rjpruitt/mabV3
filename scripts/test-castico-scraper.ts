@@ -1,6 +1,24 @@
 /**
- * Test script for the Castico product scraper
- * Scrapes product data and saves it to the debug/results directory
+ * Base & Wall Kits Scraper
+ * 
+ * Original scraper script used for testing the base & wall kits category.
+ * Uses index 0 of the category configuration in CasticoScraper.
+ * 
+ * Features:
+ * - Scrapes all base & wall kit products
+ * - Extracts patterns and variations
+ * - Downloads and saves images
+ * - Creates debug/results output
+ * 
+ * Usage:
+ * ```bash
+ * npm run test-scraper-shower-walls -- 0
+ * ```
+ * 
+ * Output:
+ * - Saves results to debug/results/base-and-wall-kits/[timestamp]/
+ * - Creates product.json for each product
+ * - Downloads and organizes images by pattern
  */
 
 import { ServiceProvider } from '../src/lib/services/service-provider'

@@ -1,14 +1,17 @@
+/**
+ * Product Types Index
+ * Central export point for all product-related type definitions
+ * Defines core ProductBase interface and re-exports from sub-modules
+ */
+
+import { ProductDescription, ProductCategorization } from './catalogue'
+
 // Core product types that are shared across systems
 export interface ProductBase {
   name: string
-  internalName: string
   brand: string
-  description: {
-    supplier: string
-    marketing: string
-    internal: string
-  }
-  categorization: Record<string, string | string[]>
+  description: ProductDescription
+  categorization: ProductCategorization
   specifications: Array<{
     name: string
     value: string
@@ -29,4 +32,11 @@ export interface ProductBase {
       team: boolean
     }
   }>
-} 
+}
+
+// Re-export everything
+export * from './catalogue'
+export * from './design'
+export * from './pricing'
+export * from './lead'
+export * from './supplier' 

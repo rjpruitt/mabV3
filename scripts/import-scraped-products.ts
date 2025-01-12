@@ -23,19 +23,18 @@ async function importScrapedProducts() {
     
     console.log('Supplier ready:', supplier.name, 'with ID:', supplier.id)
 
-    // Get all product folders
-    const resultsDir = path.join(process.cwd(), 'debug/results/base-and-wall-kits')
-    const scrapeDir = path.join(resultsDir, '2025-01-11 19-09-21')
+    // Import shower bases products
+    const resultsDir = path.join(process.cwd(), 'debug/results/shower-bases')
+    const scrapeDir = path.join(resultsDir, '2025-01-12 01-16-48')
     const productFolders = await fs.readdir(scrapeDir)
 
     console.log(`Found ${productFolders.length} products to import`)
 
-    // Import all products
     for (const folder of productFolders) {
       try {
         const product = await importService.importScrapedProduct(
           path.join(scrapeDir, folder),
-          'base-and-wall-kits'
+          'shower-bases'
         )
         console.log('Successfully imported product:', product.name)
       } catch (error) {

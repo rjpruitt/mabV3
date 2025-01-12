@@ -78,13 +78,12 @@ export class CasticoScraper implements ScraperService {
     await this.cleanupOldScreenshots()
   }
 
-  async scrapeProducts(): Promise<ScrapedProduct[]> {
+  async scrapeProducts(categoryIndex: number = 0): Promise<ScrapedProduct[]> {
     console.log('Starting Castico scrape...')
     try {
       await this.initialize()
       
-      // Start with BASE & WALL KITS category
-      const category = this.categories[0]
+      const category = this.categories[categoryIndex]
       console.log(`Scraping category: ${category.name}`)
       
       const products = await this.scrapeAllProducts(category)
@@ -142,49 +141,21 @@ export class CasticoScraper implements ScraperService {
       console.log('Product grid found')
       
       const allProductUrls: string[] = []
-      let previousCount = 0
-      let loadMoreAttempts = 0
-      const maxAttempts = 10
-
-      while (loadMoreAttempts < maxAttempts) {
-        // Get current product URLs
-        const newUrls = await page.evaluate(() => {
-          const products = document.querySelectorAll('a.product-link[title]')
-          return Array.from(products, a => (a as HTMLAnchorElement).href)
-            .filter(url => url.includes('/product/'))
+      
+      // Get base URLs without pattern variations
+      const urls = await page.evaluate(() => {
+        const products = document.querySelectorAll('a.product-link[title]')
+        return Array.from(products, a => {
+          const url = (a as HTMLAnchorElement).href
+          // Remove pattern-specific parts of URL
+          return url.split('?')[0].replace(/\/$/, '')
         })
-        
-        if (newUrls.length > previousCount) {
-          allProductUrls.length = 0
-          allProductUrls.push(...newUrls)
-          console.log(`Found ${newUrls.length} products, total: ${allProductUrls.length}`)
-          previousCount = newUrls.length
-          loadMoreAttempts = 0
-        }
-
-        // If we have all expected products, we can stop
-        if (category.expectedCount && allProductUrls.length >= category.expectedCount) {
-          console.log('Found all expected products')
-          break
-        }
-
-        // Look for Load More button
-        const loadMoreButton = await page.$('.et-infload-btn')
-        if (!loadMoreButton || !(await loadMoreButton.isVisible())) {
-          loadMoreAttempts++
-          console.log(`Load More button not found, attempt ${loadMoreAttempts}`)
-          await page.waitForTimeout(2000)
-          continue
-        }
-
-        // Click and wait for new products
-        console.log('Clicking load more button...')
-        await loadMoreButton.click()
-        await page.waitForTimeout(2000)
-      }
-
-      const uniqueUrls = [...new Set(allProductUrls)]
-      console.log(`Found ${uniqueUrls.length} unique products in ${category.name}`)
+      })
+      
+      // Deduplicate URLs
+      const uniqueUrls = [...new Set(urls)]
+        .filter(url => url.includes('/product/'))
+      
       return uniqueUrls
 
     } catch (error) {
@@ -212,7 +183,20 @@ export class CasticoScraper implements ScraperService {
     }
   }
 
-  private async extractProductDetails(page: Page): Promise<{
+  private parseFraction(str: string): number {
+    if (str.includes('-')) {
+      const [whole, fraction] = str.split('-')
+      const [num, denom] = fraction.split('/')
+      return parseInt(whole) + (parseInt(num) / parseInt(denom))
+    }
+    if (str.includes('/')) {
+      const [num, denom] = str.split('/')
+      return parseInt(num) / parseInt(denom)
+    }
+    return parseInt(str)
+  }
+
+  private async extractProductDetails(page: Page, category: CategoryInfo): Promise<{
     url: string
     name: string
     brand: string
@@ -269,25 +253,30 @@ export class CasticoScraper implements ScraperService {
         }
       }
 
-      // Updated regex to handle both Unicode (″) and ASCII (") quotes
-      const dimensionsMatch = name.match(/(\d+)[″"]\s*x\s*(\d+)[″"]\s*x\s*(\d+)[″"]/)
-      const dimensions = dimensionsMatch ? {
-        width: parseInt(dimensionsMatch[2]),  // Second number (60)
-        depth: parseInt(dimensionsMatch[1]),  // First number (32)
-        height: parseInt(dimensionsMatch[3])  // Third number (84)
-      } : {
-        width: 0,
-        depth: 0,
-        height: 0
-      }
-
+      // Just get the raw dimensions string
+      const dimensionsMatch = name.match(/(\d+)[″"]\s*x\s*(\d+)[″"]\s*x\s*([\d-/]+)[″"]/)
       return {
         name,
         price,
-        dimensions,
+        dimensionsMatch: dimensionsMatch ? {
+          width: dimensionsMatch[2],
+          depth: dimensionsMatch[1],
+          height: dimensionsMatch[3]  // Pass raw string
+        } : null,
         description
       }
     })
+
+    // Parse dimensions outside page.evaluate
+    const dimensions = details.dimensionsMatch ? {
+      width: parseInt(details.dimensionsMatch.width),
+      depth: parseInt(details.dimensionsMatch.depth),
+      height: this.parseFraction(details.dimensionsMatch.height)
+    } : {
+      width: 0,
+      depth: 0,
+      height: 0
+    }
 
     // Get technical specifications and features
     const techSpecs = await this.extractTechnicalSpecs(page)
@@ -305,16 +294,16 @@ export class CasticoScraper implements ScraperService {
       },
       categorization: {
         style: ['modern'],
-        type: ['base-and-wall-kits']
+        type: [category.name.toLowerCase().replace(/[^a-z0-9-]/g, '-')]
       },
       specifications: {
-        dimensions: details.dimensions,
+        dimensions: dimensions,
         features,
         technicalSpecs: techSpecs
       },
       metadata: {
-        dimensions: details.dimensions,
-        productType: 'base-and-wall-kits',
+        dimensions: dimensions,
+        productType: category.name.toLowerCase().replace(/[^a-z0-9-]/g, '-'),
         scrapedAt: new Date().toISOString()
       }
     }
@@ -322,10 +311,9 @@ export class CasticoScraper implements ScraperService {
 
   private async extractTechnicalSpecs(page: Page): Promise<ProductSpec[]> {
     try {
-      // Get content from the technical specifications tab
       const specs = await page.evaluate(() => {
         const specsList: Array<{ name: string, value: string }> = []
-        const techPanel = document.querySelector('#tab-technical-specification')
+        const techPanel = document.querySelector('#tab-technician-specification')
         
         if (techPanel) {
           const rows = techPanel.querySelectorAll('tr')
@@ -409,7 +397,7 @@ export class CasticoScraper implements ScraperService {
     return this.scrapeTimestamp
   }
 
-  private async setupResultsDirectory(productName: string): Promise<{
+  private async setupResultsDirectory(productName: string, category: CategoryInfo): Promise<{
     productDir: string
     imagesDir: string
   }> {
@@ -417,8 +405,8 @@ export class CasticoScraper implements ScraperService {
       process.cwd(), 
       'debug', 
       'results', 
-      'base-and-wall-kits',
-      this.getTimestamp()  // Use the same timestamp for all products
+      category.name.toLowerCase().replace(/[^a-z0-9-]/g, '-'),
+      this.getTimestamp()
     )
     
     const sanitizedName = productName.toLowerCase().replace(/[^a-z0-9]/g, '-')
@@ -458,8 +446,13 @@ export class CasticoScraper implements ScraperService {
 
   private async extractPatternVariations(page: Page, productDir: string) {
     const patterns = await page.evaluate(() => {
+      // Get pattern selector based on product type
+      const baseColorSelector = '.variable-items-wrapper[data-attribute_name="attribute_pa_base-color"] li'
+      const wallColorSelector = '.variable-items-wrapper[data-attribute_name="attribute_pa_wall-color"] li'
+      
+      // Use appropriate selector
       const items = Array.from(document.querySelectorAll(
-        '.single-product-variable-items.variable-items-wrapper[data-attribute_name="attribute_pa_wall-color"] li'
+        document.URL.includes('shower-base') ? baseColorSelector : wallColorSelector
       ))
       
       // Use a Map to deduplicate patterns by ID
@@ -472,7 +465,6 @@ export class CasticoScraper implements ScraperService {
         const id = item.getAttribute('data-value') || ''
         const name = img.alt?.replace(' Pattern', '').trim() || ''
         
-        // Only add if we haven't seen this pattern ID before
         if (!patternMap.has(id) && name && name !== 'View More') {
           patternMap.set(id, {
             id,
@@ -482,7 +474,7 @@ export class CasticoScraper implements ScraperService {
               localPath: ''
             },
             images: [],
-            order: patternMap.size  // Use map size for order to maintain sequence
+            order: patternMap.size
           })
         }
       })
@@ -603,10 +595,10 @@ export class CasticoScraper implements ScraperService {
           await page.waitForSelector('.product-type-variable', { timeout: 30000 })
           
           // Extract all product data
-          const details = await this.extractProductDetails(page)
+          const details = await this.extractProductDetails(page, category)
           
           // Setup directories for this product
-          const { productDir, imagesDir } = await this.setupResultsDirectory(details.name)
+          const { productDir, imagesDir } = await this.setupResultsDirectory(details.name, category)
           
           // Extract and save patterns with images
           const patterns = await this.extractPatternVariations(page, productDir)
@@ -646,7 +638,13 @@ export class CasticoScraper implements ScraperService {
       errors
     }
 
-    const summaryPath = path.join(process.cwd(), 'debug', 'results', 'base-and-wall-kits', 'summary.json')
+    const summaryPath = path.join(
+      process.cwd(), 
+      'debug', 
+      'results', 
+      category.name.toLowerCase().replace(/[^a-z0-9-]/g, '-'), 
+      'summary.json'
+    )
     await fs.writeFile(
       summaryPath,
       JSON.stringify(summary, null, 2).replace(/\r?\n/g, '\n'),

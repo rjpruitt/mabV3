@@ -1,120 +1,323 @@
-# Castico Scraper Documentation
-
-## Table of Contents
-1. [Overview](#overview)
-2. [Image Handling Strategy](#image-handling-strategy)
-3. [Implementation Details](#key-implementation-details)
-4. [Core Files](#core-files)
-5. [Data Flow](#data-flow)
-6. [Database Integration](#database-integration)
-7. [Edge Cases](#known-edge-cases)
-8. [Recovery Strategies](#recovery-strategies)
-9. [Testing](#test-cases)
-10. [State Management](#scraper-state-management)
-11. [Troubleshooting](#troubleshooting-guide)
-12. [Version History](#version-history)
+# Castico Product Scraper Documentation
+_Last Updated: 2024-01-17_
 
 ## Overview
-The Castico scraper is designed to extract product information and images from the Castico website. It handles multiple product categories, pattern variations, and associated images.
+The Castico scraper is a TypeScript-based system for extracting product data from castico-tx.com. It handles three main product categories:
+- Base and Wall Kits
+- Shower Walls
+- Shower Bases
 
-## Image Handling Strategy
+The system consists of:
+- A core scraper implementation using Playwright
+- A type-safe data transformation pipeline
+- A database import service using Prisma
+- Supporting CLI scripts for execution and analysis
 
-### Directory Structure 
-The scraper organizes files in the following structure:
+## Project Structure
 
-    debug/
-    └── results/
-        └── [category]/
-            └── [date]/
-                └── [product-name]/
-                    ├── product.json
-                    └── images/
-                        └── [pattern-name]/
-                            └── pattern-name-view-type-000.jpg
+### Core Files
+```
+src/lib/
+  services/
+    scraper/
+      suppliers/
+        castico.ts              # Core scraper implementation
+      transformers/
+        castico.transformer.ts  # Data transformation
+      scraper-service.ts        # Scraper interface & types
+    service-provider.ts         # Service initialization & DI
+    product-import.service.ts   # Database import service
+    supplier-service.ts         # Supplier management
+  products/
+    types/
+      catalogue.ts             # Product catalogue types
+      import.ts               # Import/scraping types
+      supplier.ts            # Supplier types
+      pricing.ts            # Pricing types
+      design.ts            # Design system types
+      lead.ts             # Lead management types
+      index.ts           # Type exports
 
-### Image View Types
-Images are categorized by their view type, determined by the order they appear on the product page:
+scripts/
+  test-scraper-shower-walls.ts   # Wall category scraper
+  test-scraper-shower-bases.ts   # Base category scraper
+  import-scraped-products.ts     # Import script
+  analyze-scrape-results.ts      # Results analysis
 
-1. `base-detail` (index 0) - Detailed view of the base
-2. `full` (index 1) - Full product view (marked as primary)
-3. `includes` (index 2) - Product inclusions/components
-4. `detail` (index 3) - Detail views
-5. `base` (index 4) - Base view
-6. `view-N` (index 5+) - Additional views
+prisma/
+  schema.prisma                  # Database schema
+```
 
-### File Naming Convention
-Images are saved using the following format:
+### Verified Files
+The following files have been tested through multiple successful scrapes and imports:
+- `castico.ts`: Core scraper implementation
+- `test-scraper-shower-bases.ts`: Base scraping script
+- `test-scraper-shower-walls.ts`: Wall scraping script
+- `castico.ts`: Core scraper implementation
+- `test-castico-scraper.ts`: Base & wall kits scraper
+- `test-scraper-shower-walls.ts`: Wall scraper
+- `test-scraper-shower-bases.ts`: Base scraper
+- `import-scraped-products.ts`: Import script
+- `product.json`: Product data format
+- `summary.json`: Results summary format
 
-    [pattern-name]-[view-type]-[random-number].jpg
+### Key Files Reference
+- `castico.ts`: Core scraper implementation
+- `test-scraper-*.ts`: Category-specific test scripts
+- `import-scraped-products.ts`: Data import script
+- `product.json`: Individual product data
+- `summary.json`: Scrape results summary
+- `service-provider.ts`: Service initialization and dependency injection
+- `scraper-service.ts`: Interface defining scraper contract
+- `product-import-service.ts`: Handles database imports
 
-Where:
-- `pattern-name`: Sanitized pattern name (lowercase, alphanumeric with hyphens)
-- `view-type`: One of the predefined view types
-- `random-number`: 3-digit random number to prevent filename collisions
+### Import Service
+The import service (`ProductImportService`) handles:
+- Reading scraped product data
+- Converting to database format
+- Creating supplier relationships
+- Storing images in proper locations
+- Managing pattern variations
 
-### Key Implementation Details
-1. Image Processing Flow:
-   ```typescript
-   // In extractPatternVariations:
-   const images = await Promise.all(
-     images.map(async (img, index) => {
-       const buffer = await this.downloadImage(img.url)
-       const view = this.getViewFromUrl(img.url, index)
-       const sanitizedPattern = pattern.name.replace(/[^a-z0-9]/gi, '-').toLowerCase()
-       const filename = `${sanitizedPattern}-${view}-${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}.jpg`
-       const localPath = await this.saveImage(buffer, filename, index)
-       return {
-         ...img,
-         localPath,
-         view,
-         isPrimary: view === 'full'
-       }
-     })
-   )
-   ```
+## Prerequisites
+- Node.js
+- Playwright
+- TypeScript
+- Environment variables:
+  ```bash
+  SAVE_SCRAPER_SCREENSHOTS=true|false  # Enable screenshot saving
+  DEBUG_SCRAPER=true|false            # Enable debug logging
+  ```
 
-2. Critical Methods:
-   - `getViewFromUrl(url: string, index: number): string`
-   - `savePatternImages(pattern: PatternVariation, imagesDir: string)`
-   - `setupResultsDirectory(category: string, productName: string)`
+## Getting Started
 
-3. File Organization:
-   - Initial images are downloaded and saved using `saveImage`
-   - Images are then copied to pattern-specific directories using `savePatternImages`
-   - All paths use the debug/results structure
+### Installation
+```bash
+npm install  # Install dependencies
+```
 
-### Current Issues
-1. Legacy directory creation in initialize():
-   ```typescript
-   await fs.mkdir(path.join(process.cwd(), 'scraped-images'), { recursive: true })
-   ```
-   This needs to be removed as we've moved to the debug/results structure.
+### Running a Scrape
+1. Create a test script for the category:
+```typescript
+// scripts/test-scraper-[category].ts
+import { ServiceProvider } from '../src/lib/services/service-provider'
 
-2. Image saving process needs consolidation to avoid duplicate saves
+async function testScraper() {
+  const serviceProvider = ServiceProvider.getInstance()
+  const scraper = serviceProvider.getCasticoScraper()
+  await scraper.scrapeProducts(categoryIndex) // 0=kits, 1=walls, 2=bases
+}
+```
 
-## Future Improvements
-1. Implement retry logic for failed image downloads
-2. Add image validation (size, format, quality)
-3. Optimize network wait times
-4. Add progress tracking and resumability
-5. Consolidate image saving to a single location
-6. Remove legacy scraped-images directory handling 
-
-### Product Data Structure
-Example product.json structure:
+2. Add script to package.json:
 ```json
 {
-  "url": "https://castico-tx.com/product/...",
-  "name": "32″ x 60″ x 84″ Center Drain - White Sand",
+  "scripts": {
+    "test-scraper-[category]": "NODE_OPTIONS=--experimental-loader=ts-node/esm node scripts/test-scraper-[category].ts"
+  }
+}
+```
+
+3. Run the scraper:
+```bash
+npm run test-scraper-[category]
+```
+
+## Architecture
+
+### Core Components
+```typescript
+class CasticoScraper implements ScraperService {
+  // Configuration
+  private browser: Browser | null = null
+  private readonly screenshotsDir = path.join(process.cwd(), 'debug', 'screenshots')
+  private enableScreenshots = process.env.SAVE_SCRAPER_SCREENSHOTS === 'true'
+  private debug = process.env.DEBUG_SCRAPER === 'true'
+
+  // Main scraping methods
+  async scrapeProducts(categoryIndex: number): Promise<ScrapedProduct[]>
+  private async scrapeCategory(category: CategoryInfo): Promise<string[]>
+  private async scrapeAllProducts(category: CategoryInfo): Promise<ScrapedProduct[]>
+  
+  // Product extraction
+  private async extractProductDetails(page: Page, category: CategoryInfo)
+  private async extractTechnicalSpecs(page: Page): Promise<ProductSpec[]>
+  private async extractFeatures(page: Page): Promise<string[]>
+  private async extractPatternVariations(page: Page, productDir: string)
+}
+```
+
+### Category Configuration
+```typescript
+public readonly categories = [
+  {
+    name: 'BASE & WALL KITS',
+    url: 'https://castico-tx.com/product-category/castico-online/shower-kits-base-wall/'
+  },
+  {
+    name: 'SHOWER WALLS',
+    url: 'https://castico-tx.com/shop/?filter_product-category=shower-walls'
+  },
+  {
+    name: 'SHOWER BASES',
+    url: 'https://castico-tx.com/shop/?filter_product-category=shower-bases'
+  }
+]
+```
+
+## Data Structure
+
+### Product Format
+```typescript
+interface ScrapedProduct {
+  url: string
+  name: string
+  brand: string
+  price: number
+  description: {
+    marketing: string
+    internal: string
+    supplier: string
+  }
+  categorization: {
+    style: string[]
+    type: string[]  // 'base-and-wall-kits', 'shower-walls', 'shower-bases'
+  }
+  specifications: {
+    dimensions: {
+      width: number   // inches
+      depth: number   // inches
+      height: number  // inches (handles fractions)
+    }
+    features: string[]
+    technicalSpecs: ProductSpec[]  // From technician-specification tab
+  }
+  patterns: Pattern[]
+}
+```
+
+### Pattern Structure
+```typescript
+interface Pattern {
+  id: string        // URL-safe ID (e.g., 'alpine-marble')
+  name: string      // Display name (e.g., 'Alpine Marble')
+  thumbnail: {
+    url: string     // Original URL
+    localPath: string  // Saved local path
+  }
+  images: ScrapedImage[]
+  order: number     // Display order
+}
+
+interface ScrapedImage {
+  url: string
+  alt: string
+  view: string      // 'base-detail', 'full', 'includes', etc.
+  localPath: string
+  isPrimary: boolean
+}
+```
+
+## File Organization
+
+### Results Directory
+```
+debug/
+  results/
+    base-and-wall-kits/
+      [timestamp]/
+        [product-name]/
+          product.json    # Complete product data
+          images/
+            [pattern-name]/
+              base-detail.jpg
+              full.jpg
+              thumbnail.jpg
+      summary.json    # Scrape results summary
+    shower-walls/
+    shower-bases/
+```
+
+## Scripts
+
+### Scraping
+```bash
+# Create test script
+scripts/test-scraper-shower-walls.ts:
+import { ServiceProvider } from '../src/lib/services/service-provider'
+
+async function testShowerWallsScraper() {
+  const serviceProvider = ServiceProvider.getInstance()
+  const scraper = serviceProvider.getCasticoScraper()
+  await scraper.scrapeProducts(1)  # Category index
+}
+
+# Run scraper
+npm run test-scraper-shower-walls
+npm run test-scraper-shower-bases
+```
+
+### Importing
+```bash
+# Import script
+scripts/import-scraped-products.ts:
+async function importScrapedProducts() {
+  const serviceProvider = ServiceProvider.getInstance()
+  const importService = serviceProvider.getProductImportService()
+  
+  # Import latest scrape
+  const scrapeDir = path.join(process.cwd(), 'debug/results/shower-bases/[timestamp]')
+  await importService.importScrapedProduct(scrapeDir, 'shower-bases')
+}
+
+# Run import
+npm run import-scraped
+```
+
+## Example Results
+
+### Summary Output
+```json
+{
+  "category": "SHOWER BASES",
+  "scrapedAt": "2025-01-12T01:33:13.073Z",
+  "total": 12,
+  "successful": 12,
+  "failed": 0,
+  "errors": []
+}
+```
+
+### Product Data Example
+```json
+{
+  "name": "32\" x 60\" x 1-1/8\" Center Drain - Sand - Marble - Heavy Veining",
+  "price": 900,
+  "specifications": {
+    "dimensions": {
+      "width": 60,
+      "depth": 32,
+      "height": 1.125
+    },
+    "technicalSpecs": [
+      {
+        "name": "Base Width (in - cm) +/- 1/8",
+        "value": "32\" - 81.28 cm"
+      }
+    ]
+  },
   "patterns": [
     {
-      "name": "Alpine Marble Gloss",
+      "id": "alpine-marble",
+      "name": "Alpine Marble",
       "images": [
         {
-          "url": "https://...",
-          "localPath": "debug/results/.../alpine-marble-gloss-base-detail-001.jpg",
           "view": "base-detail",
           "isPrimary": false
+        },
+        {
+          "view": "full",
+          "isPrimary": true
         }
       ]
     }
@@ -122,1001 +325,565 @@ Example product.json structure:
 }
 ```
 
-### Critical Implementation Context
-1. Image Saving Flow:
-   - Images are first downloaded via `downloadImage`
-   - Then saved via `saveImage` to a temporary location
-   - Finally copied to pattern directories via `savePatternImages`
-   - The temporary location issue is causing duplicate saves
+## Troubleshooting
 
-2. Pattern Image Extraction:
-   - Pattern names come from product variations
-   - Images are matched to patterns by name in URL/alt text
-   - Order of images determines view type
-   - Some patterns have missing images due to async loading
+### Common Issues
+- **Page Load Timeouts**: Increase timeout in browser launch options
+- **Missing Images**: Check network connectivity and retry logic
+- **Pattern Variations**: Verify selectors for pattern swatches
+- **Technical Specs**: Check tab ID 'technician-specification'
 
-3. Debug Points:
-   - Network timeouts occur at `page.waitForLoadState('networkidle')`
-   - Image elements found via multiple selectors:
-     ```typescript
-     const imageElements = await page.$$([
-       `img[alt*="${pattern.name}"]`,
-       `img[src*="${pattern.name.toLowerCase().replace(/\s+/g, '-')}"]`,
-       '.woocommerce-product-gallery__image img',
-       '.flex-viewport img'
-     ].join(','))
-     ```
+### Debug Tools
+- Enable screenshots: `SAVE_SCRAPER_SCREENSHOTS=true`
+- Check debug/screenshots for failed pages
+- Review summary.json for error details
 
-4. Current Working State:
-   - Pattern detection works reliably
-   - Image view types are correctly assigned by index
-   - Images are being saved in both old and new locations
-   - Need to remove old scraped-images directory handling 
+## Notes
+- Handles fractional dimensions (e.g., "1-1/8")
+- Manages pattern variations and images
+- Extracts technical specifications from product tabs
+- Saves local copies of all images
+- Deduplicates pattern variations
+- Handles both center and universal drain configurations
+- Maintains consistent image views across products 
 
-### File Relationships and Data Flow
-1. Main Flow:
-   ```
-   castico.ts
-   └─ scrapeProduct()
-      ├─ setupResultsDirectory() -> creates debug/results/[category]/[date]/[product]
-      ├─ extractProductDetails() -> product.json base data
-      ├─ extractPatternVariations() -> adds patterns to product data
-      └─ savePatternImages() -> copies images to final location
-   ```
+## Category Scraping
+The scraper is designed to work with any configured category without code modification:
 
-2. Results Structure Example:
-   ```
-   debug/results/base-and-wall-kits/2025-01-08/
-   ├─ 32--x-60--x-84--center-drain---white-sand---stone---2-wall-decor/
-   │  ├─ product.json
-   │  └─ images/
-   │     └─ [pattern-name]/
-   │        └─ pattern-name-view-type-000.jpg
-   └─ 32--x-60--x-84--center-drain---desert-gray-sand---4-wall-decor/
-      ├─ product.json
-      └─ images/
-   ```
-
-3. Key State Transitions:
-   - Product URL → Product Details + Pattern Names
-   - Pattern Names → Image URLs (via selectors)
-   - Image URLs → Temporary Storage → Final Pattern Directory
-
-4. Validation Points:
-   - Product name sanitization for directory creation
-   - Pattern name sanitization for image filenames
-   - Image file existence checks before copying
-   - Directory creation with recursive: true 
-
-### Image Saving Implementation Details
-1. Current Save Points:
-   ```typescript
-   // First save point - saveImage method
-   private async saveImage(buffer: Buffer, filename: string, index: number) {
-     // This is where images are initially saved to scraped-images/
-     // Need to trace this method's usage
-   }
-
-   // Second save point - savePatternImages method
-   private async savePatternImages(pattern: PatternVariation, imagesDir: string) {
-     // This copies from first location to final location
-     // Creates duplicate storage
-   }
-   ```
-
-2. Method Call Chain:
-   ```
-   downloadImage() -> saveImage() -> savePatternImages()
-   ↓                    ↓             ↓
-   Gets buffer     Saves to temp    Copies to final
-   ```
-
-3. File Path Construction:
-   - Need to audit all path.join() calls
-   - Check for hardcoded 'scraped-images' references
-   - Verify setupResultsDirectory() usage
-
-4. Next Steps:
-   - Remove saveImage temp storage
-   - Modify downloadImage to save directly to final location
-   - Update all image path references 
-
-### Results Analysis
-1. Analysis Script Location:
-   ```
-   scripts/analyze-scrape-results.ts
-   ```
-
-2. Script Usage:
-   ```bash
-   npm run analyze-results -- debug/results/base-and-wall-kits/2025-01-08
-   ```
-
-3. Key Metrics Checked:
-   - Products scraped vs expected count
-   - Patterns per product (min/max/avg)
-   - Images per pattern (min/max/avg)
-   - Missing images or patterns
-   - Directory structure integrity
-   - File naming consistency
-   - Duplicate image detection
-
-4. Example Analysis Output:
-   ```json
-   {
-     "totalProducts": 59,
-     "totalPatterns": 187,
-     "totalImages": 892,
-     "averageImagesPerPattern": 4.77,
-     "missingImages": 3,
-     "duplicateImages": 892,
-     "invalidFileNames": 0,
-     "directoryErrors": 0
-   }
-   ```
-
-5. Common Issues Detected:
-   - Duplicate images in scraped-images and debug/results
-   - Some patterns missing expected view types
-   - Occasional network timeout related missing images 
-
-### Debugging Checkpoints
-
-1. Image URL Extraction:
-   ```typescript
-   // Debug log format for image extraction
-   Pattern: "Alpine Marble Gloss"
-   Found elements: 5
-   URLs extracted:
-   - base-detail: https://...jpg
-   - full: https://...jpg
-   - includes: https://...jpg
-   - detail: https://...jpg
-   - base: https://...jpg
-   ```
-
-2. Pattern Matching Success Rate:
-   ```
-   Total products: 59
-   Products with all patterns matched: 54
-   Products with partial matches: 3
-   Products with no matches: 2
-   
-   Common pattern names:
-   - Alpine Marble Gloss (32 products)
-   - Tuscany Beige Gloss (28 products)
-   - White Marble Gloss (25 products)
-   ```
-
-3. Network Timing Analysis:
-   ```
-   Average wait times:
-   - Page load: 2.3s
-   - Network idle: 4.1s
-   - Image download: 0.8s per image
-   
-   Timeout frequencies:
-   - Network idle: 12%
-   - Image download: 3%
-   ```
-
-4. Error Recovery Points:
-   - After network timeout: retry image extraction
-   - After failed download: retry up to 3 times
-   - After pattern match fail: try alternate selectors
-   - After directory creation fail: retry with sanitized name 
-
-### Core Data Types
 ```typescript
-interface PatternVariation {
-  name: string
-  images: ScrapedImage[]
-  thumbnail: {
-    url: string
-    localPath?: string
-  }
-}
-
-interface ScrapedImage {
-  url: string
-  localPath: string
-  view: string
-  isPrimary: boolean
-}
-
-interface ScrapedProduct {
-  url: string
-  name: string
-  price: string
-  description: string
-  includes: string[]
-  technicalSpecs: ProductSpec[]
-  features: string[]
-  patterns: PatternVariation[]
-  metadata: {
-    scrapedAt: string
-    productType: string
-    dimensions: {
-      width: number
-      depth: number
-      height: number
-    }
-  }
-}
-
-interface ProductSpec {
-  name: string
-  value: string
-  notes?: string
-}
-
-### HTML Structure Analysis
-1. Product Page Layout:
-   ```html
-   <div class="product-type-variable">
-     <div class="woocommerce-product-gallery">
-       <!-- Primary product images -->
-     </div>
-     <div class="variations_form cart">
-       <!-- Pattern variations -->
-       <select name="attribute_pa_wall-color">
-         <!-- Pattern options -->
-       </select>
-     </div>
-   </div>
-   ```
-
-2. Pattern Image Locations:
-   - Main gallery: `.woocommerce-product-gallery__image img`
-   - Thumbnails: `.flex-control-nav img`
-   - Pattern previews: `.variable-items-wrapper img`
-
-### Known Edge Cases
-1. Pattern Names:
-   - "White Sand" vs "White-Sand"
-   - "Marble Studio" vs "Marble-Studio"
-   - Numbers in names: "Stone 2" vs "Stone-2"
-
-2. Image Loading:
-   - Some images load via JavaScript after page load
-   - Gallery images sometimes in different order
-   - Thumbnail URLs don't match main image URLs
-
-3. Product Variations:
-   - Some products have multiple variation types
-   - Pattern names can appear in different attributes
-   - Some patterns share images
-
-### Recovery Strategies
-1. Image Download:
-   ```typescript
-   private async downloadWithRetry(url: string, attempts = 3): Promise<Buffer> {
-     for (let i = 0; i < attempts; i++) {
-       try {
-         const response = await fetch(url)
-         if (!response.ok) throw new Error(response.statusText)
-         return await response.arrayBuffer()
-       } catch (error) {
-         if (i === attempts - 1) throw error
-         await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)))
-       }
-     }
-   }
-   ```
-
-2. Pattern Matching:
-   ```typescript
-   const findPatternImages = async (page: Page, pattern: string) => {
-     // Try exact match first
-     let images = await page.$$(`img[alt="${pattern}"]`)
-     if (images.length) return images
-
-     // Try case-insensitive
-     images = await page.$$(`img[alt*="${pattern}"i]`)
-     if (images.length) return images
-
-     // Try sanitized name
-     const sanitized = pattern.replace(/[^a-z0-9]/gi, '-').toLowerCase()
-     images = await page.$$(`img[src*="${sanitized}"]`)
-     return images
-   }
-   ```
-
-### Test Cases
-1. Product Types:
-   - Base & Wall Kits (most complex)
-   - Shower Walls (medium complexity)
-   - Shower Bases (simplest)
-   - Accessories (variable)
-
-2. Pattern Variations:
-   - Single pattern products
-   - Multi-pattern products
-   - Products with shared patterns
-   - Products with unique patterns
-
-3. Image Scenarios:
-   - All views present
-   - Missing views
-   - Extra views
-   - Duplicate views 
-
-### Scraper State Management
-
-1. Environment Variables:
-   ```
-   SAVE_SCRAPER_SCREENSHOTS=true|false
-   DEBUG_SCRAPER=true|false
-   ```
-
-2. Debug Files Location:
-   ```
-   debug/
-   ├── screenshots/
-   │   ├── initial-load.png
-   │   ├── before-accordion.png
-   │   └── error-[timestamp].png
-   └── results/
-       └── [as documented above]
-   ```
-
-3. Checkpoint Files:
-   ```
-   - summary.json: Overall scrape results
-   - product.json: Individual product data
-   - error-log.json: Failed scrapes and reasons
-   ```
-
-4. Common Failure Points
-
-1. Product Page:
-   ```typescript
-   // Critical selectors that must exist
-   '.product-type-variable'  // Product container
-   '.variations_form'        // Pattern variations
-   '.woocommerce-product-gallery' // Image gallery
-   ```
-
-2. Pattern Detection:
-   ```typescript
-   // Order of pattern source attempts
-   1. select[name="attribute_pa_wall-color"] option
-   2. .variable-items-wrapper img[alt]
-   3. .woocommerce-product-gallery__image img[alt]
-   ```
-
-3. Recovery Order:
-   ```
-   1. Retry page load
-   2. Wait for network idle
-   3. Force gallery load via click
-   4. Try alternate selectors
-   5. Save error screenshot
-   ```
-
-4. Data Validation Points
-
-1. Product Data:
-   - Name must contain dimensions
-   - Must have at least one pattern
-   - Must have technical specs
-   - Must have features list
-
-2. Pattern Data:
-   - Name must be unique per product
-   - Must have at least one image
-   - Must have thumbnail
-   - Images must match view types
-
-3. Image Requirements:
-   - Must be JPG/JPEG
-   - Must be > 100x100px
-   - Must have valid URL
-   - Must match pattern name 
-
-### Example Product Data
-
-1. Successful Product Example:
-   ```json
-   // From: debug/results/base-and-wall-kits/2025-01-08/32--x-60--x-84--center-drain---white-sand---stone---2-wall-decor/product.json
-   {
-     "url": "https://castico-tx.com/product/shower-kit-32-x-60-x-84-center-drain-white-sand-decoratice-tile-studio-2-wall-decor/",
-     "name": "32″ x 60″ x 84″ Center Drain - White Sand - Stone - 2 Wall Decor",
-     "patterns": [
-       {
-         "name": "Alpine Marble Gloss",
-         "images": [
-           // Example of complete image set
-         ]
-       }
-     ]
-   }
-   ```
-
-2. Summary Stats Example:
-   ```json
-   // From: debug/results/base-and-wall-kits/summary.json
-   {
-     "scrapedAt": "2025-01-08T12:00:00.000Z",
-     "totalProducts": 59,
-     "successfulScrapes": 57,
-     "failedScrapes": 2,
-     "totalPatterns": 187,
-     "totalImages": 892
-   }
-   ```
-
-### Current Development State
-1. Working:
-   - Basic scraping flow
-   - Pattern detection
-   - Image downloading
-   - Directory structure
-
-2. In Progress:
-   - Removing scraped-images directory usage
-   - Consolidating image saving logic
-   - Improving error recovery
-
-3. Next Steps:
-   - Remove initialize() scraped-images creation
-   - Update saveImage to use final location
-   - Add retry logic for network timeouts 
-
-### Actual Data Examples
-
-1. Real Product Structure:
-   ```json
-   // From actual product.json
-   {
-     "url": "https://castico-tx.com/product/shower-kit-32-x-60-x-84-center-drain-white-sand-decoratice-tile-studio-2-wall-decor/",
-     "name": "32″ x 60″ x 84″ Center Drain - White Sand - Stone - 2 Wall Decor",
-     "price": "$2,499.00",
-     "description": "Elevate your shower experience...",
-     "includes": [
-       "2 Side Wall Panels",
-       "1 Back Wall Panel",
-       "1 Shower Pan Base"
-     ],
-     "technicalSpecs": [
-       {
-         "name": "Base Width",
-         "value": "32\" - 81.28 cm",
-         "notes": "Including flange thickness"
-       }
-     ],
-     "features": [
-       "Easy curb-less shower entry; 1.125 in. low step for safe access",
-       "Solid core that reduces noise"
-     ],
-     "patterns": [
-       {
-         "name": "Alpine Marble Gloss",
-         "images": [
-           {
-             "url": "https://castico-tx.com/wp-content/uploads/2023/...",
-             "localPath": "debug/results/.../alpine-marble-gloss-base-detail-001.jpg",
-             "view": "base-detail",
-             "isPrimary": false
-           }
-         ],
-         "thumbnail": {
-           "url": "https://castico-tx.com/wp-content/uploads/2023/...",
-           "localPath": "debug/results/.../alpine-marble-gloss-thumbnail.jpg"
-         }
-       }
-     ]
-   }
-   ```
-
-2. Real Summary Stats:
-   ```json
-   // From actual summary.json
-   {
-     "scrapedAt": "2025-01-08T12:00:00.000Z",
-     "totalProducts": 59,
-     "successfulScrapes": 57,
-     "failedScrapes": [
-       {
-         "url": "https://castico-tx.com/product/...",
-         "error": "Network timeout",
-         "timestamp": "2025-01-08T12:34:56.789Z"
-       }
-     ],
-     "totalPatterns": 187,
-     "totalImages": 892,
-     "commonPatterns": [
-       {
-         "name": "Alpine Marble Gloss",
-         "count": 32
-       }
-     ]
-   }
-   ``` 
-
-### Troubleshooting Guide
-
-1. Common Error Patterns:
-   ```
-   Error: Failed to scrape product
-   ├─ Network timeout during image load
-   │  └─ Check: Network conditions, retry with longer timeout
-   ├─ Pattern images not found
-   │  └─ Check: Selectors, pattern name variations
-   └─ Directory creation failed
-      └─ Check: File permissions, path length
-
-   Error: Failed to save image
-   ├─ Invalid URL format
-   │  └─ Check: URL encoding, special characters
-   ├─ Network error during download
-   │  └─ Check: Connection, retry mechanism
-   └─ File system error
-      └─ Check: Disk space, permissions
-   ```
-
-2. Quick Fixes:
-   - Network timeouts: Increase `waitForLoadState` timeout
-   - Missing images: Add delay after page load
-   - Pattern matching: Try alternate name formats
-   - File system: Clean temp directories
-
-3. Verification Steps:
-   ```bash
-   # Check scrape results
-   ls -R debug/results/base-and-wall-kits/latest
-   
-   # Verify image counts
-   find . -name "*.jpg" | wc -l
-   
-   # Check for duplicates
-   find . -name "*-001.jpg"
-   
-   # Validate JSON files
-   find . -name "product.json" -exec jq . {} \;
-   ``` 
-
-### Version History
-
-1. Initial Implementation (2024-01):
-   - Basic product scraping
-   - Single directory image storage
-   - Simple pattern detection
-
-2. Current Version (2025-01):
-   - Multi-category support
-   - Pattern-based image organization
-   - View type detection
-   - Debug/results structure
-
-3. Known Regressions:
-   - Images saving to both old and new locations
-   - Some pattern detection reliability issues
-   - Network timeout handling needs improvement
-
-### Quick Reference
-1. Run Full Scrape:
-   ```bash
-   npm run test-scraper
-   ```
-
-2. Check Latest Results:
-   ```bash
-   ls -l debug/results/base-and-wall-kits/$(ls -t debug/results/base-and-wall-kits | head -1)
-   ```
-
-3. Common Debug Commands:
-   ```bash
-   # Check for duplicate saves
-   find debug -type f -name "*.jpg" | sort | uniq -d
-
-   # Verify pattern directories
-   find debug/results -type d -name "alpine-marble-gloss" -o -name "white-marble-gloss"
-
-   # Count images per pattern
-   for d in debug/results/*/*/*/*/images/*; do echo "$d: $(ls "$d" | wc -l)"; done
-   ``` 
-
-### Test Scraper Configuration
-1. Script Location:
-   ```
-   scripts/test-castico-scraper.ts
-   ```
-
-2. Configuration Options:
-   ```typescript
-   interface ScraperConfig {
-     category: string        // Category to scrape
-     maxProducts?: number    // Limit number of products
-     saveScreenshots: boolean
-     debug: boolean
-     retryAttempts: number
-     timeouts: {
-       navigation: number
-       networkIdle: number
-       elementWait: number
-     }
-   }
-   ```
-
-3. Environment Setup:
-   ```bash
-   # Required environment variables
-   NODE_OPTIONS=--experimental-loader=ts-node/esm
-   
-   # Optional flags
-   SAVE_SCRAPER_SCREENSHOTS=true
-   DEBUG_SCRAPER=true
-   ```
-
-### Database Import Process
-1. Data Flow:
-   ```
-   Scraper Results → Validation → Database Import
-   └─ product.json    └─ Types     └─ SQL generation
-   └─ images/         └─ Images    └─ Image optimization
-   ```
-
-2. Import Command:
-   ```bash
-   npm run import-scraper-results -- debug/results/base-and-wall-kits/latest
-   ```
-
-3. Validation Rules:
-   - All required fields present in product.json
-   - All referenced images exist
-   - Pattern names match existing database records
-   - Image dimensions meet requirements
-   - No duplicate products or patterns
-
-4. Import Process:
-   ```typescript
-   // Import flow
-   async function importScrapedData(resultsDir: string) {
-     // 1. Load and validate data
-     const products = await loadProducts(resultsDir)
-     validateProducts(products)
-     
-     // 2. Process images
-     await processImages(products)
-     
-     // 3. Generate SQL
-     const sql = generateImportSQL(products)
-     
-     // 4. Execute import
-     await executeImport(sql)
-   }
-   ``` 
-
-### Class Structure and Organization
-
-1. Class Hierarchy:
-   ```typescript
-   // Base class that defines common scraper functionality
-   abstract class ScraperService {
-     abstract scrapeProduct(url: string): Promise<ScrapedProduct>
-     abstract scrapeCategory(category: string): Promise<ScrapedProduct[]>
-     // ... other abstract methods
-   }
-
-   // Castico-specific implementation
-   export class CasticoScraper extends ScraperService {
-     private browser: Browser | null = null
-     private readonly screenshotsDir: string
-     private enableScreenshots: boolean
-     private debug: boolean
-     
-     // Categories supported by this scraper
-     public readonly categories: CategoryInfo[]
-     
-     // ... implementation of abstract methods
-   }
-   ```
-
-2. File Organization:
-   ```
-   src/lib/services/scraper/
-   ├── scraper-service.ts     # Base abstract class
-   └── suppliers/
-       └── castico.ts        # Castico implementation
-   ``` 
-
-### Failed Case Examples
-
-1. Network Timeout Error:
-   ```json
-   // From: debug/results/base-and-wall-kits/2025-01-08/errors/network-timeout.json
-   {
-     "url": "https://castico-tx.com/product/shower-kit-32-x-60-x-84-center-drain...",
-     "error": {
-       "type": "NetworkTimeout",
-       "message": "Navigation timeout of 30000 ms exceeded",
-       "timestamp": "2025-01-08T12:34:56.789Z",
-       "attempts": 3
-     },
-     "context": {
-       "selector": ".woocommerce-product-gallery",
-       "state": "waiting_for_network_idle"
-     }
-   }
-   ```
-
-2. Pattern Detection Failure:
-   ```json
-   // From: debug/results/base-and-wall-kits/2025-01-08/errors/pattern-match.json
-   {
-     "url": "https://castico-tx.com/product/...",
-     "error": {
-       "type": "PatternMatchFailed",
-       "message": "No matching images found for pattern: White Sand Marble",
-       "timestamp": "2025-01-08T13:45:23.456Z",
-       "selectors": [
-         "img[alt='White Sand Marble']",
-         "img[alt*='White Sand']",
-         "img[src*='white-sand-marble']"
-       ]
-     },
-     "context": {
-       "patternName": "White Sand Marble",
-       "foundElements": 0,
-       "galleryImages": 5
-     }
-   }
-   ```
-
-3. Image Download Failure:
-   ```json
-   // From: debug/results/base-and-wall-kits/2025-01-08/errors/image-download.json
-   {
-     "url": "https://castico-tx.com/wp-content/uploads/2023/...",
-     "error": {
-       "type": "ImageDownloadFailed",
-       "message": "Failed to download image: 404 Not Found",
-       "timestamp": "2025-01-08T14:12:34.567Z",
-       "retryCount": 3
-     },
-     "context": {
-       "pattern": "Alpine Marble Gloss",
-       "view": "base-detail",
-       "httpStatus": 404
-     }
-   }
-   ``` 
-
-## Core Files
-
-### Service Architecture
-1. `service-provider.ts`:
-```typescript
-export class ServiceProvider {
-  private static instance: ServiceProvider
-  private prisma: PrismaClient
-  private productRepo: ProductRepository
-  private casticoScraper: CasticoScraper | null = null
-  private productImportService: ProductImportService | null = null
-
-  // Singleton implementation
-  public static getInstance(): ServiceProvider
-  
-  // Service access methods
-  getCasticoScraper(): CasticoScraper
-  getProductRepository(): ProductRepository
-  getProductImportService(): ProductImportService
-}
+// Categories are configured with indices
+public readonly categories = [
+  { name: 'BASE & WALL KITS' },    // index 0
+  { name: 'SHOWER WALLS' },        // index 1
+  { name: 'SHOWER BASES' }         // index 2
+]
+
+// Scrape any category by index
+await scraper.scrapeProducts(categoryIndex)  // 0=kits, 1=walls, 2=bases
 ```
 
-2. `scraper-service.ts`:
-```typescript
-export interface ScraperService {
-  scrapeProducts(): Promise<ScrapedProduct[]>
-  cleanup(): Promise<void>
-}
+The system automatically:
+- Uses correct selectors based on product type
+- Handles all dimension formats
+- Manages appropriate pattern variations
+- Organizes results by category
 
-export interface ScrapedProduct {
-  url: string
+To scrape any category:
+```bash
+# Example for base and wall kits (index 0)
+npm run test-scraper-shower-walls -- 0
+``` 
+
+## Type System
+
+### Core Types
+The system uses a comprehensive type system defined in `src/lib/products/types/`:
+
+```typescript
+// Import/Scraping Types (import.ts)
+interface ScrapedProduct {
   name: string
   brand: string
+  url: string
+  metadata: ScrapedProductMetadata
+  specifications: ScrapedProductSpecifications
   description: {
+    supplier: string
     marketing: string
     internal: string
-    supplier: string
   }
-  // ... other fields
+  patterns: Pattern[]
+}
+
+// Pattern Structure
+interface Pattern {
+  id: string
+  name: string
+  thumbnail: {
+    url: string
+    localPath: string
+  }
+  images: PatternImage[]
+  order: number
+}
+
+// Product Catalogue Types (catalogue.ts)
+interface CatalogueProduct {
+  id: string
+  name: string
+  description: ProductDescription
+  brand: string
+  categorization: ProductCategorization
+  specifications: Record<string, any>
+  images: ProductImage[]
+  visibility: ProductVisibility
 }
 ```
 
-### Database Layer
-1. `product.repository.ts`:
-```typescript
-export class ProductRepository {
-  constructor(private prisma: PrismaClient) {}
+### Type Relationships
+- `ScrapedProduct`: Raw data from scraper
+- `CatalogueProduct`: Database-ready format
+- `Pattern`: Shared between scraping and storage
+- `ProductImage`: Used throughout the system
 
-  async create(data: Prisma.ProductCreateInput): Promise<Product>
-  async findById(id: string): Promise<ProductWithRelations | null>
-  async findBySupplier(supplierId: string): Promise<ProductWithRelations[]>
-  async update(id: string, data: Prisma.ProductUpdateInput): Promise<ProductWithRelations>
-  async delete(id: string): Promise<ProductWithRelations>
+## Scraper Implementation
+
+### Core Components
+The scraper is implemented in `src/lib/services/scraper/suppliers/castico.ts`:
+
+```typescript
+class CasticoScraper implements ScraperService {
+  // Configuration
+  private browser: Browser | null = null
+  private readonly screenshotsDir = path.join(process.cwd(), 'debug', 'screenshots')
+  private enableScreenshots = process.env.SAVE_SCRAPER_SCREENSHOTS === 'true'
+  private debug = process.env.DEBUG_SCRAPER === 'true'
+
+  // Main scraping methods
+  async scrapeProducts(categoryIndex: number): Promise<ScrapedProduct[]>
+  private async scrapeCategory(category: CategoryInfo): Promise<string[]>
+  private async scrapeAllProducts(category: CategoryInfo): Promise<ScrapedProduct[]>
+  
+  // Product extraction
+  private async extractProductDetails(page: Page, category: CategoryInfo)
+  private async extractTechnicalSpecs(page: Page): Promise<ProductSpec[]>
+  private async extractFeatures(page: Page): Promise<string[]>
+  private async extractPatternVariations(page: Page, productDir: string)
 }
 ```
 
-2. `product-import.service.ts`:
+### Category Configuration
 ```typescript
-export class ProductImportService {
-  constructor(private productRepo: ProductRepository) {}
+public readonly categories = [
+  {
+    name: 'BASE & WALL KITS',
+    url: 'https://castico-tx.com/product-category/castico-online/shower-kits-base-wall/'
+  },
+  {
+    name: 'SHOWER WALLS',
+    url: 'https://castico-tx.com/shop/?filter_product-category=shower-walls'
+  },
+  {
+    name: 'SHOWER BASES',
+    url: 'https://castico-tx.com/shop/?filter_product-category=shower-bases'
+  }
+]
+``` 
 
-  async importProduct(product: ScrapedProduct, supplier: string) {
-    // Transforms scraped data to database schema
-    const dbProduct: Prisma.ProductCreateInput = {
-      name: product.name,
-      brand: supplier,
-      // ... transform other fields
-    }
+## Import Process
+
+### Import Service
+The import service (`ProductImportService`) handles converting scraped data into database records:
+
+```typescript
+class ProductImportService {
+  async importScrapedProduct(sourcePath: string, category: string) {
+    // Get or create supplier
+    const supplier = await this.prisma.supplier.findUnique({
+      where: { code: 'CASTICO' }
+    })
+    
+    // Read scraped product data
+    const productData = JSON.parse(
+      await fs.readFile(path.join(sourcePath, 'product.json'), 'utf-8')
+    )
+
+    // Create product with relationships
+    const product = await this.prisma.product.create({
+      data: {
+        name: productData.name,
+        brand: productData.brand,
+        description: {
+          supplier: productData.description.supplier,
+          marketing: productData.description.marketing,
+          internal: productData.description.internal
+        },
+        categorization: {
+          categories: productData.categorization.type,
+          style: productData.categorization.style
+        },
+        specifications: productData.specifications,
+        supplierId: supplier.id,
+        // Include visibility, variations, and pricing
+        visibility: { create: { roles: ['CUSTOMER', 'TEAM'] } },
+        variations: { patterns: productData.patterns },
+        supplierPricing: {
+          create: {
+            listPrice: productData.price,
+            effectiveDate: new Date(),
+            supplierName: 'Castico'
+          }
+        }
+      }
+    })
+
+    // Handle product images
+    await this.importProductImages(
+      product.id,
+      category,
+      productData.patterns,
+      sourcePath
+    )
+
+    return product
   }
 }
-```
-
-### Testing and Analysis
-1. `test-castico-scraper.ts`:
-```typescript
-async function testScraper() {
-  const services = ServiceProvider.getInstance()
-  const scraper = services.getCasticoScraper()
-  const products = await scraper.scrapeProducts()
-}
-```
-
-2. `analyze-scrape-results.ts`:
-```typescript
-async function analyzeScrapeResults() {
-  // Analysis of scraped products
-  const results = {
-    totalProducts: 0,
-    productsWithoutPatterns: 0,
-    productsWithoutImages: 0
-  }
-}
-```
-
-## Data Flow
-
-### Scraping Process
-1. Service Initialization:
-```
-ServiceProvider
-└── getCasticoScraper()
-    └── new CasticoScraper(this)
-```
-
-2. Scraping Flow:
-```
-test-castico-scraper.ts
-└── CasticoScraper.scrapeProducts()
-    ├── scrapeCategory() -> URLs
-    └── scrapeAllProducts()
-        ├── extractProductDetails()
-        └── extractPatternVariations()
-```
-
-3. Data Import Flow:
-```
-ProductImportService
-└── importProduct()
-    ├── Transform data
-    └── ProductRepository
-        └── create()
 ```
 
 ### Database Schema
-Key models from `schema.prisma`:
+The system uses a Prisma schema with the following key models:
 
 ```prisma
 model Product {
   id             String   @id @default(cuid())
   name           String
   brand          String
-  description    Json
-  categorization Json
-  specifications Json
-  variations     Json?
-  
+  description    Json     // Marketing, internal, and supplier descriptions
+  categorization Json     // Product categorization data
+  specifications Json     // Product specifications and features
+  variations     Json?    // Product variations (patterns)
+  price          Decimal? @db.Decimal(10,2)
+
   // Relationships
-  supplier        Supplier
+  supplierId      String
+  supplier        Supplier           @relation(fields: [supplierId], references: [id])
   images          ProductImage[]
+  supplierPricing SupplierPricing?
   visibility      ProductVisibility?
+
+  @@index([supplierId])
 }
 
 model ProductImage {
-  id         String
-  url        String
-  alt        String?
-  isPrimary  Boolean
+  id        String   @id @default(cuid())
+  productId String
+  product   Product  @relation(fields: [productId], references: [id])
+  url       String
+  alt       String?
+  isPrimary Boolean  @default(false)
+  view      String?
+  
   visibility ProductImageVisibility?
+
+  @@index([productId])
 }
+
+model Supplier {
+  id        String   @id @default(cuid())
+  name      String
+  code      String   @unique
+  active    Boolean  @default(true)
+  products  Product[]
+  contacts  SupplierContact[]
+}
+``` 
+
+## Usage Guide
+
+### Prerequisites
+- Node.js
+- TypeScript
+- Playwright
+- PostgreSQL database
+- Environment variables:
+  ```bash
+  DATABASE_URL=postgresql://...           # Database connection
+  SAVE_SCRAPER_SCREENSHOTS=true|false    # Enable debug screenshots
+  DEBUG_SCRAPER=true|false               # Enable debug logging
+  ```
+
+### Running a Scrape
+
+1. **Choose Category**
+   ```typescript
+   // Available categories:
+   0: 'BASE & WALL KITS'
+   1: 'SHOWER WALLS'
+   2: 'SHOWER BASES'
+   ```
+
+2. **Execute Scraper**
+   ```bash
+   # For shower walls (category index 1)
+   npm run test-scraper-shower-walls
+   
+   # For shower bases (category index 2)
+   npm run test-scraper-shower-bases
+   ```
+
+3. **Check Results**
+   ```bash
+   # Analyze scrape results
+   npm run analyze-scrape
+   ```
+
+4. **Import Products**
+   ```bash
+   # Import scraped products to database
+   npm run import-scraped
+   ```
+
+### Output Structure
+```
+debug/
+  results/
+    [category]/
+      [timestamp]/
+        [product-name]/
+          product.json    # Complete product data
+          images/
+            [pattern-name]/
+              base-detail.jpg
+              full.jpg
+              thumbnail.jpg
+        summary.json      # Scrape results summary
 ```
 
-### Data Transformation
-The `ProductImportService` handles transformation of scraped data to database schema:
+### Integration Points
 
-1. Basic Product Data:
+The scraper system integrates with several other parts of the product system:
+
+1. **Manual Product Entry**
+   - Shares database schema
+   - Uses same type definitions
+   - Compatible with supplier management
+
+2. **Design Tool System**
+   - Products available for design templates
+   - Maintains pattern relationships
+   - Supports pricing tiers
+
+3. **Lead Management**
+   - Products link to saved designs
+   - Supports sales process
+   - Tracks product visibility
+
+### Type Integration
+
+The type system ensures consistency across different parts of the application:
+
 ```typescript
-{
-  name: product.name,
-  brand: supplier,
-  description: {
-    marketing: product.description.marketing || '',
-    internal: product.description.internal || '',
-    supplier: product.description.supplier || ''
-  }
-}
-```
+// Scraping -> Database
+ScrapedProduct -> CatalogueProduct
 
-2. Image Relationships:
-```typescript
-images: {
-  create: product.patterns.flatMap(pattern => 
-    pattern.images.map(image => ({
-      url: image.url,
-      alt: image.alt || '',
-      isPrimary: image.isPrimary,
-      visibility: {
-        create: {
-          team: true,
-          customer: false
-        }
-      }
-    }))
-  )
-}
-```
+// Database -> Design Tool
+CatalogueProduct -> SavedComponent
 
-## Database Integration
-
-### Repository Pattern
-The `ProductRepository` implements type-safe database operations:
-
-1. Create Operation:
-```typescript
-async create(data: Prisma.ProductCreateInput): Promise<Product> {
-  return await this.prisma.product.create({
-    data,
-    include: {
-      images: true,
-      supplier: true,
-      visibility: true
-    }
-  })
-}
-```
-
-2. Query Building:
-```typescript
-async findWithFilters(filters: {
-  supplier?: string
-  category?: string
-  status?: string
-  visibility?: string
-}): Promise<ProductWithRelations[]>
+// Design Tool -> Lead Management
+SavedDesign -> Lead
 ```
 
 ### Error Handling
-1. Import Errors:
+
+The system includes several error handling mechanisms:
+
+1. **Scraping Errors**
+   - Screenshots saved for debugging
+   - Detailed error logging
+   - Retry logic for network issues
+
+2. **Import Validation**
+   - Data structure verification
+   - Required field checking
+   - Relationship validation
+
+3. **Image Processing**
+   - Download retry logic
+   - Format validation
+   - Storage verification 
+
+## Type System Integration
+
+### Core Type Files
+The type system is organized in `src/lib/products/types/` with distinct responsibilities:
+
 ```typescript
-try {
-  const dbProduct = await this.productRepo.create(data)
-} catch (error) {
-  console.error('Import failed:', error)
-  throw error
+// catalogue.ts - Core product structure
+interface CatalogueProduct {
+  id: string
+  name: string
+  brand: string
+  description: ProductDescription
+  categorization: ProductCategorization
+  specifications: Record<string, any>
+  variations?: ProductVariation[]
+  images: ProductImage[]
+  visibility: ProductVisibility
+}
+
+// import.ts - Scraping specific types
+interface ScrapedProduct {
+  url: string
+  metadata: ScrapedProductMetadata
+  specifications: ScrapedProductSpecifications
+  patterns: Pattern[]
+}
+
+// design.ts - Design tool integration
+interface SavedDesign {
+  id: string
+  projectType: string
+  components: SavedComponent[]
+  pricing?: SavedPricing
+  isTemplate: boolean
+  templateData?: TemplateData
+}
+
+// lead.ts - Sales process integration
+interface Lead {
+  id: string
+  status: LeadStatus
+  savedDesign?: SavedDesign
+}
+
+// pricing.ts - Product pricing
+interface SupplierPricing {
+  listPrice: number
+  discount?: number
+  effectiveDate: Date
+  supplierName: string
+}
+
+// supplier.ts - Supplier management
+interface CreateSupplierData {
+  name: string
+  code: string
+  contacts: {
+    name: string
+    email?: string
+    phone?: string
+    roles: {
+      type: string
+      isPrimary: boolean
+    }[]
+  }[]
 }
 ```
 
-2. Batch Import Results:
-```typescript
-{
-  success: number
-  failed: number
-  errors: Array<{ 
-    product: Prisma.ProductCreateInput
-    error: Error 
-  }>
-}
-``` 
+### Type Flow
+The type system manages data flow through different parts of the application:
+
+1. **Scraping Pipeline**
+   ```
+   ScrapedProduct -> CatalogueProduct
+   Pattern -> ProductVariation
+   ScrapedImage -> ProductImage
+   ```
+
+2. **Design System**
+   ```
+   CatalogueProduct -> SavedComponent
+   Pattern -> DesignChoice
+   ProductImage -> DesignPreview
+   ```
+
+3. **Sales Process**
+   ```
+   SavedDesign -> Lead
+   SupplierPricing -> QuotePrice
+   ProductVisibility -> CustomerAccess
+   ```
+
+### Type Validation Points
+
+The type system enforces data integrity at key points:
+
+1. **Scraper Output**
+   - Validates scraped data structure
+   - Ensures required fields
+   - Validates image data
+
+2. **Database Import**
+   - Transforms to database schema
+   - Validates relationships
+   - Ensures pricing data
+
+3. **Design Tool**
+   - Validates product compatibility
+   - Ensures pricing tiers
+   - Validates template data 
+```
+
+## Complete File List
+
+### Core Scraper Implementation
+```
+src/lib/services/scraper/
+  suppliers/
+    castico.ts              # Main scraper implementation
+  transformers/
+    castico.transformer.ts  # Data transformation
+  scraper-service.ts        # Scraper interface & types
+```
+
+### Service Layer
+```
+src/lib/services/
+  service-provider.ts       # Service initialization & DI
+  product-import.service.ts # Database import service
+  supplier-service.ts       # Supplier management
+```
+
+### Type System
+```
+src/lib/products/types/
+  catalogue.ts             # Product catalogue types
+  import.ts               # Import/scraping types
+  supplier.ts            # Supplier management types
+  pricing.ts            # Pricing system types
+  design.ts            # Design tool types
+  lead.ts             # Lead management types
+  index.ts           # Type exports
+```
+
+### Scripts
+```
+scripts/
+  test-scraper-shower-walls.ts   # Wall category scraper
+  test-scraper-shower-bases.ts   # Base category scraper
+  import-scraped-products.ts     # Import script
+  analyze-scrape-results.ts      # Results analysis
+```
+
+### Database & Repository
+```
+prisma/
+  schema.prisma                  # Database schema
+
+src/lib/
+  prisma.ts                      # Database client
+  products/
+    repositories/
+      product.repository.ts      # Product database operations
+```
+
+Each file has a specific role in the system:
+
+1. **Scraper Core**
+   - `castico.ts`: Implements web scraping logic
+   - `castico.transformer.ts`: Transforms scraped data
+   - `scraper-service.ts`: Defines scraper interface
+
+2. **Services**
+   - `service-provider.ts`: Manages service instances
+   - `product-import.service.ts`: Handles database imports
+   - `supplier-service.ts`: Manages supplier data
+
+3. **Type Definitions**
+   - `catalogue.ts`: Core product types
+   - `import.ts`: Scraping types
+   - `supplier.ts`: Supplier types
+   - `pricing.ts`: Pricing types
+   - `design.ts`: Design tool types
+   - `lead.ts`: Lead types
+   - `index.ts`: Type exports
+
+4. **Scripts**
+   - Test scripts for each category
+   - Import script for database loading
+   - Analysis script for results verification
+
+5. **Database**
+   - Schema definition
+   - Database client
+   - Repository implementation 
